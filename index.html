@@ -103,6 +103,9 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #steps div.done{color:var(--gold)}
 #gTap{position:absolute;left:50%;bottom:calc(var(--u)*40);transform:translateX(-50%);white-space:nowrap;padding:calc(var(--u)*3.5) calc(var(--u)*8);font-size:calc(var(--u)*8);color:var(--ink);background:var(--gold);border:calc(var(--u)*1.5) solid var(--ink);border-radius:calc(var(--u)*3);box-shadow:0 calc(var(--u)*2) 0 var(--ink);animation:gtap 1s ease-in-out infinite}
 #gTap::before{content:'▶ '}
+#ema{position:absolute;left:50%;top:calc(var(--u)*150);width:calc(var(--u)*64);padding:calc(var(--u)*9) calc(var(--u)*4) calc(var(--u)*5);background:linear-gradient(180deg,#e8c48a,#c9995a);color:#3a1f0a;font-size:calc(var(--u)*6.5);line-height:1.4;text-align:center;clip-path:polygon(50% 0,100% 22%,100% 100%,0 100%,0 22%);filter:drop-shadow(0 calc(var(--u)*2) 0 rgba(0,0,0,.4));animation:ema 2.6s ease-out both}
+#ema b{display:block;font-weight:400;font-size:.75em;color:#9c1f1a;letter-spacing:.3em;margin-bottom:calc(var(--u)*1.5)}
+@keyframes ema{0%{transform:translate(-50%,40%) scale(.6);opacity:0}20%{transform:translate(-50%,0) scale(1.05);opacity:1}35%{transform:translate(-50%,0) scale(1)}75%{transform:translate(-50%,0) rotate(-3deg);opacity:1}100%{transform:translate(-50%,-60%) scale(.5) rotate(4deg);opacity:0}}
 @keyframes gtap{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.07)}}
 
 .fx{position:absolute;transform:translate(-50%,-50%);font-family:var(--display);font-size:calc(var(--u)*9);color:var(--gold);white-space:nowrap;animation:fx 1s ease-out forwards;pointer-events:none}
@@ -196,7 +199,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 .sh-btn.copy{background:var(--paper);color:var(--ink)}
 .sh-url{font-size:calc(var(--u)*5);color:var(--mute);text-align:center;word-break:break-all}
 .sh-close{align-self:center;margin-top:calc(var(--u)*1);font-family:var(--pixel);font-size:calc(var(--u)*6.5);color:var(--paper);background:transparent;border:calc(var(--u)*1) solid var(--mute);padding:calc(var(--u)*2) calc(var(--u)*8);cursor:pointer}
-.sh-btn:focus-visible,.sh-close:focus-visible,#storySkip:focus-visible{outline:calc(var(--u)*1.5) solid var(--gold);outline-offset:calc(var(--u)*1)}
+#hardBtn:focus-visible,#pauseBtn:focus-visible,#title:focus-visible .t-start,.sh-btn:focus-visible,.sh-close:focus-visible,#storySkip:focus-visible{outline:calc(var(--u)*1.5) solid var(--gold);outline-offset:calc(var(--u)*1)}
 #toast{position:absolute;left:50%;bottom:calc(var(--u)*70);transform:translateX(-50%);padding:calc(var(--u)*3) calc(var(--u)*7);background:var(--gold);color:var(--ink);font-size:calc(var(--u)*7);border:calc(var(--u)*1) solid var(--ink);z-index:6;animation:pop2 .25s steps(3) both;white-space:nowrap}
 /* ---- PC keyboard hint ---- */
 #keyhint{position:absolute;left:calc(var(--u)*20);right:calc(var(--u)*20);bottom:calc(var(--u)*3);text-align:center;font-size:calc(var(--u)*5.5);color:var(--paper);pointer-events:none;background:rgba(7,4,26,.72);border-radius:calc(var(--u)*3);padding:calc(var(--u)*1.5) 0;text-shadow:0 1px 0 #000}
@@ -308,10 +311,11 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
     <div id="msg" hidden><img id="msgIcon" alt=""><div><b id="msgName">ひつじ</b><span id="msgText"></span></div></div>
     <div id="bossbar" hidden><span>怠け心</span><div class="bbar"><div id="bossFill"></div></div></div>
     <div id="gTap" hidden></div>
+    <div id="ema" hidden></div>
     <div id="steps" hidden><div id="st1">① お賽銭</div><div id="st2">② 鈴を鳴らす</div><div id="st3">③ 二礼二拍手一礼</div></div>
     <div id="result" hidden>
       <div class="r-head" id="rHead"></div>
-      <div id="slip" hidden><div class="s-top">御神籤</div><div class="s-no">第一番</div><div class="s-big" id="sBig"><span>大</span><span>吉</span></div><div class="s-foot">タカヨシ神社</div></div>
+      <div id="slip" hidden><div class="s-top">御神籤</div><div class="s-no" id="sNo">第一番</div><div class="s-big" id="sBig"><span>大</span><span>吉</span></div><div class="s-foot">タカヨシ神社</div></div>
       <div id="best" hidden>最高の年になるでしょう！</div>
       <div id="stats" hidden></div>
       <div id="titles" hidden></div>
@@ -755,7 +759,7 @@ function fx(text, sx, sy, color) {
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
   $('ui').appendChild(d); setTimeout(() => d.remove(), 1100);
 }
-function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause', 'gTap', 'hardBtn'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
+function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause', 'gTap', 'hardBtn', 'ema'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
 
 // ---------- run record, wishes, story, share ----------
 const WISHES = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
@@ -1701,6 +1705,7 @@ class Goal extends Phaser.Scene {
     // hands together: tell the kami this year's goal
     const wishStep = () => { fx('いのる…', 96, 268, '#fff6e8'); showWish(i => {
       RUN.wish = i; fx('願いをこめて', 96, 250, '#ffd23f');
+      { const em = $('ema'); em.innerHTML = `<b>絵馬</b>${rubify(WISHES[i])}`; em.hidden = true; void em.offsetWidth; em.hidden = false; setTimeout(() => em.hidden = true, 2600); }
       const gl = this.add.image(96, 300, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.4);
       this.tweens.add({ targets: gl, y: 150, scale: 3, alpha: 0, duration: 1400, ease: 'Sine.out', onComplete: () => gl.destroy() });
       sfx((o, T2) => ['G5', 'B5', 'D6', 'G6'].forEach((n, k) => T2(k * .12, .5, o, { type: 'triangle', f: hz(n), peak: .08, rel: .4 })));
@@ -1750,6 +1755,7 @@ class Result extends Phaser.Scene {
       if (k < 1) { if (Math.random() < .35) sfx((o, T2) => T2(0, .02, o, { type: 'square', f: 1200 + k * 800, peak: .04 })); requestAnimationFrame(f); }
       else if (best.clears && (newT || newC)) { const st = document.createElement('div'); st.className = 'stamp'; st.textContent = '記録更新'; $('result').appendChild(st); sfx((o, T2, N, Dr) => Dr('T', 0, o, 1.2)); this.cameras.main.shake(160, .008); } };
       requestAnimationFrame(f); };
+    { const d = '〇一二三四五六七八九', n = 1 + Math.floor(Math.random() * 100), kj = v => v === 100 ? '百' : (v >= 10 ? (v >= 20 ? d[v / 10 | 0] : '') + '十' : '') + (v % 10 ? d[v % 10] : ''); $('sNo').textContent = `第${kj(n)}番`; }
     const T = [];
     if (data.coins >= COIN_MAX) T.push(['小判コンプリート', 1]); else if (data.coins >= Math.round(COIN_MAX * .75)) T.push(['小判名人', 0]);
     if (RUN.hard) T.push(['修行の参拝者', 1]);
