@@ -238,7 +238,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
     </div>
     <div id="banner" class="outline" hidden></div>
     <div id="controls" hidden>
-      <div id="stick"><div id="knob"></div><span id="stickLabel">ドラッグで<br>移動</span></div>
+      <div id="stick"><div id="knob"></div><span id="stickLabel">どこでも<br>ドラッグで移動</span></div>
       <button id="btnHashiru" class="btn" type="button" aria-label="跳ぶ（ジャンプ）">跳</button>
       <button id="btnHarai" class="btn" type="button" aria-label="祓う（お札を投げる）">払</button>
       <div id="keyhint" hidden><kbd>←↑↓→</kbd>移動　<kbd>Z</kbd>払う　<kbd>X</kbd>跳ぶ　<kbd>P</kbd>休む</div>
@@ -787,6 +787,9 @@ function stagePt(e) { const r = $('stage').getBoundingClientRect(); return [(e.c
 touch.addEventListener('pointerdown', e => {
   if (stickId !== null) return; stickId = e.pointerId; touch.setPointerCapture(e.pointerId);
   [sx0, sy0] = stagePt(e); $('stick').classList.add('active', 'used'); $('knob').style.transform = 'translate(0,0)';
+  // the stick appears under the finger, wherever the thumb lands
+  const st = $('stick').style, cx = Math.max(31, Math.min(GW - 31, sx0)), cy = Math.max(96, Math.min(GH - 31, sy0));
+  st.left = ((cx - 29) / GW * 100) + '%'; st.top = ((cy - 29) / GH * 100) + '%'; st.bottom = 'auto';
 });
 touch.addEventListener('pointermove', e => {
   if (e.pointerId !== stickId) return; const [x, y] = stagePt(e); let dx = x - sx0, dy = y - sy0; const L = Math.hypot(dx, dy), R = 22;
@@ -794,12 +797,12 @@ touch.addEventListener('pointermove', e => {
   input.x = Math.abs(dx) < 3 ? 0 : dx / R; input.y = Math.abs(dy) < 3 ? 0 : dy / R;
   const k = $('stage').clientWidth / GW * (17 / 22); $('knob').style.transform = `translate(${dx * k}px, ${dy * k}px)`;
 });
-function endStick(e) { if (e.pointerId !== stickId) return; stickId = null; input.x = input.y = 0; $('stick').classList.remove('active'); $('knob').style.transform = 'translate(0,0)'; }
+function endStick(e) { if (e.pointerId !== stickId) return; stickId = null; input.x = input.y = 0; $('stick').classList.remove('active'); $('knob').style.transform = 'translate(0,0)'; const st = $('stick').style; st.left = st.top = st.bottom = ''; }
 touch.addEventListener('pointerup', endStick); touch.addEventListener('pointercancel', endStick);
 function holdBtn(id, key) {
   const b = $(id);
-  b.addEventListener('pointerdown', e => { e.preventDefault(); input[key] = true; b.classList.add('down'); });
-  ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => b.addEventListener(t, () => b.classList.remove('down')));
+  b.addEventListener('pointerdown', e => { e.preventDefault(); input[key] = true; input[key + 'Held'] = true; b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (_) {} });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => b.addEventListener(t, () => { b.classList.remove('down'); input[key + 'Held'] = false; }));
   b.addEventListener('click', e => { if (e.detail === 0) input[key] = true; });
 }
 holdBtn('btnHarai', 'harai'); holdBtn('btnHashiru', 'hashiru');
@@ -978,7 +981,7 @@ class Play extends Phaser.Scene {
     this.add.image(0, 0, 'map').setOrigin(0).setDepth(-10);
     placeTorii(this, D.toriiPlay);
         this.st = { hp: 3, coins: 0, lv: 1, invuln: 0, lock: 0, air: 0, airCd: 0, cool: 0, walkT: 0, flip: false, zone: null, done: false, boss: 'none', t: 0, dmg: 0, power: false };
-    input.harai = input.hashiru = false; input.x = input.y = 0; RUN.wish = -1;
+    input.harai = input.hashiru = input.haraiHeld = input.hashiruHeld = false; input.x = input.y = 0; RUN.wish = -1;
     const [sx, sy] = ZONES.bamboo.start;
     this.p = { x: sx, y: sy };
     this.lastSafe = [sx, sy];
@@ -1099,9 +1102,13 @@ class Play extends Phaser.Scene {
     if (!locked) {
       const sp = 70 * (s.air > 0 ? 1.3 : 1);
       p.x += ix * sp * dt; p.y += iy * sp * dt;
-      if (input.hashiru && s.air <= 0 && s.airCd <= 0) { s.air = .55; se('跳（ジャンプ）'); }
-      if (input.harai && s.cool <= 0 && this.ofuda.length < (s.power ? 9 : 3)) {
-        s.cool = .28; se('払（お札）');
+      // jump buffer: a press just before landing still counts
+      if (input.hashiru) s.jbuf = .2; s.jbuf = Math.max(0, (s.jbuf || 0) - dt);
+      if (s.jbuf > 0 && s.air <= 0 && s.airCd <= 0) { s.jbuf = 0; s.air = .55; se('跳（ジャンプ）'); }
+      // holding 払 (button or Z) keeps throwing
+      const wantHarai = input.harai || input.haraiHeld || keys['z'] || keys['j'];
+      if (wantHarai && s.cool <= 0 && this.ofuda.length < (s.power ? 9 : 3)) {
+        s.cool = input.harai ? .26 : .32; se('払（お札）');
         for (const vx of s.power ? [-55, 0, 55] : [0]) {
           const o = { x: p.x, y: p.y - 26, vx, life: .7, s: this.add.image(p.x, p.y - 26, 'ofuda').setScale(1.5).setDepth(3000) };
           if (s.power) o.s.setTint(0xfff0a0); this.ofuda.push(o);
@@ -1111,7 +1118,7 @@ class Play extends Phaser.Scene {
     input.harai = input.hashiru = false;
     // jump
     let h = 0;
-    if (s.air > 0) { s.air -= dt; h = Math.sin(Math.PI * Math.max(0, s.air) / .55) * 14; if (s.air <= 0) { s.air = 0; s.airCd = .15; } }
+    if (s.air > 0) { s.air -= dt; h = Math.sin(Math.PI * Math.max(0, s.air) / .55) * 14; if (s.air <= 0) { s.air = 0; s.airCd = .06; } }
     const air = s.air > 0;
     if (this.wasAir && !air && !locked) { const wet = p.y > 556 && p.y < 758; puff(this, 'ring', p.x, p.y, { scale: .12, grow: 3, life: .3, tint: wet ? 0xbff4ff : 0xe8d8b0, alpha: .7, depth: p.y }); for (const d of [-1, 1]) puff(this, 'mote', p.x + d * 4, p.y - 1, { scale: .45, vx: d * 22, vy: -6, life: .35, tint: wet ? 0xdffaff : 0xd9c7a0, alpha: .6, depth: p.y }); }
     this.wasAir = air;
