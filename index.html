@@ -1794,7 +1794,7 @@ class Play extends Phaser.Scene {
     this.tweens.add({ targets: this.heroAura, alpha: { from: .9, to: .5 }, duration: 500, yoyo: true, repeat: -1, delay: 600 });
     for (let i = 0; i < 3; i++) T(i * 180, () => ringFx(this, p.x, p.y - 14, 0xffd23f, 1.2 + i * .5));
     this.burst(p.x, p.y - 16, 16);
-    T(2000, () => { say('その気持ちが、いちばんのお札だメェ！ いけーっ！', 2000); s.hp = 3; s.power = true; this.updateHud(); this.pSpr.clearTint(); banner('覚醒！ お札が3枚に！');
+    T(2000, () => { say('その気持ちが、いちばんのお札だメェ！ いけーっ！', 2000); s.hp = Math.min(3, s.hp + 1); s.power = true; this.updateHud(); this.pSpr.clearTint(); banner('覚醒！ お札が3枚に！');
       sfx((o, T2) => ['A5', 'D6', 'F#6', 'A6', 'D7'].forEach((n, i) => T2(i * .05, .2, o, { type: 'square', f: hz(n), peak: .12, rel: .15 }))); });
     B.dmgPer = Math.max(2, Math.ceil(B.hp / 9)); // about three volleys of three ofuda
     T(3600, () => { if (s.boss !== 'awake') return; s.boss = 'fight'; bgm('boss'); B.atk = 1.4; });
