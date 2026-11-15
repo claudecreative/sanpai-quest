@@ -1105,6 +1105,15 @@ class Title extends Phaser.Scene {
     {
       }
     { const b = store.get('best', {}); $('tBest').hidden = !b.clears; if (b.clears) $('tBest').innerHTML = `自己ベスト ${fmtTime(b.t)}　小判 ${b.coins}/${COIN_MAX}<br>参拝 ${b.clears}回　称号 ${store.get('titles', []).length}/${ALL_TITLES}`; }
+    // preview: ?ending jumps straight to the ending (after the sound gate), with a sample journey
+    if (/[?&]ending\b/.test(location.search)) {
+      const go2 = () => { show('gate', false); const R = RUN; R.easy = false; R.wish = 0; R.wipes = 2; R.falls = 2; R.trail = [];
+        for (let y = 1274; y > 116; y -= 5) R.trail.push([Math.round(pc(y) + Math.sin(y / 23) * 6), y]);
+        R.marks = [[pc(700), 700, 'fall'], [pc(630), 630, 'fall'], [pc(380), 380, 'hit']];
+        this.scene.start('Ending'); };
+      ensure(); if (ctx.state === 'running') { go2(); return; }
+      show('gate'); $('gate').onclick = () => { ensure(); go2(); }; return;
+    }
     const startTitle = () => { show('gate', false); show('title'); setTimeout(() => { if (!$('title').hidden && matchMedia('(hover:hover)').matches) $('mShiren').focus({ preventScroll: true }); }, 50); bgm('title'); if (muted && master) master.gain.value = 0; };
     ensure();
     if (ctx.state === 'running') startTitle();
