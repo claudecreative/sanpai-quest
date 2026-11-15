@@ -1032,6 +1032,10 @@ class Boot extends Phaser.Scene {
     for (const k of [...BG_KEYS, ...Object.keys(D.toriiTex)]) { addHD(this, k, epxCanvas(this.textures.get(k + '_raw').getSourceImage()), 2); this.textures.remove(k + '_raw'); }
     // FX textures
     const mk = (key, w, h, draw, res = 4) => { const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h); addHD(this, key, c, res); };
+    mk('flower', 9, 9, (x) => { const P = (c, pts) => { x.fillStyle = c; for (const [a, b] of pts) x.fillRect(a, b, 1, 1); };
+      P('#ff9ac0', [[3,0],[4,0],[5,0],[2,1],[3,1],[5,1],[6,1],[0,3],[1,3],[7,3],[8,3],[0,4],[1,4],[7,4],[8,4],[0,5],[1,5],[7,5],[8,5],[2,7],[3,7],[5,7],[6,7],[3,8],[4,8],[5,8],[1,2],[7,2],[1,6],[7,6]]);
+      P('#ffd6e6', [[4,1],[2,2],[6,2],[2,6],[6,6],[4,7]]); P('#ffd23f', [[3,3],[4,3],[5,3],[3,4],[5,4],[3,5],[4,5],[5,5]]); P('#fff6c0', [[4,4]]); }, 1);
+    mk('lheart', 7, 6, (x) => { x.fillStyle = '#ff5a8a'; ['.##.##.', '#######', '#######', '.#####.', '..###..', '...#...'].forEach((r, y) => [...r].forEach((c, k) => c === '#' && x.fillRect(k, y, 1, 1))); x.fillStyle = '#ffc0d4'; x.fillRect(1, 1, 1, 1); }, 1);
     mk('beam', 32, 256, (x, w, h) => { const g1 = x.createLinearGradient(0, 0, w, 0); g1.addColorStop(0, 'rgba(255,250,210,0)'); g1.addColorStop(.5, 'rgba(255,250,210,1)'); g1.addColorStop(1, 'rgba(255,250,210,0)'); x.fillStyle = g1; x.fillRect(0, 0, w, h);
       x.globalCompositeOperation = 'destination-in'; const g2 = x.createLinearGradient(0, 0, 0, h); g2.addColorStop(0, 'rgba(0,0,0,0)'); g2.addColorStop(.25, 'rgba(0,0,0,1)'); g2.addColorStop(.8, 'rgba(0,0,0,.6)'); g2.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g2; x.fillRect(0, 0, w, h); });
     mk('snow', 8, 8, (x) => { x.fillStyle = '#fff6e8'; x.beginPath(); x.arc(4, 4, 3.2, 0, 7); x.fill(); });
@@ -1892,7 +1896,10 @@ class Ending extends Phaser.Scene {
     $('stick').classList.remove('active', 'used'); $('knob').style.transform = 'translate(0,0)'; input.x = input.y = 0;
     const cam = this.cameras.main; cam.fadeIn(900, 255, 246, 232);
     this.add.image(0, 0, 'ending_map').setOrigin(0).setDepth(-10);
-    addAmbient(this, .1, () => { const top = this.cameras.main.scrollY; puff(this, Math.random() < .3 ? 'petal' : 'snow', Math.random() * GW, top - 4, { vy: 14 + Math.random() * 10, vx: -3, wob: 12, va: 80, life: 30, alpha: .85, depth: 3000 }); });
+    addAmbient(this, .1, () => { const top = this.cameras.main.scrollY, pr = this.dawnP || 0; puff(this, Math.random() < .3 + pr * .7 ? 'petal' : 'snow', Math.random() * GW, top - 4, { vy: 14 + Math.random() * 10, vx: -3, wob: 12, va: 80, life: 30, alpha: .85, depth: 3000 });
+      if (Math.random() < pr) puff(this, 'mote', Math.random() * GW, top + GH - Math.random() * 60, { scale: .3 + Math.random() * .3, add: true, vy: -12 - Math.random() * 8, wob: 5, life: 5, fadeIn: .6, alpha: .8, tint: 0xffe08a, depth: 3001 }); });
+    // the night slowly turns into the first dawn of the year as you walk down
+    this.dawnP = 0; this.dawn = this.add.graphics().setScrollFactor(0).setDepth(2900).setBlendMode('ADD');
     placeTorii(this, D.toriiEnd);
     this.hs = this.add.image(86, 70, 'shadow').setScale(1.4);
     this.hero = this.add.image(86, 70, 'player_front').setOrigin(.5, 1).setScale(2);
@@ -1935,39 +1942,58 @@ class Ending extends Phaser.Scene {
       const q = this.queue.shift(); say(q.t, q.ms); this.qT = q.ms / 1000 + .3;
       if (q.spark) this.sparkRing(this.sx, this.sy - 16, 10, 18);
     }
-    const stx = this.hy > 900 ? 96 : Phaser.Math.Clamp(this.hx + 30, 66, 128), sty = Math.min(this.hy + 6, 990);
+    const stx = this.together ? this.hx + 24 : this.hy > 900 ? 96 : Phaser.Math.Clamp(this.hx + 30, 66, 128), sty = this.together ? this.hy + 2 : Math.min(this.hy + 6, 990);
     const pdx = stx - this.sx; this.sx += pdx * Math.min(1, dt * 3); this.sy += (sty - this.sy) * Math.min(1, dt * 3);
     if (this.phase === 'walk') this.sheep.setFlipX(this.qT > 0 ? this.hx < this.sx : pdx < -1);
     const bob = moving ? Math.abs(Math.sin(this.time.now / 170)) * 2 : 0, sbob = Math.abs(pdx) > 2 || Math.abs(sty - this.sy) > 2 ? Math.abs(Math.sin(this.time.now / 170)) * 2 : 0;
     this.hero.setPosition(this.hx, this.hy - bob).setDepth(this.hy); this.hs.setPosition(this.hx, this.hy).setDepth(this.hy - 1);
-    if (!this.gone) { this.sheep.setPosition(this.sx, this.sy - sbob).setDepth(this.sy); this.ss.setPosition(this.sx, this.sy).setDepth(this.sy - 1); }
-    const target = Phaser.Math.Clamp((this.phase === 'walk' ? this.hy : 1010) - GH * .5, 0, 1240 - GH);
+    if (this.together) { this.hero.setTexture((Math.floor(this.time.now / 160) % 2) ? 'player_front_w1' : 'player_front_w2'); }
+    if (!this.gone) { this.sheep.setPosition(this.sx, this.sy - sbob - (this.hop || 0)).setDepth(this.sy); this.ss.setPosition(this.sx, this.sy).setDepth(this.sy - 1); }
+    if (this.phase === 'walk') this.dawnP = Math.max(this.dawnP, Phaser.Math.Clamp((this.hy - 120) / 1000, 0, 1) * .7);
+    { const d = this.dawnP, g = this.dawn; g.clear(); g.fillGradientStyle(0x7a3a6a, 0x7a3a6a, 0x8a4a18, 0x8a4a18, .5 * d, .5 * d, .38 * d, .38 * d); g.fillRect(0, 0, GW, GH); }
+    const target = Phaser.Math.Clamp((this.phase === 'walk' ? this.hy : this.together ? Math.min(this.hy, 1010) : 1010) - GH * .5, 0, 1240 - GH);
     cam.scrollY += (target - cam.scrollY) * Math.min(1, dt * 3);
   }
+  // not a goodbye: the sheep is this year's eto, so it stays with you all year. ends in the first sunrise.
   farewell() {
-    let T = (ms, f) => this.time.delayedCall(ms, f); const sc = (x, y) => [x - this.cameras.main.scrollX, y - this.cameras.main.scrollY];
-    this.hero.setTexture('player_back'); bgm('wakare');
-    T(300, () => say('…え？', 1700, '主人公'));
-    T(2100, () => say('ぼくは、ここまで。この鳥居の先は、きみの一年だメェ。', 4200));
+    let T = (ms, f) => this.time.delayedCall(ms, f);
+    const hop = (n = 2) => this.tweens.add({ targets: this, hop: 10, duration: 160, yoyo: true, repeat: n - 1, ease: 'Sine.out' });
+    this.hero.setTexture('player_back');
+    T(300, () => say('……ひつじとは、ここでお別れ？', 2200, '主人公'));
+    T(2600, () => { say('ううん、お別れじゃないメェ！', 2200); hop(3); this.sheep.setFlipX(this.hx < this.sx);
+      sfx((o, T2) => ['G5', 'C6', 'E6'].forEach((n, i) => T2(i * .08, .14, o, { type: 'square', f: hz(n), peak: .08, rel: .1 }))); });
+    T(4900, () => say('ぼくは2027年の干支、ひつじ。この一年は、ずーっときみといっしょだメェ！', 4200));
     const W = RUN.wish >= 0 ? 4200 : 0;
-    if (W) T(6500, () => say(`「${WL()[RUN.wish]}」――神さまにも、ぼくにも、ちゃんと届いたよ。`, 4000));
-    const T0 = T; T = (ms, f) => T0(ms + (ms >= 6500 ? W : 0), f);
-    T(6500, () => {
-      this.halo = this.add.image(this.sx, this.sy - 14, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.5).setDepth(this.sy - 2);
-      this.tweens.add({ targets: this.halo, scale: 3.4, duration: 1400, ease: 'Sine.out' });
-      this.tweens.add({ targets: this.halo, alpha: .6, duration: 900, yoyo: true, repeat: -1 });
-      this.sparkRing(this.sx, this.sy - 16, 14, 30);
-      say('怠け心がまた出てきても、大丈夫。きみなら、きっと祓えるメェ。', 4400);
-    });
-    T(11100, () => say('一年間、ずっと応援してるよ！', 3400));
-    T(14600, () => { say('ありがとう、ひつじ！ 今年は……あきらめない！', 2800, '主人公'); this.hero.setTexture('player_wave');
-      this.waveEv = this.time.addEvent({ delay: 320, loop: true, callback: () => this.hero.setFlipX(!this.hero.flipX) }); });
-    T(17600, () => { this.gone = true; this.sparkRing(this.sx, this.sy - 16, 18, 26);
-      this.tweens.add({ targets: [this.sheep, this.ss], alpha: 0, duration: 1600 }); this.tweens.add({ targets: this.sheep, y: this.sy - 30, duration: 1600 });
-      this.halo && this.tweens.add({ targets: this.halo, alpha: 0, scale: 5, duration: 1800 });
-      T(300, () => say('またね。', 2200)); });
-    T(20600, () => { this.waveEv && this.waveEv.remove(); this.hero.setFlipX(false); this.cameras.main.fadeOut(1600, 255, 246, 232);
+    if (W) T(9200, () => say(`「${WL()[RUN.wish]}」――神さまにも、ぼくにも、ちゃんと届いたよ。`, 4000));
+    const T0 = T; T = (ms, f) => T0(ms + (ms >= 9200 ? W : 0), f);
+    // the first sunrise of the year floods the path with warm light and flowers
+    T(9200, () => { this.sunrise(); say('見て！ 一年の、はじまりの光だメェ！', 3400); hop(2); });
+    T(12800, () => say('怠け心がまた出てきても、大丈夫。ぼくがとなりで応援するメェ！', 3800));
+    T(16800, () => { say('ありがとう、ひつじ！ 今年は……あきらめない！', 2800, '主人公'); this.hero.setTexture('player_wave');
+      this.waveEv = this.time.addEvent({ delay: 320, loop: true, callback: () => this.hero.setFlipX(!this.hero.flipX) }); hop(3);
+      for (let i = 0; i < 6; i++) T0(i * 120, () => puff(this, 'lheart', this.hx + (i % 2 ? 22 : -2), this.hy - 30, { scale: .6, vy: -24, wob: 6, life: 1.2, add: false, depth: 3002 })); });
+    T(19800, () => { this.waveEv && this.waveEv.remove(); this.hero.setFlipX(false); say('いっしょに行こう！ 最高の一年に、するメェ！', 2600);
+      this.together = true; this.hero.setTexture('player_front');
+      this.tweens.add({ targets: this, hy: this.hy + 150, duration: 3800, ease: 'Sine.in' }); });
+    T(21600, () => { this.cameras.main.fadeOut(1800, 255, 246, 232);
       this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('EndCard')); });
+  }
+  sunrise() {
+    const cam = this.cameras.main; cam.flash(900, 255, 224, 160);
+    sfx((o, T2) => ['C5', 'E5', 'G5', 'C6', 'E6', 'G6', 'C7'].forEach((n, i) => T2(i * .09, .5, o, { type: 'triangle', f: hz(n), peak: .07, rel: .5 })));
+    this.tweens.add({ targets: this, dawnP: 1, duration: 2200 });
+    for (let i = 0; i < 7; i++) { const b = this.add.image(GW / 2, GH + 30, 'beam').setOrigin(.5, 1).setScrollFactor(0).setAngle(-54 + i * 18).setScale(1.4, 2.2).setBlendMode('ADD').setTint(0xffe0a0).setAlpha(0).setDepth(2950);
+      this.tweens.add({ targets: b, alpha: .22, duration: 1600, delay: i * 80 }); this.tweens.add({ targets: b, angle: b.angle + 8, duration: 4000, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
+    const halo = this.add.image(this.sx, this.sy - 14, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.5).setDepth(this.sy - 2);
+    this.tweens.add({ targets: halo, scale: 3, alpha: .5, duration: 1400, ease: 'Sine.out' });
+    this.events.on('update', () => halo.setPosition(this.sx, this.sy - 14 - (this.hop || 0)));
+    // flowers pop up along the path, from the torii outward
+    for (let i = 0; i < 34; i++) {
+      const side = i % 2 ? 1 : -1, y = 1000 + Math.random() * 230, x = 96 + side * (40 + Math.random() * 54);
+      const f = this.add.image(x, y, 'flower').setOrigin(.5, 1).setScale(0).setDepth(y).setTint(i % 3 ? 0xffffff : 0xfff0a0);
+      this.tweens.add({ targets: f, scale: 1 + Math.random() * .5, duration: 400, delay: 200 + (y - 1000) * 6 + Math.random() * 300, ease: 'Back.easeOut' });
+    }
+    for (let i = 0; i < 40; i++) this.time.delayedCall(i * 40, () => puff(this, 'petal', Math.random() * GW, cam.scrollY - 4, { vy: 30 + Math.random() * 20, vx: -6, wob: 14, va: 120, life: 8, alpha: .95, depth: 3000 }));
   }
 }
 
@@ -1984,9 +2010,12 @@ class EndCard extends Phaser.Scene {
     const h = this.add.image(96, 372, 'player_back').setOrigin(.5, 1).setScale(1.4);
     this.tweens.add({ targets: h, y: 326, scale: .8, duration: 9000, ease: 'Sine.out' });
     this.time.addEvent({ delay: 200, loop: true, callback: () => h.setFlipX(!h.flipX) });
-    const g = this.add.image(38, 286, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(1.2).setAlpha(0);
-    const sp = this.add.image(38, 290, 'sheep').setOrigin(.5, 1).setAlpha(0);
-    this.tweens.add({ targets: [g, sp], alpha: { from: 0, to: .9 }, duration: 2000, delay: 3500 });
+    // the sheep walks right beside you, hopping, into the new year
+    const sp = this.add.image(118, 376, 'sheep').setOrigin(.5, 1).setScale(1.4);
+    this.tweens.add({ targets: sp, x: 106, y: 330, scale: .8, duration: 9000, ease: 'Sine.out' });
+    this.time.addEvent({ delay: 900, loop: true, callback: () => this.tweens.add({ targets: sp, y: sp.y - 4, duration: 140, yoyo: true }) });
+    addAmbient(this, .25, () => puff(this, 'petal', Math.random() * GW, -4, { vy: 16 + Math.random() * 10, vx: -3, wob: 12, va: 80, life: 30, alpha: .9, depth: 10 }));
+    this.time.addEvent({ delay: 1600, loop: true, callback: () => puff(this, 'lheart', 100 + Math.random() * 8, h.y - 26, { scale: .5, vy: -14, wob: 4, life: 1.4, depth: 11 }) });
     $('eWish').textContent = RUN.wish >= 0 ? `2027年、${WL()[RUN.wish]}！` : ''; $('eWish').hidden = RUN.wish < 0;
     show('endcard');
     this.time.delayedCall(5200, () => { show('eBtns'); matchMedia('(hover:hover)').matches && $('endShare').focus({ preventScroll: true }); });
