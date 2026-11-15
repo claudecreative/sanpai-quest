@@ -1112,8 +1112,11 @@ class Play extends Phaser.Scene {
       this.tweens.add({ targets: sp, x: x + Math.cos(a) * 18, y: y + Math.sin(a) * 18, alpha: 0, scale: 1.6, duration: 420, onComplete: () => sp.destroy() });
     }
   }
+  // the sheep's one-time remarks
+  once(key, text, ms = 2800, delay = 300) { this.said = this.said || {}; if (this.said[key] || this.st.boss === 'intro' || this.st.boss === 'mid') return; this.said[key] = 1; this.time.delayedCall(delay, () => { if (!this.st.done) say(text, ms); }); }
   // consecutive coins climb a pentatonic scale
   coinChime() {
+    this.once('coin', '小判は「運のかけら」。集めるほど、運勢が上がるメェ！');
     const now = this.time.now; this.combo = now - (this.lastCoin || -9999) < 1200 ? Math.min((this.combo || 0) + 1, 7) : 0; this.lastCoin = now;
     const sc = ['B5', 'D6', 'E6', 'F#6', 'A6', 'B6', 'D7', 'E7'], n = sc[this.combo];
     sfx((o, T) => { T(0, .06, o, { type: 'square', f: hz(n), peak: .13 }); T(.06, .22, o, { type: 'square', f: hz(n) * 1.335, peak: .12, rel: .18 }); });
@@ -1148,11 +1151,13 @@ class Play extends Phaser.Scene {
     const s = this.st; if (s.invuln > 0 || s.lock > 0 || s.done || window.__autopilot) return;
     if (kind === 'fall' || kind === 'water') {
       s.lock = .9; s.air = 0;
+      this.once(kind, kind === 'water' ? '石の上を「跳」で渡るんだメェ。着地の輪っかが緑ならセーフ！' : '黒い穴は「跳」で飛びこえられるメェ！', 3200, 1000);
       if (kind === 'water') { se('落とし穴'); sfx((o, T, N) => N(0, .35, o, 'lowpass', 900, 1, .5)); fx('ドボン！', ...this.scr(this.p.x, this.p.y - 20), '#7fe8ff'); }
       else { se('落とし穴'); fx('ヒュ〜', ...this.scr(this.p.x, this.p.y - 20), '#fff6e8'); }
       this.tweens.add({ targets: this.pSpr, scale: 0, angle: 200, duration: 600, onComplete: () => {
         this.pSpr.setScale(2).setAngle(0); this.p.x = this.lastSafe[0]; this.p.y = this.lastSafe[1]; this.damage(); } });
     } else {
+      this.once('hit', '妖怪にさわると痛いメェ。「払」のお札で祓おう！', 2800, 600);
       se('ダメージ'); this.cameras.main.shake(160, .012); this.hurtT = .12; ringFx(this, this.p.x, this.p.y - 14, 0xff5a46, .8); this.p.y = Math.min(this.p.y + 16, 1332); this.damage();
     }
   }
@@ -1161,6 +1166,7 @@ class Play extends Phaser.Scene {
     const s = this.st;
     if (s.shield) { s.shield = false; s.invuln = 1.5; this.shieldFx && this.shieldFx.destroy(); this.shieldFx = null; ringFx(this, this.p.x, this.p.y - 14, 0xff9a8a, 1.4); fx('お守りが守ってくれた！', ...this.scr(this.p.x, this.p.y - 40), '#ff9a8a'); return; }
     s.hp--; s.dmg++; s.invuln = 1.5;
+    if (s.hp === 1) this.once('low', 'あぶないメェ！ 赤いお守りを見つけたら、体力が戻るよ。', 3000, 900);
     if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3; say('負けないでメェ！体力を回復したよ。', 2400); }
     else if (s.hp <= 0) { s.hp = 3; this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); }
     this.updateHud();
@@ -1304,6 +1310,7 @@ class Play extends Phaser.Scene {
         this.updateHud(); }
     }
     if (this.shieldFx) this.shieldFx.setPosition(p.x, p.y - 14 - h).setDepth(p.y + 11).setAlpha(.35 + Math.sin(this.time.now / 150) * .12);
+    if (p.y < 200 && s.boss === 'done') this.once('near', 'あの鳥居をくぐれば、タカヨシ神社だメェ！', 2400, 0);
     // landing guide over the river while airborne
     if (air && p.y > 556 && p.y < 760) {
       const lx = p.x + ix * 70 * 1.3 * s.air, ly = p.y + iy * 70 * 1.3 * s.air;
@@ -1444,7 +1451,8 @@ class Play extends Phaser.Scene {
       onComplete: () => { B.spr.destroy(); this.tether.clear(); this.B = null; this.burst(p.x, p.y - 16, 10);
         sfx((o, T) => ['D5', 'G5', 'A5', 'D6', 'E6', 'G6', 'A6', 'D7'].forEach((n, i) => T(i * .07, .22, o, { type: 'square', f: hz(n), peak: .12, rel: .15 })));
         s.coins += 5; this.lvCheck(); fx('小判 +5', ...this.scr(p.x, p.y - 40), '#ffd23f');
-        say('心のモヤモヤが晴れたメェ！ 怠け心も、きみの一部。さあ、参拝へ！', 3400); bgm('title'); } }));
+        say('……なんだか、体が軽くなった。', 2400, '主人公'); bgm('title');
+        this.time.delayedCall(2600, () => say('心のモヤモヤが晴れたメェ！ 怠け心も、きみの一部。さあ、参拝へ！', 3400)); } }));
   }
   autopilot() {
     const p = this.p, s = this.st, cl = (v) => Math.max(-1, Math.min(1, v));
