@@ -86,16 +86,34 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 .btn.down{transform:translateY(calc(var(--u)*1.5));filter:brightness(1.25)}
 .btn:focus-visible,#mute:focus-visible,.cta:focus-visible{outline:calc(var(--u)*1.5) solid var(--gold);outline-offset:calc(var(--u)*1)}
 
-#title{position:absolute;inset:0;pointer-events:auto;display:flex;flex-direction:column;align-items:center;cursor:pointer;background:transparent;border:0;color:inherit;font-family:inherit;padding:0}
+#title{position:absolute;inset:0;pointer-events:auto;display:flex;flex-direction:column;align-items:center;background:transparent;border:0;color:inherit;font-family:inherit;padding:0}
 .t-eyebrow{margin-top:calc(var(--u)*26);font-size:calc(var(--u)*5.5);letter-spacing:.3em;color:var(--gold)}
 .t-logo{margin-top:calc(var(--u)*3);font-family:var(--display);font-size:calc(var(--u)*30);line-height:1.05;color:var(--gold);text-align:center;
   text-shadow:calc(var(--u)*1.5) 0 0 var(--ink),calc(var(--u)*-1.5) 0 0 var(--ink),0 calc(var(--u)*1.5) 0 var(--ink),0 calc(var(--u)*-1.5) 0 var(--ink),calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink),calc(var(--u)*-1.5) calc(var(--u)*-1.5) 0 var(--ink),0 calc(var(--u)*3.5) 0 var(--shu),0 calc(var(--u)*5) 0 var(--ink)}
 .t-sub{margin-top:calc(var(--u)*7);padding:calc(var(--u)*3) calc(var(--u)*7);background:var(--ink);border:calc(var(--u)*1) solid var(--gold);font-size:calc(var(--u)*7)}
-.t-start{position:absolute;bottom:calc(var(--u)*134);padding:calc(var(--u)*2) calc(var(--u)*6);background:rgba(26,15,46,.7);font-size:calc(var(--u)*9);letter-spacing:.15em;animation:blink 1s steps(2) infinite}
+.t-modes{position:absolute;bottom:calc(var(--u)*58);width:calc(var(--u)*182);padding:calc(var(--u)*5) calc(var(--u)*4) calc(var(--u)*5);background:rgba(18,10,36,.96);border:calc(var(--u)*1) solid rgba(255,210,63,.6);border-radius:calc(var(--u)*3);text-align:center;box-shadow:0 calc(var(--u)*2) calc(var(--u)*6) rgba(0,0,0,.5);animation:pop2 .4s .6s steps(4) both}
+.t-mq{font-size:calc(var(--u)*7.5);color:var(--gold);letter-spacing:.1em;margin-bottom:calc(var(--u)*7)}
+.t-row{display:flex;gap:calc(var(--u)*3)}
+.mode{flex:1;position:relative;font-family:var(--pixel);color:var(--ink);background:var(--paper);border:calc(var(--u)*1.2) solid var(--ink);border-radius:calc(var(--u)*2.5);box-shadow:0 calc(var(--u)*2) 0 var(--ink);padding:calc(var(--u)*7) calc(var(--u)*1) calc(var(--u)*4);cursor:pointer;line-height:1.15}
+.mode b{display:block;font-family:var(--display);font-weight:400;font-size:calc(var(--u)*14);letter-spacing:.05em}
+.mode u{display:block;text-decoration:none;margin-top:calc(var(--u)*2.5);font-size:calc(var(--u)*6.5);font-weight:700}
+.mode.rec u{color:#9c1f1a}
+#mShugyo u{color:#2a6a40}
+.mode i.kid{background:#2a8a3a}
+.t-luck{margin-top:calc(var(--u)*5);font-family:var(--display);font-size:calc(var(--u)*8);color:var(--gold);text-shadow:0 calc(var(--u)*.8) 0 #7a4a08}
+.mode small{display:block;font-size:calc(var(--u)*6.5);color:#5a4a6a;margin-top:calc(var(--u)*1)}
+.mode.rec{background:linear-gradient(180deg,#fff0a0,var(--gold));animation:recpulse 1.6s ease-in-out infinite}
+@keyframes recpulse{0%,100%{transform:scale(1);box-shadow:0 calc(var(--u)*2) 0 var(--ink),0 0 0 rgba(255,210,63,0)}50%{transform:scale(1.04);box-shadow:0 calc(var(--u)*2) 0 var(--ink),0 0 calc(var(--u)*8) rgba(255,210,63,.8)}}
+.mode.rec b{color:#9c1f1a}
+.mode i{position:absolute;top:calc(var(--u)*-5);left:50%;transform:translateX(-50%);font-style:normal;white-space:nowrap;font-size:calc(var(--u)*6.5);color:#fff;background:var(--shu);border:calc(var(--u)*.8) solid var(--ink);border-radius:calc(var(--u)*5);padding:0 calc(var(--u)*3)}
+#mShugyo{background:linear-gradient(180deg,#e9fff0,#b8f0c8)}
+#mShugyo b{color:#1f6a3a}
+.mode:hover,.mode:focus-visible{outline:calc(var(--u)*1.5) solid #fff;outline-offset:calc(var(--u)*1)}
+.t-mnote{margin-top:calc(var(--u)*3);font-size:calc(var(--u)*6.8);line-height:1.6;color:var(--paper)}
+.t-mnote em{font-style:normal;color:#7dff9a}
 .t-note{position:absolute;bottom:calc(var(--u)*6);font-size:calc(var(--u)*5);color:var(--mute)}
 @keyframes blink{50%{opacity:.15}}
 @keyframes tpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.96)}}
-.t-start{animation:tpulse 1.4s ease-in-out infinite!important;color:var(--gold);border:calc(var(--u)*1) solid rgba(255,210,63,.7);border-radius:calc(var(--u)*2)}
 
 #steps{position:absolute;left:calc(var(--u)*6);right:calc(var(--u)*6);top:calc(var(--u)*7);display:flex;gap:calc(var(--u)*3)}
 #steps div{flex:1;padding:calc(var(--u)*3) 0;text-align:center;font-size:calc(var(--u)*5.5);background:rgba(26,15,46,.8);border:calc(var(--u)*1) solid #8a809e;color:var(--mute)}
@@ -119,6 +137,8 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 .s-no{font-size:calc(var(--u)*5.5);color:#9c1f1a;letter-spacing:.2em}
 .s-big{display:flex;flex-direction:column;align-items:center;font-family:var(--display);font-size:calc(var(--u)*38);line-height:1;color:var(--shu);text-shadow:calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink)}
 .s-foot{margin-top:auto;width:100%;border-top:calc(var(--u)*1) dashed var(--shu);padding-top:calc(var(--u)*3);text-align:center;font-size:calc(var(--u)*5);color:#5a4f75}
+#modeLuck{margin-top:calc(var(--u)*2);font-size:calc(var(--u)*6.5);color:var(--paper);background:rgba(26,15,46,.8);padding:calc(var(--u)*1.5) calc(var(--u)*5);border-radius:calc(var(--u)*2);animation:pop2 .5s steps(5) both}
+#modeLuck b{color:var(--gold);font-weight:400}
 #best{margin-top:calc(var(--u)*6);font-family:var(--display);font-size:calc(var(--u)*12);color:var(--gold);text-align:center;animation:pop2 .5s steps(5) both;
   text-shadow:calc(var(--u)*1.5) 0 0 var(--ink),calc(var(--u)*-1.5) 0 0 var(--ink),0 calc(var(--u)*1.5) 0 var(--ink),0 calc(var(--u)*-1.5) 0 var(--ink),calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink),0 calc(var(--u)*3) 0 #9c1f1a}
 @keyframes pop2{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
@@ -148,7 +168,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #title:not([hidden]) .t-logo{animation:logoIn .7s steps(7) both}
 #title:not([hidden]) .t-sub{animation:logoIn .5s .5s steps(5) both}
 @keyframes logoIn{from{transform:translateY(calc(var(--u)*-40)) scale(1.4);opacity:0}to{transform:none;opacity:1}}
-@media (prefers-reduced-motion: reduce){.t-start,.g-tap{animation:none}#title .t-logo,#title .t-sub{animation:none!important}}
+@media (prefers-reduced-motion: reduce){.g-tap{animation:none}#title .t-logo,#title .t-sub{animation:none!important}}
 /* ---- story cut-scenes ---- */
 #story{position:absolute;inset:0;pointer-events:auto;cursor:pointer;background:transparent;border:0;padding:0;color:inherit;font-family:inherit;text-align:left}
 #storyBox{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*30);min-height:calc(var(--u)*52);box-sizing:border-box;padding:calc(var(--u)*6) calc(var(--u)*7) calc(var(--u)*9);background:rgba(26,15,46,.92);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold),calc(var(--u)*2) calc(var(--u)*2) 0 rgba(0,0,0,.4);display:flex;gap:calc(var(--u)*5);align-items:flex-start;line-height:1.7;font-size:calc(var(--u)*7.5)}
@@ -199,7 +219,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 .sh-btn.copy{background:var(--paper);color:var(--ink)}
 .sh-url{font-size:calc(var(--u)*5);color:var(--mute);text-align:center;word-break:break-all}
 .sh-close{align-self:center;margin-top:calc(var(--u)*1);font-family:var(--pixel);font-size:calc(var(--u)*6.5);color:var(--paper);background:transparent;border:calc(var(--u)*1) solid var(--mute);padding:calc(var(--u)*2) calc(var(--u)*8);cursor:pointer}
-#hardBtn:focus-visible,#pauseBtn:focus-visible,#title:focus-visible .t-start,.sh-btn:focus-visible,.sh-close:focus-visible,#storySkip:focus-visible{outline:calc(var(--u)*1.5) solid var(--gold);outline-offset:calc(var(--u)*1)}
+#pauseBtn:focus-visible,.sh-btn:focus-visible,.sh-close:focus-visible,#storySkip:focus-visible{outline:calc(var(--u)*1.5) solid var(--gold);outline-offset:calc(var(--u)*1)}
 #toast{position:absolute;left:50%;bottom:calc(var(--u)*70);transform:translateX(-50%);padding:calc(var(--u)*3) calc(var(--u)*7);background:var(--gold);color:var(--ink);font-size:calc(var(--u)*7);border:calc(var(--u)*1) solid var(--ink);z-index:6;animation:pop2 .25s steps(3) both;white-space:nowrap}
 /* ---- PC keyboard hint ---- */
 #keyhint{position:absolute;left:calc(var(--u)*20);right:calc(var(--u)*20);bottom:calc(var(--u)*3);text-align:center;font-size:calc(var(--u)*5.5);color:var(--paper);pointer-events:none;background:rgba(7,4,26,.72);border-radius:calc(var(--u)*3);padding:calc(var(--u)*1.5) 0;text-shadow:0 1px 0 #000}
@@ -221,14 +241,12 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #loading{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;color:var(--gold);letter-spacing:.2em;animation:blink 1s steps(2) infinite;pointer-events:none}
 #rotate{position:fixed;left:8px;top:8px;max-width:calc(50vw - 110px);font-size:13px;line-height:1.5;color:var(--paper);background:rgba(26,15,46,.85);border:1px solid var(--gold);padding:4px 12px;border-radius:6px;pointer-events:none;z-index:9}
 #rotate b{color:var(--gold);font-weight:400}
-@media (prefers-reduced-motion: reduce){#zcard,#zcard::before,.stamp,#hearts.low img:first-child,#hearts img.lost,#hearts img.gain,#lv.up,#gTap,.t-start{animation-duration:.01s!important;animation-iteration-count:1!important}#ema{animation:none}}
+@media (prefers-reduced-motion: reduce){#zcard,#zcard::before,.stamp,#hearts.low img:first-child,#hearts img.lost,#hearts img.gain,#lv.up,#gTap,.mode.rec,.t-modes{animation-duration:.01s!important;animation-iteration-count:1!important}#ema{animation:none}}
 
 #stats b{font-weight:400}
 .stamp{position:absolute;right:calc(var(--u)*14);top:calc(var(--u)*176);padding:calc(var(--u)*2) calc(var(--u)*4);font-family:var(--display);font-size:calc(var(--u)*10);color:var(--shu);border:calc(var(--u)*1.5) solid var(--shu);border-radius:calc(var(--u)*2);background:rgba(255,246,232,.85);transform:rotate(-14deg);animation:stamp .35s cubic-bezier(.3,1.8,.5,1) both;pointer-events:none;box-shadow:0 0 0 calc(var(--u)*1) rgba(255,246,232,.85)}
 @keyframes stamp{from{transform:rotate(-14deg) scale(3);opacity:0}to{transform:rotate(-14deg) scale(1);opacity:1}}
-#hardBtn{position:absolute;z-index:3;left:50%;transform:translateX(-50%);bottom:calc(var(--u)*95);white-space:nowrap;pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*6);color:var(--paper);background:rgba(26,15,46,.85);border:calc(var(--u)*1) solid var(--mute);border-radius:calc(var(--u)*2);padding:calc(var(--u)*1.5) calc(var(--u)*5);cursor:pointer}
-#hardBtn[aria-pressed="true"]{background:var(--shu);border-color:var(--gold);color:#fff}
-.t-best{position:absolute;bottom:calc(var(--u)*110);font-size:calc(var(--u)*6);color:var(--gold);background:rgba(26,15,46,.75);padding:calc(var(--u)*1.5) calc(var(--u)*5);border:calc(var(--u)*.8) solid rgba(255,210,63,.6)}
+.t-best{position:absolute;top:calc(var(--u)*128);text-align:center;line-height:1.5;font-size:calc(var(--u)*6);color:var(--gold);background:rgba(26,15,46,.75);padding:calc(var(--u)*1.5) calc(var(--u)*5);border:calc(var(--u)*.8) solid rgba(255,210,63,.6)}
 
 #wipe{position:absolute;inset:0;pointer-events:none;z-index:8;--r:0%;--x:50%;--y:50%;background:radial-gradient(circle at var(--x) var(--y),transparent var(--r),var(--gold) calc(var(--r) + .6%),#07041a calc(var(--r) + 1.4%))}
 #wipeMark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:calc(var(--u)*30);color:var(--shu);opacity:var(--m,0);filter:drop-shadow(0 0 calc(var(--u)*4) rgba(224,58,46,.6))}
@@ -321,6 +339,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
       <div class="r-head" id="rHead"></div>
       <div id="slip" hidden><div class="s-top">御神籤</div><div class="s-no" id="sNo">第一番</div><div class="s-big" id="sBig"><span>大</span><span>吉</span></div><div class="s-foot">タカヨシ神社</div></div>
       <div id="best" hidden>最高の年になるでしょう！</div>
+      <div id="modeLuck" hidden></div>
       <div id="stats" hidden></div>
       <div id="titles" hidden></div>
       <div id="wishLine" hidden></div>
@@ -378,15 +397,22 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
         <div class="g-tap">▶ タップしてはじめる</div>
       </div>
     </button>
-    <button id="hardBtn" type="button" hidden aria-pressed="false"></button>
-    <button id="title" type="button" hidden aria-label="タップでスタート">
+    <div id="title" hidden>
       <div class="t-eyebrow outline">2027 新春 ／ カレンダーハガキ 1月号</div>
       <div class="t-logo">参拝<br>クエスト</div>
       <div class="t-sub">タカヨシ神社を目指せ！</div>
-      <div class="t-start outline">▶ タップでスタート</div>
       <div class="t-best" id="tBest" hidden></div>
-      <div class="t-note">♪ 音が出ます　／　PCは矢印キー・Z（払）・X（跳）・Enterでスタート</div>
-    </button>
+      <div class="t-modes">
+        <div class="t-mq">▼ モードをえらんでスタート ▼</div>
+        <div class="t-row">
+          <button class="mode rec" id="mShiren" type="button"><i>おすすめ</i><b>試練<br>モード</b><small>ふつう</small><u>ご利益 大！</u></button>
+          <button class="mode" id="mShugyo" type="button"><i class="kid">子ども向け</i><b>修行<br>モード</b><small>やさしい</small><u>ご利益 ふつう</u></button>
+        </div>
+        <div class="t-luck">試練がきびしいほど、運がひらける！</div>
+        <div class="t-mnote">小さなお子さまや、ゲームが苦手な方は<br><em>「修行モード」</em>をお選びください</div>
+      </div>
+      <div class="t-note">♪ 音が出ます　／　PCは ←→ でえらんで Enter・矢印キー・Z（払）・X（跳）</div>
+    </div>
   </div>
 </div>
 
@@ -763,17 +789,17 @@ function fx(text, sx, sy, color) {
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
   $('ui').appendChild(d); setTimeout(() => d.remove(), 1100);
 }
-function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause', 'gTap', 'hardBtn', 'ema'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
+function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause', 'gTap', 'ema', 'modeLuck'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
 
 // ---------- run record, wishes, story, share ----------
 const WISHES = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
 let COIN_MAX = 57;
-const RUN = { wish: -1, fortune: '', hard: false };
-const HK = () => RUN.hard ? 1.25 : 1; // 修行モード: everything a little quicker
+const RUN = { wish: -1, fortune: '', easy: false };
+const HK = () => RUN.easy ? .7 : 1; // 修行モード (やさしい): yokai move and throw more slowly
 const CANON_URL = 'https://claudecreative.github.io/sanpai-quest/';
 const SHARE_URL = ['claudecreative.github.io', 'aimania.tech', 'www.aimania.tech'].includes(location.hostname) ? location.origin + location.pathname.replace(/index\.html$/, '') : CANON_URL;
 const buzz = ms => { try { if (!muted && navigator.vibrate && matchMedia('(pointer:coarse)').matches) navigator.vibrate(ms); } catch (e) {} };
-const ALL_TITLES = 11; // 修行の参拝者・ 小判コンプリート・小判名人・強運の持ち主・大判ハンター・無傷の参拝者・身のこなし上手・韋駄天・健脚・初もうで達成・約束の見届け人
+const ALL_TITLES = 10; // 小判コンプリート・小判名人・強運の持ち主・大判ハンター・無傷の参拝者・身のこなし上手・韋駄天・健脚・初もうで達成・約束の見届け人
 const store = { get(k, d) { try { const v = localStorage.getItem('sq_' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('sq_' + k, JSON.stringify(v)); } catch (e) {} } };
 const fmtTime = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 let storyKey = null, wishKey = null;
@@ -811,7 +837,7 @@ function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = true;
 function shareText(kind) {
   const w = RUN.wish >= 0 ? WISHES[RUN.wish] : '';
   if (kind === 'end') return `参拝クエストをさいごまでクリア！🐑⛩️\n${w ? `2027年の目標は「${w}」！\n` : ''}ひつじと約束した一年が、はじまる。\n#参拝クエスト`;
-  const meta = [RUN.time && `タイム ${RUN.time}`, RUN.titles && RUN.titles.length && `称号：${RUN.titles.join('・')}`].filter(Boolean).join('\n');
+  const meta = [RUN.time && `${RUN.easy ? '修行' : '試練'}モード　タイム ${RUN.time}`, RUN.titles && RUN.titles.length && `称号：${RUN.titles.join('・')}`].filter(Boolean).join('\n');
   return `参拝クエストをクリア！⛩️\n2027年の運勢は【${RUN.fortune || '大吉'}】でした✨\n${meta ? meta + '\n' : ''}${w ? `今年の目標は「${w}」！\n` : ''}#参拝クエスト`;
 }
 function openShare(kind) {
@@ -886,13 +912,13 @@ addEventListener('keydown', e => {
   if (e.key.startsWith('Arrow') || ['z', 'x', 'w', 'a', 's', 'd', 'j', 'k'].includes(k)) setKb(true);
   if (!$('share').hidden) { if (k === 'escape') show('share', false); return; }
   if (!$('pause').hidden) { if (k === 'p' || k === 'escape' || act) { setPause(false); e.preventDefault(); } return; }
-  if (k === 'h' && !$('hardBtn').hidden) { $('hardBtn').click(); return; }
+  if (!$('title').hidden && (k === 'arrowleft' || k === 'arrowright')) { (k === 'arrowleft' ? $('mShiren') : $('mShugyo')).focus(); return; }
   if (wishKey && /^[1-4]$/.test(k)) { wishKey(+k - 1); return; }
   if (storyKey && act && !e.repeat) { e.preventDefault(); storyKey(); return; }
   if (act && !e.repeat && document.activeElement && document.activeElement.tagName === 'BUTTON' && !document.activeElement.hidden && document.activeElement.offsetParent && k !== 'z') return; // native button activation
   if (act && !e.repeat) {
     if (!$('gate').hidden) { e.preventDefault(); $('gate').click(); return; }
-    if (!$('title').hidden) { e.preventDefault(); $('title').click(); return; }
+    if (!$('title').hidden) { e.preventDefault(); (document.activeElement === $('mShugyo') ? $('mShugyo') : $('mShiren')).click(); return; }
   }
   if ((k === 'p' || k === 'escape') && curPlay()) setPause(true);
 });
@@ -1038,18 +1064,19 @@ class Title extends Phaser.Scene {
     const sg = this.add.image(96, 196, 'glow').setTint(0xffd23f).setBlendMode('ADD').setScale(2.2).setAlpha(.35);
     this.tweens.add({ targets: sg, alpha: .7, scale: 2.8, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
     const t = $('title');
-    { const b = store.get('best', {}), hb = $('hardBtn'); RUN.hard = !!b.clears && !!store.get('hard', false);
-      const lab = () => { hb.textContent = RUN.hard ? '修行モード ON（手ごわい）' : '修行モード OFF'; hb.setAttribute('aria-pressed', String(RUN.hard)); };
-      hb.onclick = ev => { ev.stopPropagation(); RUN.hard = !RUN.hard; store.set('hard', RUN.hard); lab(); se('鈴'); }; lab(); this.hardOk = !!b.clears; }
+    {
+      }
     { const b = store.get('best', {}); $('tBest').hidden = !b.clears; if (b.clears) $('tBest').innerHTML = `自己ベスト ${fmtTime(b.t)}　小判 ${b.coins}/${COIN_MAX}<br>参拝 ${b.clears}回　称号 ${store.get('titles', []).length}/${ALL_TITLES}`; }
-    const startTitle = () => { show('gate', false); show('title'); show('hardBtn', this.hardOk); bgm('title'); if (muted && master) master.gain.value = 0; };
+    const startTitle = () => { show('gate', false); show('title'); setTimeout(() => { if (!$('title').hidden && matchMedia('(hover:hover)').matches) $('mShiren').focus({ preventScroll: true }); }, 50); bgm('title'); if (muted && master) master.gain.value = 0; };
     ensure();
     if (ctx.state === 'running') startTitle();
     else {
       show('gate'); $('gate').onclick = () => { ensure(); startTitle(); };
       (ctx instanceof OfflineAudioContext ? Promise.reject() : ctx.resume()).then(() => { if (ctx.state === 'running' && !$('gate').hidden) startTitle(); }).catch(() => {});
     }
-    t.onclick = () => { ensure(); show('title', false); show('hardBtn', false); se('鈴'); this.cameras.main.fadeOut(500, 7, 4, 26); this.cameras.main.once('camerafadeoutcomplete', () => { bgmStop(); this.scene.start('Prologue'); }); t.onclick = null; };
+    let going = false;
+    const go = easy => { if (going) return; going = true; ensure(); RUN.easy = easy; show('title', false); se('鈴'); this.cameras.main.fadeOut(500, 7, 4, 26); this.cameras.main.once('camerafadeoutcomplete', () => { bgmStop(); this.scene.start('Prologue'); }); };
+    $('mShiren').onclick = () => go(false); $('mShugyo').onclick = () => go(true);
   }
 }
 
@@ -1207,7 +1234,7 @@ class Play extends Phaser.Scene {
     for (let i = 0; i < 3; i++) { const im = document.createElement('img'); im.src = i < s.hp ? HEART : HEART_E; im.alt = i === 0 ? `体力 ${s.hp}/3` : '';
       if (s.hp < prev && i >= s.hp && i < prev) im.className = 'lost'; if (s.hp > prev && i < s.hp && i >= prev) im.className = 'gain'; $('hearts').appendChild(im); }
     $('hearts').classList.toggle('low', s.hp === 1);
-    $('lv').textContent = (RUN.hard ? '修 ' : '') + '運 Lv.' + s.lv; const cn = '×' + String(s.coins).padStart(2, '0'); if ($('coinNum').textContent !== cn) { $('coinNum').textContent = cn; const c = $('coins'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
+    $('lv').textContent = (RUN.easy ? '修 ' : '') + '運 Lv.' + s.lv; const cn = '×' + String(s.coins).padStart(2, '0'); if ($('coinNum').textContent !== cn) { $('coinNum').textContent = cn; const c = $('coins'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
     $('progFill').style.width = Math.max(0, Math.min(100, (1314 - this.p.y) / (1314 - 136) * 100)) + '%';
   }
   enterZone(z) {
@@ -1283,7 +1310,7 @@ class Play extends Phaser.Scene {
       if (kind === 'water') { se('落とし穴'); sfx((o, T, N) => N(0, .35, o, 'lowpass', 900, 1, .5)); fx('ドボン！', ...this.scr(this.p.x, this.p.y - 20), '#7fe8ff'); }
       else { se('落とし穴'); fx('ヒュ〜', ...this.scr(this.p.x, this.p.y - 20), '#fff6e8'); }
       this.tweens.add({ targets: this.pSpr, scale: 0, angle: 200, duration: 480, onComplete: () => {
-        this.pSpr.setAngle(0); this.p.x = this.lastSafe[0]; this.p.y = this.lastSafe[1]; this.damage(); this.respawnFx(); } });
+        this.pSpr.setAngle(0); this.p.x = this.lastSafe[0]; this.p.y = this.lastSafe[1]; if (RUN.easy) s.invuln = 1.5; else this.damage(); this.respawnFx(); } });
     } else {
       this.once('hit', '妖怪にさわると痛いメェ。「払」のお札で祓おう！', 2800, 600);
       se('ダメージ'); this.cameras.main.shake(160, .012); this.hurtT = .12; ringFx(this, this.p.x, this.p.y - 14, 0xff5a46, .8);
@@ -1306,7 +1333,7 @@ class Play extends Phaser.Scene {
     if (s.hp === 1) this.once('low', 'あぶないメェ！ 赤いお守りを見つけたら、体力が戻るよ。', 3000, 900);
     if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3; say('負けないでメェ！体力を回復したよ。', 2400); }
     else if (s.hp <= 0) { s.hp = 3; this.retries = this.retries || {}; const rz = s.zone, rn = this.retries[rz] = (this.retries[rz] || 0) + 1;
-      if (rn >= 2 && !s.shield && !RUN.hard) this.time.delayedCall(2800, () => { if (s.shield || s.done) return; s.shield = true; this.shieldFx = this.add.image(this.p.x, this.p.y - 14, 'glow').setTint(0xff9a8a).setBlendMode('ADD').setScale(1.6).setAlpha(.45); fx('お守りバリア！', ...this.scr(this.p.x, this.p.y - 40), '#ff9a8a'); say('ぼくのお守り、貸してあげるメェ。一回だけ守ってくれるよ！', 2800); }); this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); s.invuln = 2; this.respawnFx(); }
+      if (rn >= (RUN.easy ? 1 : 2) && !s.shield) this.time.delayedCall(2800, () => { if (s.shield || s.done) return; s.shield = true; this.shieldFx = this.add.image(this.p.x, this.p.y - 14, 'glow').setTint(0xff9a8a).setBlendMode('ADD').setScale(1.6).setAlpha(.45); fx('お守りバリア！', ...this.scr(this.p.x, this.p.y - 40), '#ff9a8a'); say('ぼくのお守り、貸してあげるメェ。一回だけ守ってくれるよ！', 2800); }); this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); s.invuln = 2; this.respawnFx(); }
     this.updateHud();
   }
   update(_, dms) {
@@ -1519,7 +1546,7 @@ class Play extends Phaser.Scene {
     const s = this.st, p = this.p; s.boss = 'intro'; s.lock = 4.6; bgmStop(); show('msg', false);
     for (const e of this.enemies) if (e.y < 440) e.dead = true;
     this.tether = this.add.graphics().setDepth(880);
-    this.B = { x: 96, y: 140, hp: RUN.hard ? 32 : 24, max: RUN.hard ? 32 : 24, t: 0, atk: 2.2, n: 0, flash: 0, face: 0, spr: this.add.image(96, 140, 'lz_idle').setScale(2).setAlpha(0).setDepth(900), tie: 0 };
+    this.B = { x: 96, y: 140, hp: RUN.easy ? 16 : 24, max: RUN.easy ? 16 : 24, t: 0, atk: 2.2, n: 0, flash: 0, face: 0, spr: this.add.image(96, 140, 'lz_idle').setScale(2).setAlpha(0).setDepth(900), tie: 0 };
     const B = this.B;
     fx('ふぁ〜…', ...this.scr(p.x, p.y - 40), '#cfc6e6');
     sfx((o, T) => T(0, 1.4, o, { type: 'triangle', f: 330, f2: 140, peak: .12, rel: .4 }));
@@ -1750,10 +1777,12 @@ class Result extends Phaser.Scene {
     const head = '2027年の運勢は……';
     [...head].forEach((ch, i) => this.time.delayedCall(120 * i, () => { $('rHead').textContent = head.slice(0, i + 1); }));
     for (let i = 0; i < 14; i++) this.time.delayedCall(1200 + i * (110 - i * 5), () => sfx((o, T, N, Dr) => Dr('t', 0, o, .9)));
-    const dd = data.coins >= DAIDAI;
+    const big = data.coins >= DAIDAI, ez = RUN.easy, dd = big && !ez; // 試練モード: 大吉/大大吉、修行モード: 中吉/大吉
+    const fort = ez ? (big ? '大吉' : '中吉') : (big ? '大大吉' : '大吉');
     $('slip').classList.toggle('dd', dd);
-    $('sBig').innerHTML = dd ? '<span>大</span><span>大</span><span>吉</span>' : '<span>大</span><span>吉</span>';
-    $('best').classList.toggle('dd', dd); $('best').textContent = dd ? 'とびきり最高の年になるでしょう！' : '最高の年になるでしょう！';
+    $('sBig').innerHTML = [...fort].map(c => `<span>${c}</span>`).join('');
+    $('best').classList.toggle('dd', dd); $('best').textContent = dd ? 'とびきり最高の年になるでしょう！' : fort === '大吉' ? '最高の年になるでしょう！' : 'よい年になるでしょう！';
+    $('modeLuck').innerHTML = ez ? 'つぎは<b>試練モード</b>で、もっと大きなご利益を！' : 'きびしい試練をこえたぶん、<b>ご利益も大きい！</b>';
     this.time.delayedCall(2500, () => {
       show('slip'); bgm('fanfare'); sfx((o, T, N, Dr) => Dr('T', 0, o, 1.2));
       if (dd) { this.cameras.main.flash(500, 255, 240, 160); sfx((o, T) => ['D6','G6','A6','D7'].forEach((n, i) => T(.5 + i * .09, .3, o, { type: 'square', f: hz(n), peak: .12, rel: .2 }))); }
@@ -1761,8 +1790,8 @@ class Result extends Phaser.Scene {
       this.tweens.add({ targets: [sp], y: 350, duration: 300, yoyo: true, repeat: -1, delay: 120, ease: 'Sine.out' });
       this.time.addEvent({ delay: 140, repeat: 40, callback: () => { const c = this.add.image(Phaser.Math.Between(8, 184), -10, 'coin').setScale(1.5); this.tweens.add({ targets: c, y: 430, angle: 360, duration: Phaser.Math.Between(1400, 2400), onComplete: () => c.destroy() }); } });
     });
-    this.time.delayedCall(3300, () => { show('best'); });
-    RUN.fortune = dd ? '大大吉' : '大吉';
+    this.time.delayedCall(3300, () => { show('best'); show('modeLuck'); });
+    RUN.fortune = fort;
     // records & titles
     const t = data.t || 0, dmg = data.dmg || 0, best = store.get('best', {});
     const newT = !best.t || t < best.t, newC = !(best.coins >= data.coins);
@@ -1777,7 +1806,6 @@ class Result extends Phaser.Scene {
     { const d = '〇一二三四五六七八九', n = 1 + Math.floor(Math.random() * 100), kj = v => v === 100 ? '百' : (v >= 10 ? (v >= 20 ? d[v / 10 | 0] : '') + '十' : '') + (v % 10 ? d[v % 10] : ''); $('sNo').textContent = `第${kj(n)}番`; }
     const T = [];
     if (data.coins >= COIN_MAX) T.push(['小判コンプリート', 1]); else if (data.coins >= Math.round(COIN_MAX * .75)) T.push(['小判名人', 0]);
-    if (RUN.hard) T.push(['修行の参拝者', 1]);
     if (dd) T.push(['強運の持ち主', 1]);
     if (data.big >= 3) T.push(['大判ハンター', 1]);
     if (dmg === 0) T.push(['無傷の参拝者', 1]); else if (dmg <= 2) T.push(['身のこなし上手', 0]);
@@ -1791,7 +1819,7 @@ class Result extends Phaser.Scene {
     this.time.delayedCall(4900, () => { show('titles'); sfx((o, T2) => ['E6', 'A6'].forEach((n, i) => T2(i * .08, .12, o, { type: 'square', f: hz(n), peak: .1 }))); });
     this.time.delayedCall(5500, () => {
       if (RUN.wish >= 0) show('wishLine');
-      $('hint').textContent = dd ? '小判の達人！ 大大吉をひきあてた' : `小判を${DAIDAI}枚以上あつめると…？`; show('hint');
+      $('hint').textContent = dd ? '小判の達人！ 大大吉をひきあてた' : RUN.easy ? (data.coins >= DAIDAI ? '試練モードなら、大大吉が出るかも…？' : `試練モードで小判を${DAIDAI}枚以上あつめると…？`) : `小判を${DAIDAI}枚以上あつめると…？`; show('hint');
       show('rBtns'); matchMedia('(hover:hover)').matches && $('again').focus({ preventScroll: true });
     });
     $('rShare').onclick = () => openShare('result');
