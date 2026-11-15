@@ -3,10 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>参拝クエスト ─ 2027 新春</title>
+<meta name="description" content="ひつじといっしょに、山の上のタカヨシ神社をめざす新春ミニゲーム。竹林・川・厄岩をこえて、自分の中の「怠け心」と対決！">
+<meta name="theme-color" content="#07041a">
+<meta property="og:type" content="website">
+<meta property="og:title" content="参拝クエスト ─ 2027 新春">
+<meta property="og:description" content="ひつじといっしょに初もうでへ。竹林・川・厄岩をこえて、自分の中の「怠け心」と対決！ 2027年の運勢をうらなおう。">
+<meta property="og:url" content="https://claudecreative.github.io/sanpai-quest/">
+<meta property="og:image" content="https://claudecreative.github.io/sanpai-quest/og.png">
+<meta property="og:locale" content="ja_JP">
+<meta name="twitter:card" content="summary_large_image">
 <style>[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}html,body{height:100%}</style>
 </head>
 <body>
-<title>参拝クエスト</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Dela+Gothic+One&display=swap">
 <style>
@@ -81,13 +90,13 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 
 #result{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;pointer-events:none}
 .r-head{margin-top:calc(var(--u)*20);padding:calc(var(--u)*4) calc(var(--u)*9);background:var(--ink);border:calc(var(--u)*1.5) solid var(--gold);font-size:calc(var(--u)*9);letter-spacing:.06em;min-height:1.6em}
-#slip{margin-top:calc(var(--u)*10);width:calc(var(--u)*72);height:calc(var(--u)*178);box-sizing:border-box;background:var(--paper);color:var(--ink);border:calc(var(--u)*2) solid var(--ink);box-shadow:calc(var(--u)*3) calc(var(--u)*3) 0 #9c1f1a;display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*4);padding:calc(var(--u)*5);animation:slip .6s cubic-bezier(.2,1.6,.4,1) both}
+#slip{margin-top:calc(var(--u)*7);width:calc(var(--u)*66);height:calc(var(--u)*150);box-sizing:border-box;background:var(--paper);color:var(--ink);border:calc(var(--u)*2) solid var(--ink);box-shadow:calc(var(--u)*3) calc(var(--u)*3) 0 #9c1f1a;display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*4);padding:calc(var(--u)*5);animation:slip .6s cubic-bezier(.2,1.6,.4,1) both}
 @keyframes slip{from{transform:scale(.2) rotate(-12deg);opacity:0}to{transform:none;opacity:1}}
 .s-top{width:100%;padding:calc(var(--u)*2) 0;background:var(--shu);color:var(--paper);text-align:center;letter-spacing:.4em;font-size:calc(var(--u)*7)}
 .s-no{font-size:calc(var(--u)*5.5);color:#9c1f1a;letter-spacing:.2em}
-.s-big{display:flex;flex-direction:column;align-items:center;font-family:var(--display);font-size:calc(var(--u)*44);line-height:1;color:var(--shu);text-shadow:calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink)}
+.s-big{display:flex;flex-direction:column;align-items:center;font-family:var(--display);font-size:calc(var(--u)*38);line-height:1;color:var(--shu);text-shadow:calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink)}
 .s-foot{margin-top:auto;width:100%;border-top:calc(var(--u)*1) dashed var(--shu);padding-top:calc(var(--u)*3);text-align:center;font-size:calc(var(--u)*5);color:#5a4f75}
-#best{margin-top:calc(var(--u)*8);font-family:var(--display);font-size:calc(var(--u)*12);color:var(--gold);text-align:center;animation:pop2 .5s steps(5) both;
+#best{margin-top:calc(var(--u)*6);font-family:var(--display);font-size:calc(var(--u)*12);color:var(--gold);text-align:center;animation:pop2 .5s steps(5) both;
   text-shadow:calc(var(--u)*1.5) 0 0 var(--ink),calc(var(--u)*-1.5) 0 0 var(--ink),0 calc(var(--u)*1.5) 0 var(--ink),0 calc(var(--u)*-1.5) 0 var(--ink),calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink),0 calc(var(--u)*3) 0 #9c1f1a}
 @keyframes pop2{from{transform:scale(.3);opacity:0}to{transform:none;opacity:1}}
 #tally{margin-top:calc(var(--u)*4);font-size:calc(var(--u)*6.5);padding:calc(var(--u)*2) calc(var(--u)*6);background:rgba(26,15,46,.75)}
@@ -96,7 +105,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 .cta.red{background:var(--shu);color:var(--paper)}
 .cta.white{background:var(--paper);color:var(--ink)}
 #slip.dd{background:linear-gradient(180deg,#fff7c2,#ffd23f 60%,#f0a020);box-shadow:calc(var(--u)*3) calc(var(--u)*3) 0 #9c1f1a,0 0 calc(var(--u)*24) rgba(255,230,120,.9)}
-#slip.dd .s-big{font-size:calc(var(--u)*34)}
+#slip.dd .s-big{font-size:calc(var(--u)*29)}
 #slip.dd .s-foot{color:#6a3a10}
 #best.dd{font-size:calc(var(--u)*10)}
 .r-hint{margin-top:calc(var(--u)*3);font-size:calc(var(--u)*5.5);color:var(--paper);background:rgba(26,15,46,.75);padding:calc(var(--u)*1.5) calc(var(--u)*5)}
@@ -105,7 +114,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 .e-year{margin-top:calc(var(--u)*40);font-size:calc(var(--u)*7);letter-spacing:.4em;color:var(--gold)}
 .e-big{margin-top:calc(var(--u)*6);font-family:var(--display);font-size:calc(var(--u)*15);line-height:1.35;text-shadow:calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink)}
 .e-msg{margin-top:calc(var(--u)*8);font-size:calc(var(--u)*7.5);line-height:1.8;text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 var(--ink);animation:fadeIn 2s 1.5s both}
-.e-foot{position:absolute;bottom:calc(var(--u)*46);font-family:var(--display);font-size:calc(var(--u)*8);color:var(--gold);text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 var(--ink);animation:fadeIn 2s 3s both}
+.e-foot{position:absolute;bottom:calc(var(--u)*72);font-family:var(--display);font-size:calc(var(--u)*8);color:var(--gold);text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 var(--ink);animation:fadeIn 2s 3s both}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 #gate{position:absolute;inset:0;pointer-events:auto;cursor:pointer;border:0;padding:0;background:rgba(7,4,26,.78);color:var(--paper);font-family:var(--pixel);display:grid;place-items:center}
 .g-box{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*5);padding:calc(var(--u)*12) calc(var(--u)*14);background:var(--ink);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold)}
@@ -117,6 +126,64 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #title:not([hidden]) .t-sub{animation:logoIn .5s .5s steps(5) both}
 @keyframes logoIn{from{transform:translateY(calc(var(--u)*-40)) scale(1.4);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.t-start,.g-tap{animation:none}#title .t-logo,#title .t-sub{animation:none!important}}
+/* ---- story cut-scenes ---- */
+#story{position:absolute;inset:0;pointer-events:auto;cursor:pointer;background:transparent;border:0;padding:0;color:inherit;font-family:inherit;text-align:left}
+#storyBox{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*30);min-height:calc(var(--u)*52);box-sizing:border-box;padding:calc(var(--u)*6) calc(var(--u)*7) calc(var(--u)*9);background:rgba(26,15,46,.92);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold),calc(var(--u)*2) calc(var(--u)*2) 0 rgba(0,0,0,.4);display:flex;gap:calc(var(--u)*5);align-items:flex-start;line-height:1.7;font-size:calc(var(--u)*7.5)}
+#storyBox img{width:calc(var(--u)*22);height:calc(var(--u)*22);image-rendering:pixelated;flex:none;background:rgba(255,246,232,.08);border:calc(var(--u)*1) solid rgba(255,246,232,.25)}
+#storyBox b{display:block;font-weight:400;color:var(--gold);font-size:calc(var(--u)*5.5);letter-spacing:.1em}
+#storyText{white-space:pre-line}
+#storyBox.narr{background:rgba(7,4,26,.72);box-shadow:none;border-color:rgba(255,246,232,.35)}
+#storyBox.narr img,#storyBox.narr b{display:none}
+#storyBox.narr #storyText{color:#e8e0ff;text-align:center;width:100%}
+#storyNext{position:absolute;right:calc(var(--u)*6);bottom:calc(var(--u)*2.5);font-size:calc(var(--u)*6);color:var(--gold);animation:blink .8s steps(2) infinite}
+#storySkip{position:absolute;right:calc(var(--u)*6);top:calc(var(--u)*8);pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*5.5);color:var(--paper);background:rgba(58,36,88,.85);border:calc(var(--u)*.8) solid var(--mute);padding:calc(var(--u)*1.5) calc(var(--u)*4);cursor:pointer}
+#storyDate{position:absolute;left:0;right:0;top:calc(var(--u)*150);text-align:center;font-family:var(--display);font-size:calc(var(--u)*16);color:var(--gold);line-height:1.3;animation:fadeIn 1.2s both}
+#storyDate small{display:block;font-family:var(--pixel);font-size:calc(var(--u)*7);color:var(--paper);letter-spacing:.3em}
+/* ---- wish choice ---- */
+#wish{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);top:calc(var(--u)*92);pointer-events:auto;padding:calc(var(--u)*7) calc(var(--u)*7) calc(var(--u)*8);background:rgba(26,15,46,.95);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold);animation:pop2 .35s steps(4) both;text-align:center}
+.w-q{font-size:calc(var(--u)*7.5);line-height:1.6;margin-bottom:calc(var(--u)*5)}
+.w-q small{display:block;color:var(--gold);font-size:calc(var(--u)*5.5);letter-spacing:.2em}
+#wish button{display:block;width:100%;margin-top:calc(var(--u)*4);padding:calc(var(--u)*4) calc(var(--u)*3);font-family:var(--pixel);font-size:calc(var(--u)*7);color:var(--ink);background:var(--paper);border:calc(var(--u)*1.5) solid var(--ink);box-shadow:0 calc(var(--u)*2) 0 var(--ink);cursor:pointer;text-align:left}
+#wish button i{font-style:normal;display:inline-block;width:calc(var(--u)*10);color:var(--shu);font-family:var(--display)}
+#wish button:hover,#wish button:focus-visible{background:var(--gold);outline:none}
+/* ---- result stats ---- */
+#stats{margin-top:calc(var(--u)*4);display:grid;grid-template-columns:repeat(3,1fr);gap:calc(var(--u)*2);width:calc(var(--u)*172);animation:pop2 .4s steps(4) both}
+#stats div{background:rgba(26,15,46,.82);border:calc(var(--u)*1) solid rgba(255,246,232,.5);padding:calc(var(--u)*2) 0;text-align:center;font-size:calc(var(--u)*5);color:var(--mute);line-height:1.35}
+#stats div span{display:block;font-size:calc(var(--u)*8);color:var(--paper);font-variant-numeric:tabular-nums}
+#stats div.new span{color:var(--gold)}
+#titles{margin-top:calc(var(--u)*3);display:flex;flex-wrap:wrap;justify-content:center;gap:calc(var(--u)*2);max-width:calc(var(--u)*176)}
+#titles span{font-size:calc(var(--u)*5.5);padding:calc(var(--u)*1) calc(var(--u)*3.5);background:var(--shu);color:var(--paper);border:calc(var(--u)*1) solid var(--ink);animation:pop2 .4s steps(4) both}
+#titles span.g{background:var(--gold);color:var(--ink)}
+#wishLine{margin-top:calc(var(--u)*3);font-size:calc(var(--u)*6.5);padding:calc(var(--u)*1.5) calc(var(--u)*5);background:rgba(255,246,232,.92);color:var(--ink);border:calc(var(--u)*1) solid var(--ink)}
+.r-btns.three .cta{font-size:calc(var(--u)*6.5)}
+.cta.gold{background:var(--gold);color:var(--ink)}
+#result .r-btns{bottom:calc(var(--u)*10)}
+.e-wish{margin:calc(var(--u)*7) calc(var(--u)*10) 0;font-family:var(--display);font-size:calc(var(--u)*8.5);line-height:1.45;color:var(--gold);text-shadow:calc(var(--u)*1) calc(var(--u)*1) 0 var(--ink);animation:fadeIn 2s 2.2s both}
+#endcard .r-btns{flex-wrap:wrap;row-gap:calc(var(--u)*5)}
+#endcard .cta.gold{flex-basis:100%}
+/* ---- share sheet ---- */
+#share{position:absolute;inset:0;pointer-events:auto;background:rgba(7,4,26,.8);display:grid;place-items:center;z-index:5}
+.sh-box{width:calc(var(--u)*170);box-sizing:border-box;padding:calc(var(--u)*8) calc(var(--u)*8) calc(var(--u)*9);background:var(--ink);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold);animation:pop2 .3s steps(3) both;display:flex;flex-direction:column;gap:calc(var(--u)*4)}
+.sh-h{font-family:var(--display);font-size:calc(var(--u)*10);color:var(--gold);text-align:center}
+#shText{font-size:calc(var(--u)*6);line-height:1.6;background:rgba(255,246,232,.08);border:calc(var(--u)*1) dashed rgba(255,246,232,.4);padding:calc(var(--u)*3) calc(var(--u)*4);white-space:pre-wrap;word-break:break-all}
+.sh-btn{display:flex;align-items:center;justify-content:center;gap:calc(var(--u)*3);height:calc(var(--u)*22);font-family:var(--pixel);font-size:calc(var(--u)*7);border:calc(var(--u)*1.5) solid var(--ink);box-shadow:0 calc(var(--u)*2) 0 #000;cursor:pointer;color:#fff}
+.sh-btn svg{width:calc(var(--u)*9);height:calc(var(--u)*9);fill:currentColor}
+.sh-btn.native{background:var(--shu)}
+.sh-btn.x{background:#000;border-color:#555}
+.sh-btn.line{background:#06c755}
+.sh-btn.copy{background:var(--paper);color:var(--ink)}
+.sh-url{font-size:calc(var(--u)*5);color:var(--mute);text-align:center;word-break:break-all}
+.sh-close{align-self:center;margin-top:calc(var(--u)*1);font-family:var(--pixel);font-size:calc(var(--u)*6.5);color:var(--paper);background:transparent;border:calc(var(--u)*1) solid var(--mute);padding:calc(var(--u)*2) calc(var(--u)*8);cursor:pointer}
+.sh-btn:focus-visible,.sh-close:focus-visible,#storySkip:focus-visible{outline:calc(var(--u)*1.5) solid var(--gold);outline-offset:calc(var(--u)*1)}
+#toast{position:absolute;left:50%;bottom:calc(var(--u)*70);transform:translateX(-50%);padding:calc(var(--u)*3) calc(var(--u)*7);background:var(--gold);color:var(--ink);font-size:calc(var(--u)*7);border:calc(var(--u)*1) solid var(--ink);z-index:6;animation:pop2 .25s steps(3) both;white-space:nowrap}
+/* ---- PC keyboard hint ---- */
+#keyhint{position:absolute;left:0;right:0;bottom:calc(var(--u)*3);text-align:center;font-size:calc(var(--u)*5);color:rgba(255,246,232,.8);pointer-events:none}
+#keyhint kbd{font-family:var(--pixel);display:inline-block;min-width:calc(var(--u)*7);padding:0 calc(var(--u)*1.5);margin:0 calc(var(--u)*.5);background:rgba(26,15,46,.85);border:calc(var(--u)*.8) solid rgba(255,246,232,.6);border-bottom-width:calc(var(--u)*1.6)}
+#stage.kb #stick,#stage.kb .btn{opacity:.45}
+#stage.kb #stickLabel{display:none}
+#pause{position:absolute;inset:0;pointer-events:auto;background:rgba(7,4,26,.7);display:grid;place-items:center;font-family:var(--display);font-size:calc(var(--u)*14);color:var(--gold);border:0;cursor:pointer}
+#pause small{display:block;font-family:var(--pixel);font-size:calc(var(--u)*6.5);color:var(--paper);margin-top:calc(var(--u)*4);text-align:center}
+#pauseBtn{pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*5.5);color:var(--paper);background:var(--plum);border:calc(var(--u)*.8) solid var(--mute);padding:calc(var(--u)*1) calc(var(--u)*2.5);cursor:pointer;margin-left:calc(var(--u)*-2)}
 </style>
 
 <div id="stage">
@@ -128,7 +195,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
         <div id="hearts"></div>
         <div id="lv">運 Lv.1</div>
         <div id="coins"><img id="coinIcon" alt="小判"><span id="coinNum">×00</span></div>
-        <button id="mute" type="button" aria-pressed="false">音 ON</button>
+        <button id="mute" type="button" aria-pressed="false">音 ON</button><button id="pauseBtn" type="button" aria-label="一時停止">II</button>
       </div>
       <div class="prog"><span style="color:var(--mute)">入口</span><div class="bar"><div id="progFill"></div><div class="tick" style="left:33%"></div><div class="tick" style="left:66%"></div></div><span style="color:var(--gold)">神社</span></div>
     </div>
@@ -137,6 +204,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
       <div id="stick"><div id="knob"></div><span id="stickLabel">ドラッグで<br>移動</span></div>
       <button id="btnHashiru" class="btn" type="button" aria-label="跳ぶ（ジャンプ）">跳</button>
       <button id="btnHarai" class="btn" type="button" aria-label="祓う（お札を投げる）">払</button>
+      <div id="keyhint" hidden><kbd>←↑↓→</kbd>移動　<kbd>Z</kbd>払う　<kbd>X</kbd>跳ぶ　<kbd>P</kbd>休む</div>
     </div>
     <div id="msg" hidden><img id="msgIcon" alt=""><div><b id="msgName">ひつじ</b><span id="msgText"></span></div></div>
     <div id="bossbar" hidden><span>怠け心</span><div class="bbar"><div id="bossFill"></div></div></div>
@@ -145,23 +213,54 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
       <div class="r-head" id="rHead"></div>
       <div id="slip" hidden><div class="s-top">御神籤</div><div class="s-no">第一番</div><div class="s-big" id="sBig"><span>大</span><span>吉</span></div><div class="s-foot">タカヨシ神社</div></div>
       <div id="best" hidden>最高の年になるでしょう！</div>
-      <div id="tally" hidden></div>
+      <div id="stats" hidden></div>
+      <div id="titles" hidden></div>
+      <div id="wishLine" hidden></div>
       <div class="r-hint" id="hint" hidden></div>
-      <div class="r-btns" id="rBtns" hidden>
-        <button class="cta red" id="again" type="button">帰り道へ ▶</button>
-        <button class="cta white" id="toTitle" type="button">もう一度あそぶ</button>
+      <div class="r-btns three" id="rBtns" hidden>
+        <button class="cta red" id="again" type="button" style="flex:1.3">帰り道へ ▶</button>
+        <button class="cta gold" id="rShare" type="button">シェア</button>
+        <button class="cta white" id="toTitle" type="button">もう一度</button>
       </div>
     </div>
     <div id="endcard" hidden>
       <div class="e-year outline">2027</div>
       <div class="e-big">あけまして<br>おめでとう<br>ございます</div>
+      <div class="e-wish" id="eWish"></div>
       <div class="e-msg">あなたの一年を、<br>心から応援しています。</div>
       <div class="e-foot">参拝クエスト ─ おしまい</div>
       <div class="r-btns" id="eBtns" hidden>
+        <button class="cta gold" id="endShare" type="button">この一年の決意をシェアする</button>
         <button class="cta red" id="endAgain" type="button">もう一度あそぶ</button>
         <button class="cta white" id="endTitle" type="button">タイトルへ</button>
       </div>
     </div>
+    <button id="story" type="button" hidden aria-label="タップで次へ">
+      <div id="storyBox"><img id="storyIcon" alt=""><div><b id="storyName"></b><span id="storyText"></span></div><span id="storyNext">▼</span></div>
+      <div id="storyDate" hidden></div>
+    </button>
+    <button id="storySkip" type="button" hidden>スキップ ▶▶</button>
+    <div id="wish" hidden role="dialog" aria-label="今年の目標をえらぶ">
+      <div class="w-q"><small>神さまに伝えよう</small>2027年、きみは<br>なにをがんばる？</div>
+      <button type="button" data-w="0"><i>1</i>べんきょうをがんばる</button>
+      <button type="button" data-w="1"><i>2</i>スポーツ・習いごと</button>
+      <button type="button" data-w="2"><i>3</i>友だち・家族を大切に</button>
+      <button type="button" data-w="3"><i>4</i>新しいことにチャレンジ</button>
+    </div>
+    <button id="pause" type="button" hidden><div>一時停止<small>タップ / P キーで再開</small></div></button>
+    <div id="share" hidden role="dialog" aria-label="シェア">
+      <div class="sh-box">
+        <div class="sh-h">シェアする</div>
+        <div id="shText"></div>
+        <button class="sh-btn native" id="shNative" type="button" hidden><svg viewBox="0 0 24 24"><path d="M12 2l5 5h-3.5v7h-3V7H7zm-7 12h3v5h8v-5h3v8H5z"/></svg>スマホで共有</button>
+        <button class="sh-btn x" id="shX" type="button"><svg viewBox="0 0 24 24"><path d="M17.8 3h3.1l-6.8 7.7L22 21h-6.2l-4.9-6.4L5.3 21H2.2l7.2-8.3L1.8 3h6.4l4.4 5.8zm-1.1 16.2h1.7L7.3 4.7H5.5z"/></svg>X でポスト</button>
+        <button class="sh-btn line" id="shLine" type="button"><svg viewBox="0 0 24 24"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5 1.1-.5 5.9-3.5 8-5.9 1.5-1.6 2-3.2 2-4.9C22 6.6 17.5 3 12 3z"/></svg>LINE で送る</button>
+        <button class="sh-btn copy" id="shCopy" type="button"><svg viewBox="0 0 24 24"><path d="M8 3h11v13h-3v-2h1V5h-7v1H8zM4 8h11v13H4zm2 2v9h7v-9z"/></svg>URL をコピー</button>
+        <div class="sh-url" id="shUrl"></div>
+        <button class="sh-close" id="shClose" type="button">とじる</button>
+      </div>
+    </div>
+    <div id="toast" hidden></div>
     <button id="gate" type="button" hidden aria-label="タップしてはじめる">
       <div class="g-box">
         <div class="g-eyebrow">カレンダーハガキ 1月号</div>
@@ -175,7 +274,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
       <div class="t-logo">参拝<br>クエスト</div>
       <div class="t-sub">タカヨシ神社を目指せ！</div>
       <div class="t-start outline">▶ タップでスタート</div>
-      <div class="t-note">♪ 音が出ます　／　PCは矢印キー・Z（払）・X（跳）</div>
+      <div class="t-note">♪ 音が出ます　／　PCは矢印キー・Z（払）・X（跳）・Enterでスタート</div>
     </button>
   </div>
 </div>
@@ -282,6 +381,13 @@ const TRACKS = [
       { inst:'drum', vol:.45, m:3, s: bars('T . . . . . . .','. . . . . . . .','t . . . . . . .','. . . . . . . .','T . . . . . . .','. . . . . . . .','t . . . t . . .','T . . . . . . .') },
       { inst:'drum', vol:.5, m:4, s: bars('S . . . . . . .','. . . . . . . .','. . . . . . . .','. . . . . . . .','S . . . . . . .','. . . . . . . .','. . . . . . . .','. . . . S . . .') },
     ]},
+  { no:'10', name:'除夜', desc:'プロローグ。大みそかの夜、遠くで除夜の鐘が鳴る。静かな篠笛と琴。', bpm:66, spb:2, loop:true,
+    ch:[
+      { inst:'flute', vol:.26, m:0, s: bars('. . . . D5 - C5 -','A4 - - - - - - -','G4 - A4 - C5 - D5 -','E5 - - - D5 - - -','F5 - - - E5 - D5 -','C5 - A4 - - - G4 -','A4 - - - - - - -','D5 - - - - - . .') },
+      { inst:'pluck', vol:.11, m:1, s: ['D3','A2','C3','G2','F2','C3','A2','D3'].map(r => `${tp(r,12)} . ${tp(r,19)} . ${tp(r,24)} . . .`).join(' | ') },
+      { inst:'bass', vol:.22, m:2, s: ['D3','A2','C3','G2','F2','C3','A2','D3'].map(r => `${r} - - - - - - -`).join(' | ') },
+      { inst:'drum', vol:.8, m:4, s: bars('G . . . . . . .','. . . . . . . .','. . . . . . . .','. . . . . . . .','G . . . . . . .','. . . . . . . .','. . . . . . . .','. . . . . . . .') },
+    ]},
 ];
 TRACKS.forEach(t => { t.ch.forEach(c => Object.assign(c, parse(c.s))); t.len = Math.max(...t.ch.map(c => c.len)); });
 
@@ -351,6 +457,10 @@ function drum(tok, t, out, v) {
     noise(t, .05, out, 'highpass', 6000, 1, v * .08);
   } else if (tok === 's') noise(t, .12, out, 'bandpass', 1900, 1.2, v * .35);
   else if (tok === 'c') [0, .012, .024].forEach((d, i) => noise(t + d, i === 2 ? .18 : .02, out, 'bandpass', 1300, 1.5, v * .8));
+  else if (tok === 'G') { // temple bell (joya no kane)
+    [[98, .5], [99.6, .35], [196.5, .16], [262, .09], [329, .05]].forEach(([f, k]) => tone(t, 4.2, out, { type: 'sine', f, peak: v * k * .55, a: .006, rel: 4 }));
+    noise(t, .08, out, 'lowpass', 500, 1, v * .3);
+  }
   else if (tok === 'S') for (let i = 0; i < 5; i++) tone(t + i * .018, .09, out, { type: 'triangle', f: 4200 + Math.random() * 2600, peak: v * .09, a: .001, rel: .08 });
 }
 
@@ -406,7 +516,7 @@ function fireSE(i) {
 
 
 function render() {}
-const BGM = { title: 0, bamboo: 1, river: 2, rock: 3, boss: 4, sanpai: 5, fanfare: 6, shinshun: 7, wakare: 8 };
+const BGM = { title: 0, bamboo: 1, river: 2, rock: 3, boss: 4, sanpai: 5, fanfare: 6, shinshun: 7, wakare: 8, joya: 9 };
 window.__sqAudio = () => ({ ctx, master });
 let muted = false, curBgm = -1;
 function bgm(k) { const i = BGM[k]; if (i === curBgm && cur) return; curBgm = i; play(i); if (muted && master) master.gain.value = 0; }
@@ -448,7 +558,78 @@ function fx(text, sx, sy, color) {
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
   $('ui').appendChild(d); setTimeout(() => d.remove(), 1100);
 }
-function resetUI() { ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'tally', 'hint', 'rBtns'].forEach(id => show(id, false)); }
+function resetUI() { ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
+
+// ---------- run record, wishes, story, share ----------
+const WISHES = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
+const COIN_MAX = 45;
+const RUN = { wish: -1, fortune: '' };
+const CANON_URL = 'https://claudecreative.github.io/sanpai-quest/';
+const SHARE_URL = ['claudecreative.github.io', 'aimania.tech', 'www.aimania.tech'].includes(location.hostname) ? location.origin + location.pathname.replace(/index\.html$/, '') : CANON_URL;
+const store = { get(k, d) { try { const v = localStorage.getItem('sq_' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('sq_' + k, JSON.stringify(v)); } catch (e) {} } };
+const fmtTime = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+let storyKey = null, wishKey = null;
+function blip(who) { if (muted) return; const f = who === 'ひつじ' ? 1180 : who === '怠け心' ? 300 : 820; sfx((o, T) => T(0, .03, o, { type: 'square', f, peak: .035, a: .001, rel: .02 })); }
+function iconOf(who) { return who === 'ひつじ' ? SHEEP_ICON : who === '主人公' ? HERO_ICON : who === '怠け心' ? BOSS_ICON : ''; }
+// lines: [{ who?, t, fn? }]  who omitted = narration
+function runStory(lines, done) {
+  let i = -1, typing = null, full = '';
+  const box = $('storyBox'), txt = $('storyText');
+  show('story'); show('storySkip');
+  const finish = () => { clearInterval(typing); typing = null; storyKey = null; show('story', false); show('storySkip', false); $('story').onclick = $('storySkip').onclick = null; done && done(); };
+  const next = () => {
+    if (typing) { clearInterval(typing); typing = null; txt.textContent = full; $('storyNext').hidden = false; return; }
+    if (++i >= lines.length) return finish();
+    const L = lines[i], who = L.who || '';
+    L.fn && L.fn();
+    box.className = who ? '' : 'narr';
+    $('storyName').textContent = who; $('storyName').style.color = who === '怠け心' ? '#ff7fa8' : who === '主人公' ? '#7fe8ff' : '';
+    if (who) $('storyIcon').src = iconOf(who);
+    full = L.t; txt.textContent = ''; $('storyNext').hidden = true; let k = 0;
+    typing = setInterval(() => { k++; txt.textContent = full.slice(0, k); if (who && k % 3 === 1) blip(who);
+      if (k >= full.length) { clearInterval(typing); typing = null; $('storyNext').hidden = false; } }, 42);
+  };
+  storyKey = next; $('story').onclick = next;
+  $('storySkip').onclick = e => { e.stopPropagation(); i = lines.length; finish(); };
+  next();
+}
+function showWish(done) {
+  show('wish'); const bs = [...document.querySelectorAll('#wish button')];
+  const pick = i => { wishKey = null; show('wish', false); bs.forEach(b => b.onclick = null); se('鈴'); done(i); };
+  bs.forEach(b => b.onclick = () => pick(+b.dataset.w)); wishKey = pick;
+  setTimeout(() => { if (!$('wish').hidden && matchMedia('(hover:hover)').matches) bs[0].focus({ preventScroll: true }); }, 50);
+}
+function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = true; void el.offsetWidth; el.hidden = false; clearTimeout(toast.tm); toast.tm = setTimeout(() => el.hidden = true, 1800); }
+function shareText(kind) {
+  const w = RUN.wish >= 0 ? WISHES[RUN.wish] : '';
+  if (kind === 'end') return `参拝クエストをさいごまでクリア！🐑⛩️\n${w ? `2027年の目標は「${w}」！\n` : ''}ひつじと約束した一年が、はじまる。\n#参拝クエスト`;
+  return `参拝クエストをクリア！⛩️\n2027年の運勢は【${RUN.fortune || '大吉'}】でした✨\n${w ? `今年の目標は「${w}」！\n` : ''}#参拝クエスト`;
+}
+function openShare(kind) {
+  const text = shareText(kind);
+  $('shText').textContent = text; $('shUrl').textContent = SHARE_URL; show('share');
+  $('shNative').hidden = !navigator.share;
+  const go = u => { window.open(u, '_blank', 'noopener'); };
+  $('shNative').onclick = () => navigator.share({ title: '参拝クエスト', text, url: SHARE_URL }).catch(() => {});
+  $('shX').onclick = () => go('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(SHARE_URL));
+  $('shLine').onclick = () => go('https://line.me/R/share?text=' + encodeURIComponent(text + '\n' + SHARE_URL));
+  $('shCopy').onclick = () => copyText(SHARE_URL).then(ok => toast(ok ? 'URLをコピーしました！' : 'コピーできませんでした'));
+  $('shClose').onclick = () => show('share', false);
+  setTimeout(() => matchMedia('(hover:hover)').matches && $('shX').focus({ preventScroll: true }), 50);
+}
+function copyText(t) {
+  if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).then(() => true, () => legacyCopy(t));
+  return Promise.resolve(legacyCopy(t));
+}
+function legacyCopy(t) { const a = document.createElement('textarea'); a.value = t; a.setAttribute('readonly', ''); a.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(a); a.select(); let ok = false; try { ok = document.execCommand('copy'); } catch (e) {} a.remove(); return ok; }
+// pause (Play scene only)
+function curPlay() { const g = window.__sq; return g && g.scene.isActive('Play') ? g.scene.getScene('Play') : null; }
+function setPause(on) {
+  const sc = window.__sq && window.__sq.scene.getScene('Play'); if (!sc) return;
+  if (on) { if (!curPlay() || sc.st.done || !$('pause').hidden) return; sc.scene.pause(); show('pause'); if (ctx && ctx.state === 'running') ctx.suspend(); }
+  else { if ($('pause').hidden) return; show('pause', false); sc.scene.resume(); ensure(); }
+}
+
 
 // river kappa + its plate (original designs)
 D.sprites.kappa = [
@@ -477,6 +658,25 @@ const input = { x: 0, y: 0, harai: false, hashiru: false };
 const keys = {};
 addEventListener('keydown', e => { keys[e.key.toLowerCase()] = true; if (['z', 'j'].includes(e.key.toLowerCase())) input.harai = true; if ([' ', 'x', 'k'].includes(e.key.toLowerCase())) input.hashiru = true; if (e.key.startsWith('Arrow') || e.key === ' ') e.preventDefault(); });
 addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+// menu / cut-scene keys (PC)
+addEventListener('keydown', e => {
+  const k = e.key.toLowerCase(), act = k === 'enter' || k === ' ' || k === 'z';
+  if (e.key.startsWith('Arrow') || ['z', 'x', 'w', 'a', 's', 'd', 'j', 'k'].includes(k)) setKb(true);
+  if (!$('share').hidden) { if (k === 'escape') show('share', false); return; }
+  if (!$('pause').hidden) { if (k === 'p' || k === 'escape' || act) { setPause(false); e.preventDefault(); } return; }
+  if (wishKey && /^[1-4]$/.test(k)) { wishKey(+k - 1); return; }
+  if (storyKey && act && !e.repeat) { e.preventDefault(); storyKey(); return; }
+  if (act && !e.repeat && document.activeElement && document.activeElement.tagName === 'BUTTON' && !document.activeElement.hidden && document.activeElement.offsetParent && k !== 'z') return; // native button activation
+  if (act && !e.repeat) {
+    if (!$('gate').hidden) { e.preventDefault(); $('gate').click(); return; }
+    if (!$('title').hidden) { e.preventDefault(); $('title').click(); return; }
+  }
+  if ((k === 'p' || k === 'escape') && curPlay()) setPause(true);
+});
+function setKb(on) { $('stage').classList.toggle('kb', on); $('keyhint').hidden = !on; }
+if (matchMedia('(hover:hover) and (pointer:fine)').matches) setKb(true);
+addEventListener('pointerdown', e => { if (e.pointerType === 'touch') setKb(false); }, true);
+document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
 let stickId = null, sx0 = 0, sy0 = 0;
 const touch = $('touch');
 function stagePt(e) { const r = $('stage').getBoundingClientRect(); return [(e.clientX - r.left) / r.width * GW, (e.clientY - r.top) / r.height * GH]; }
@@ -499,6 +699,8 @@ function holdBtn(id, key) {
   b.addEventListener('click', e => { if (e.detail === 0) input[key] = true; });
 }
 holdBtn('btnHarai', 'harai'); holdBtn('btnHashiru', 'hashiru');
+$('pauseBtn').addEventListener('click', () => setPause(true));
+$('pause').addEventListener('click', () => setPause(false));
 $('mute').addEventListener('click', () => { muted = !muted; ensure(); master.gain.value = muted ? 0 : .55; $('mute').textContent = muted ? '音 OFF' : '音 ON'; $('mute').setAttribute('aria-pressed', String(muted)); });
 
 function readMove() {
@@ -550,7 +752,70 @@ class Title extends Phaser.Scene {
       show('gate'); $('gate').onclick = () => { ensure(); startTitle(); };
       ctx.resume().then(() => { if (ctx.state === 'running' && !$('gate').hidden) startTitle(); }).catch(() => {});
     }
-    t.onclick = () => { ensure(); show('title', false); bgmStop(); se('鈴'); this.scene.start('Play'); };
+    t.onclick = () => { ensure(); show('title', false); se('鈴'); this.cameras.main.fadeOut(500, 7, 4, 26); this.cameras.main.once('camerafadeoutcomplete', () => { bgmStop(); this.scene.start('Prologue'); }); t.onclick = null; };
+  }
+}
+
+// prologue: New Year's Eve, the sheep (zodiac of 2027) comes down with the temple bell
+class Prologue extends Phaser.Scene {
+  constructor() { super('Prologue'); }
+  create() {
+    resetUI(); const cam = this.cameras.main; cam.fadeIn(900, 7, 4, 26);
+    if (!this.textures.exists('snow')) { const c = document.createElement('canvas'); c.width = c.height = 2; const x = c.getContext('2d'); x.fillStyle = '#fff6e8'; x.fillRect(0, 0, 2, 2); this.textures.addCanvas('snow', c); }
+    const bg = this.add.image(0, 0, 'title').setOrigin(0).setCrop(0, 0, 192, 297).setTint(0x7068a8);
+    const g = this.add.graphics();
+    g.fillStyle(0x140c2a); g.fillRect(0, 296, 192, 120);
+    g.fillStyle(0xcfc6e6); g.fillRect(0, 296, 192, 2); g.fillStyle(0x8a809e); g.fillRect(0, 298, 192, 1);
+    g.fillStyle(0x221640); for (let x = 3; x < 192; x += 9) g.fillRect(x, 306 + (x * 7) % 40, 4, 1);
+    // houses with warm windows (everyone else is at home on New Year's Eve)
+    const house = (x, w, h) => { g.fillStyle(0x0c0820); g.fillRect(x, 297 - h, w, h); g.fillTriangle(x - 5, 297 - h, x + w / 2, 297 - h - 14, x + w + 5, 297 - h);
+      g.fillStyle(0xcfc6e6); g.fillTriangle(x - 3, 297 - h - 1, x + w / 2, 297 - h - 13, x + w + 3, 297 - h - 1); g.fillStyle(0x0c0820); g.fillTriangle(x, 297 - h, x + w / 2, 297 - h - 10, x + w, 297 - h);
+      g.fillStyle(0xffc860); for (let wx = x + 4; wx < x + w - 6; wx += 11) g.fillRect(wx, 297 - h + 6, 6, 6); };
+    house(4, 38, 22); house(150, 36, 18);
+    this.add.image(96, 352, 'shadow').setScale(1.6);
+    this.hero = this.add.image(96, 352, 'player_back').setOrigin(.5, 1).setScale(2);
+    this.snowT = 0; this.flakes = [];
+    bgm('joya');
+    const bell = () => { sfx((o, T, N, Dr) => Dr('G', 0, o, 1)); cam.shake(500, .002); };
+    const sheepDown = () => {
+      const halo = this.add.image(132, -20, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(2.6).setDepth(5);
+      const sp = this.add.image(132, -20, 'sheep').setOrigin(.5, 1).setScale(2).setDepth(6);
+      const sh = this.add.image(132, 360, 'shadow').setScale(1.4).setAlpha(0);
+      this.tweens.add({ targets: [sp, halo], y: (t) => t === sp ? 360 : 346, duration: 2600, ease: 'Sine.out',
+        onUpdate: () => { halo.y = sp.y - 14; }, onComplete: () => { this.tweens.add({ targets: sh, alpha: 1, duration: 300 }); this.tweens.add({ targets: halo, alpha: .35, scale: 1.8, duration: 800 }); } });
+      bg.setTint(0x9088c0);
+      sfx((o, T) => ['A5', 'D6', 'E6', 'A6', 'D7'].forEach((n, i) => T(i * .12, .5, o, { type: 'triangle', f: hz(n), peak: .07, rel: .4 })));
+      this.sheep = sp; this.halo = halo;
+    };
+    const lines = [
+      { t: '2026年12月31日。\n大みそかの夜。' },
+      { who: '主人公', t: '……今年も、決めたこと、ぜんぜん続かなかったな。' },
+      { t: 'ゴーン……。\n除夜の鐘がひとつ鳴るたびに、心が少しだけ重くなる。', fn: bell },
+      { t: 'そのとき――\n鐘の音といっしょに、ふわふわの光がおりてきた。', fn: sheepDown },
+      { who: 'ひつじ', t: 'こんばんはメェ。ぼくは、来年の干支のひつじ。', fn: () => { this.hero.setTexture('player_front'); } },
+      { who: 'ひつじ', t: 'きみの「もう一回がんばりたい」って声が、空まで聞こえたんだメェ。' },
+      { who: '主人公', t: '……でも、どうせまた三日坊主だよ。' },
+      { who: 'ひつじ', t: 'だったら、いっしょに初もうでに行こう！ あの山の上の、タカヨシ神社まで！', fn: () => { this.hero.setTexture('player_back'); this.sheep && this.tweens.add({ targets: this.sheep, y: 350, duration: 160, yoyo: true, repeat: 2 }); this.shrineGlow(); } },
+      { who: 'ひつじ', t: '道はけわしいけど、一歩ずつなら、きっとたどり着けるメェ。' },
+      { t: 'ゴーン――。\n108つめの鐘。新しい一年が、はじまった。', fn: () => { bell(); this.tweens.addCounter({ from: 0, to: 1, duration: 2500, onUpdate: tw => { const v = tw.getValue(); const c = Phaser.Display.Color.Interpolate.ColorWithColor(Phaser.Display.Color.ValueToColor(0x9088c0), Phaser.Display.Color.ValueToColor(0xffffff), 1, v); bg.setTint(Phaser.Display.Color.GetColor(c.r, c.g, c.b)); } }); } },
+    ];
+    this.time.delayedCall(700, () => runStory(lines, () => this.toPlay()));
+  }
+  shrineGlow() {
+    const gl = this.add.image(96, 196, 'glow').setTint(0xffd23f).setBlendMode('ADD').setScale(.5).setAlpha(0);
+    this.tweens.add({ targets: gl, alpha: .9, scale: 3, duration: 900, yoyo: true, repeat: 2 });
+  }
+  toPlay() {
+    if (this.leaving) return; this.leaving = true;
+    const d = $('storyDate'); d.innerHTML = '2027年<br>元日<small>いざ、初もうで！</small>'; show('storyDate'); show('story'); $('storyBox').hidden = true;
+    sfx((o, T) => ['D5', 'G5', 'A5', 'D6'].forEach((n, i) => T(i * .1, .4, o, { type: 'triangle', f: hz(n), peak: .1, rel: .3 })));
+    this.time.delayedCall(1700, () => { this.cameras.main.fadeOut(700, 255, 246, 232); this.cameras.main.once('camerafadeoutcomplete', () => { $('storyBox').hidden = false; bgmStop(); this.scene.start('Play'); }); });
+  }
+  update(_, dms) {
+    const dt = Math.min(dms / 1000, .05); this.snowT -= dt;
+    if (this.snowT <= 0) { this.snowT = .09; const f = this.add.image(Math.random() * 200 - 4, -4, 'snow').setAlpha(.5 + Math.random() * .5).setDepth(10); f.vy = 14 + Math.random() * 16; f.ph = Math.random() * 6; this.flakes.push(f); }
+    for (const f of this.flakes) { f.y += f.vy * dt; f.ph += dt; f.x += Math.sin(f.ph * 1.6) * 6 * dt; if (f.y > 420) f.dead = true; }
+    this.flakes = this.flakes.filter(f => { if (f.dead) f.destroy(); return !f.dead; });
   }
 }
 
@@ -561,7 +826,8 @@ class Play extends Phaser.Scene {
     this.add.image(0, 0, 'map').setOrigin(0).setDepth(-10);
     placeTorii(this, D.toriiPlay);
     this.cameras.main.setBounds(0, 0, GW, WH);
-    this.st = { hp: 3, coins: 0, lv: 1, invuln: 0, lock: 0, air: 0, airCd: 0, cool: 0, walkT: 0, flip: false, zone: null, done: false, boss: 'none' };
+    this.st = { hp: 3, coins: 0, lv: 1, invuln: 0, lock: 0, air: 0, airCd: 0, cool: 0, walkT: 0, flip: false, zone: null, done: false, boss: 'none', t: 0, dmg: 0, power: false };
+    input.harai = input.hashiru = false; input.x = input.y = 0; RUN.wish = -1;
     const [sx, sy] = ZONES.bamboo.start;
     this.p = { x: sx, y: sy };
     this.lastSafe = [sx, sy];
@@ -608,7 +874,7 @@ class Play extends Phaser.Scene {
   }
   enterZone(z) {
     if (this.st.zone === z) return; this.st.zone = z; const Z = ZONES[z];
-    banner(Z.name); bgm(Z.bgm); this.time.delayedCall(700, () => say(Z.tip, z === 'bamboo' ? 4200 : 3000));
+    banner(Z.name); bgm(Z.bgm); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動、Zでお札、Xでジャンプ。神社をめざすメェ！' : Z.tip; this.time.delayedCall(700, () => say(tip, z === 'bamboo' ? 4200 : 3000));
     this.zoneStart = Z.start;
   }
   burst(x, y, n = 6) {
@@ -632,14 +898,15 @@ class Play extends Phaser.Scene {
     }
   }
   damage() {
-    const s = this.st; s.hp--; s.invuln = 1.5;
-    if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro')) { s.hp = 3; say('負けないでメェ！体力を回復したよ。', 2400); }
+    const s = this.st; s.hp--; s.dmg++; s.invuln = 1.5;
+    if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3; say('負けないでメェ！体力を回復したよ。', 2400); }
     else if (s.hp <= 0) { s.hp = 3; this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！体力を回復したよ。', 2600); }
     this.updateHud();
   }
   update(_, dms) {
     const dt = Math.min(dms / 1000, .05), s = this.st, p = this.p;
     if (s.done) return;
+    s.t += dt;
     s.invuln = Math.max(0, s.invuln - dt); s.lock = Math.max(0, s.lock - dt); s.cool = Math.max(0, s.cool - dt); s.airCd = Math.max(0, s.airCd - dt);
     // input
     let [ix, iy] = readMove();
@@ -650,9 +917,12 @@ class Play extends Phaser.Scene {
       const sp = 70 * (s.air > 0 ? 1.3 : 1);
       p.x += ix * sp * dt; p.y += iy * sp * dt;
       if (input.hashiru && s.air <= 0 && s.airCd <= 0) { s.air = .55; se('跳（ジャンプ）'); }
-      if (input.harai && s.cool <= 0 && this.ofuda.length < 3) {
+      if (input.harai && s.cool <= 0 && this.ofuda.length < (s.power ? 9 : 3)) {
         s.cool = .28; se('払（お札）');
-        this.ofuda.push({ x: p.x, y: p.y - 26, life: .7, s: this.add.image(p.x, p.y - 26, 'ofuda').setScale(1.5).setDepth(3000) });
+        for (const vx of s.power ? [-55, 0, 55] : [0]) {
+          const o = { x: p.x, y: p.y - 26, vx, life: .7, s: this.add.image(p.x, p.y - 26, 'ofuda').setScale(1.5).setDepth(3000) };
+          if (s.power) o.s.setTint(0xfff0a0); this.ofuda.push(o);
+        }
       }
     }
     input.harai = input.hashiru = false;
@@ -668,7 +938,7 @@ class Play extends Phaser.Scene {
     }
     // bounds
     p.y = Phaser.Math.Clamp(p.y, 128, 1332);
-    const inBoss = s.boss === 'intro' || s.boss === 'fight';
+    const inBoss = s.boss === 'intro' || s.boss === 'fight' || s.boss === 'mid';
     if (inBoss) p.y = Phaser.Math.Clamp(p.y, 240, 360);
     if (s.boss === 'none' && p.y < 262) this.startBoss();
     const [bx0, bx1] = xBounds(p.y);
@@ -727,7 +997,7 @@ class Play extends Phaser.Scene {
     }
     // ofuda
     for (const o of this.ofuda) {
-      o.y -= 230 * dt; o.life -= dt; o.s.setPosition(o.x, o.y).setAngle(Math.sin(o.life * 30) * 12);
+      o.y -= 230 * dt; o.x += o.vx * dt; o.life -= dt; o.s.setPosition(o.x, o.y).setAngle(Math.sin(o.life * 30) * 12);
       for (const e of this.enemies) {
         if (e.dead || o.life <= 0) continue;
         if (Math.hypot(o.x - e.x, o.y - e.y) < e.r + 6) {
@@ -770,14 +1040,14 @@ class Play extends Phaser.Scene {
     if (p.y <= 136 && !s.done) {
       s.done = true; show('controls', false); show('touch', false); show('msg', false); bgmStop();
       se('鈴'); cam.fadeOut(700, 255, 246, 232);
-      cam.once('camerafadeoutcomplete', () => this.scene.start('Goal', { coins: s.coins, lv: s.lv }));
+      cam.once('camerafadeoutcomplete', () => this.scene.start('Goal', { coins: s.coins, lv: s.lv, t: s.t, dmg: s.dmg }));
     }
   }
   startBoss() {
     const s = this.st, p = this.p; s.boss = 'intro'; s.lock = 4.6; bgmStop(); show('msg', false);
     for (const e of this.enemies) if (e.y < 440) e.dead = true;
     this.tether = this.add.graphics().setDepth(880);
-    this.B = { x: 96, y: 140, hp: 16, max: 16, t: 0, atk: 2.2, n: 0, flash: 0, face: 0, spr: this.add.image(96, 140, 'lz_idle').setScale(2).setAlpha(0).setDepth(900), tie: 0 };
+    this.B = { x: 96, y: 140, hp: 24, max: 24, t: 0, atk: 2.2, n: 0, flash: 0, face: 0, spr: this.add.image(96, 140, 'lz_idle').setScale(2).setAlpha(0).setDepth(900), tie: 0 };
     const B = this.B;
     fx('ふぁ〜…', ...this.scr(p.x, p.y - 40), '#cfc6e6');
     sfx((o, T) => T(0, 1.4, o, { type: 'triangle', f: 330, f2: 140, peak: .12, rel: .4 }));
@@ -794,6 +1064,26 @@ class Play extends Phaser.Scene {
     this.time.delayedCall(4500, () => say('きみの中から「怠け心」が出てきたメェ！ お札で祓うんだ！', 3000));
     this.time.delayedCall(4600, () => { if (s.boss !== 'intro') return; s.boss = 'fight'; bgm('boss'); banner('怠け心を祓え！'); show('bossbar'); $('bossFill').style.width = '100%'; });
   }
+  // halfway: the hero answers back, and the ofuda triple
+  bossMid() {
+    const s = this.st, B = this.B, p = this.p; s.boss = 'mid'; s.lock = 5.4; B.atk = 2;
+    for (const e of this.enemies) if (e.noCoin) { e.dead = true; this.burst(e.x, e.y, 4); }
+    for (const o of this.ofuda) o.life = 0;
+    B.spr.clearTint().setTexture('lz_yawn');
+    say('どうせ今年もムリだって。去年みたいに、すぐやめちゃうよ…', 2700, '怠け心');
+    this.time.delayedCall(2800, () => {
+      say('ムリかどうかは……やってみなきゃ、わからない！', 2600, '主人公');
+      this.cameras.main.flash(300, 255, 210, 63); this.cameras.main.shake(300, .01); this.burst(p.x, p.y - 16, 12);
+      sfx((o, T) => ['D5', 'A5', 'D6', 'A6'].forEach((n, i) => T(i * .05, .25, o, { type: 'square', f: hz(n), peak: .12, rel: .15 })));
+      const ring = this.add.image(p.x, p.y - 14, 'glow').setTint(0xffd23f).setBlendMode('ADD').setScale(.4).setDepth(3000);
+      this.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 900, onComplete: () => ring.destroy() });
+      B.tie = .4;
+    });
+    this.time.delayedCall(5400, () => {
+      if (s.boss !== 'mid') return; s.boss = 'fight'; s.power = true; B.spr.setTexture('lz_idle');
+      banner('気合い！ お札が３まいに！'); say('その意気だメェ！ いっけー！', 2000);
+    });
+  }
   drawTether() {
     const B = this.B, p = this.p, g = this.tether; g.clear(); if (!B || B.tie <= 0) return;
     const x0 = B.x, y0 = B.y + 44, x1 = p.x, y1 = p.y - 16, cx = (x0 + x1) / 2 + Math.sin(this.time.now / 300) * 18, cy = (y0 + y1) / 2;
@@ -806,18 +1096,19 @@ class Play extends Phaser.Scene {
     const B = this.B, s = this.st, p = this.p;
     if (s.boss === 'fight') {
       B.t += dt;
+      B.t += B.hp <= 12 ? dt * .3 : 0;
       B.x = 96 + Math.sin(B.t * .8) * 48; B.y = 140 + Math.sin(B.t * 1.7) * 10;
       B.atk -= dt; B.face = Math.max(0, B.face - dt);
       if (B.atk <= 0) {
-        B.n++; B.atk = B.hp > 8 ? 1.5 : 1.05; B.face = .5;
-        const shots = B.hp > 8 ? [0] : [-.35, 0, .35];
+        B.n++; B.atk = B.hp > 12 ? 1.6 : 1.15; B.face = .5;
+        const shots = B.hp > 12 ? [0] : [-.35, 0, .35];
         const mx = B.x - 2, my = B.y + 6, a0 = Math.atan2(p.y - 12 - my, p.x - mx);
         for (const da of shots) {
           const e = { type: 'zzz', x: mx, y: my, t: 0, r: 5, pure: true, noCoin: true, vx: Math.cos(a0 + da) * 62, vy: Math.sin(a0 + da) * 62, s: this.add.image(mx, my, 'zzz').setScale(1.6) };
           this.enemies.push(e);
         }
         fx(['Zzz…', 'めんどい…', 'ダラ〜', 'あと5分…'][B.n % 4], ...this.scr(B.x + 34, B.y - 30), '#cfc6e6');
-        if (B.hp <= 8 && B.n % 3 === 0) for (const dx of [-30, 30]) {
+        if (B.hp <= 12 && B.n % 3 === 0) for (const dx of [-30, 30]) {
           const m = { type: 'hitodama', x: B.x + dx, y: B.y + 24, x0: B.x + dx, y0: B.y + 24, t: 0, r: 8, pure: true, noCoin: true, s: this.add.image(B.x + dx, B.y + 24, 'hitodama').setScale(2).setTint(0xc080ff) };
           m.glow = this.add.image(m.x, m.y, 'glow').setScale(1.4).setBlendMode('ADD').setTint(0xc080ff);
           this.enemies.push(m);
@@ -830,6 +1121,7 @@ class Play extends Phaser.Scene {
           this.burst(o.x, o.y, 4);
           if (B.hp % 4 === 0 && B.hp > 0) fx(['やる気出ない…', 'どうせムリだよ…', 'もう帰ろうよ…'][(B.hp / 4) % 3 | 0], ...this.scr(B.x, B.y - 50), '#ff7fa8');
           if (B.hp <= 0) { this.defeatBoss(); return; }
+          if (B.hp === 12 && !s.power) { this.bossMid(); return; }
         }
       }
       B.hitT = Math.max(0, (B.hitT || 0) - dt);
@@ -907,9 +1199,16 @@ class Goal extends Phaser.Scene {
     T(4600, () => { $('st2').className = 'done'; $('st3').className = 'on'; });
     bow(4700); bow(5800);
     clap(6900, 66); clap(7500, 126);
-    bow(8300, 900);
-    T(9600, () => { $('st3').className = 'done'; });
-    T(10100, () => { this.cameras.main.fadeOut(800, 255, 230, 160); this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Result', this.data_)); });
+    // hands together: tell the kami this year's goal
+    T(8100, () => { fx('いのる…', 96, 268, '#fff6e8'); showWish(i => {
+      RUN.wish = i; fx('願いをこめて', 96, 250, '#ffd23f');
+      const gl = this.add.image(96, 300, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.4);
+      this.tweens.add({ targets: gl, y: 150, scale: 3, alpha: 0, duration: 1400, ease: 'Sine.out', onComplete: () => gl.destroy() });
+      sfx((o, T2) => ['G5', 'B5', 'D6', 'G6'].forEach((n, k) => T2(k * .12, .5, o, { type: 'triangle', f: hz(n), peak: .08, rel: .4 })));
+      bow(900, 900);
+      T(2200, () => { $('st3').className = 'done'; });
+      T(2700, () => { this.cameras.main.fadeOut(800, 255, 230, 160); this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Result', this.data_)); });
+    }); });
   }
 }
 
@@ -935,11 +1234,28 @@ class Result extends Phaser.Scene {
       this.time.addEvent({ delay: 140, repeat: 40, callback: () => { const c = this.add.image(Phaser.Math.Between(8, 184), -10, 'coin').setScale(1.5); this.tweens.add({ targets: c, y: 430, angle: 360, duration: Phaser.Math.Between(1400, 2400), onComplete: () => c.destroy() }); } });
     });
     this.time.delayedCall(3300, () => { show('best'); });
-    this.time.delayedCall(4300, () => {
-      $('tally').textContent = `集めた小判 ×${data.coins}　運 Lv.${data.lv}`; show('tally');
+    RUN.fortune = dd ? '大大吉' : '大吉';
+    // records & titles
+    const t = data.t || 0, dmg = data.dmg || 0, best = store.get('best', {});
+    const newT = !best.t || t < best.t, newC = !(best.coins >= data.coins);
+    store.set('best', { t: newT ? t : best.t, coins: newC ? data.coins : best.coins, clears: (best.clears || 0) + 1 });
+    const cell = (label, v, isNew) => `<div class="${isNew ? 'new' : ''}">${label}${isNew && best.clears ? ' NEW' : ''}<span>${v}</span></div>`;
+    $('stats').innerHTML = cell('タイム', fmtTime(t), newT) + cell('小判', `${data.coins}<small>/${COIN_MAX}</small>`, newC) + cell('ダメージ', dmg, false);
+    const T = [];
+    if (data.coins >= COIN_MAX) T.push(['小判コンプリート', 1]); else if (data.coins >= 35) T.push(['小判名人', 0]);
+    if (dmg === 0) T.push(['無傷の参拝者', 1]); else if (dmg <= 2) T.push(['身のこなし上手', 0]);
+    if (t <= 100) T.push(['韋駄天', 1]); else if (t <= 150) T.push(['健脚', 0]);
+    if (!T.length) T.push(['初もうで達成', 0]);
+    $('titles').innerHTML = T.map(([n, g]) => `<span class="${g ? 'g' : ''}">${n}</span>`).join('');
+    $('wishLine').textContent = RUN.wish >= 0 ? `今年の目標：${WISHES[RUN.wish]}` : '';
+    this.time.delayedCall(4300, () => { show('stats'); sfx((o, T2) => T2(0, .08, o, { type: 'square', f: hz('A5'), peak: .1 })); });
+    this.time.delayedCall(4900, () => { show('titles'); sfx((o, T2) => ['E6', 'A6'].forEach((n, i) => T2(i * .08, .12, o, { type: 'square', f: hz(n), peak: .1 }))); });
+    this.time.delayedCall(5500, () => {
+      if (RUN.wish >= 0) show('wishLine');
       $('hint').textContent = dd ? '小判の達人！ 大大吉をひきあてた' : `小判を${DAIDAI}枚以上あつめると…？`; show('hint');
-      show('rBtns');
+      show('rBtns'); matchMedia('(hover:hover)').matches && $('again').focus({ preventScroll: true });
     });
+    $('rShare').onclick = () => openShare('result');
     $('again').onclick = () => { bgmStop(); this.cameras.main.fadeOut(600, 255, 246, 232); this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Ending')); };
     $('toTitle').onclick = () => { bgmStop(); this.scene.start('Play'); };
   }
@@ -961,8 +1277,8 @@ class Ending extends Phaser.Scene {
     cam.scrollY = 0;
     this.talks = [
       { y: 150, t: 'おつかれさま。帰りは、ゆっくり歩こうメェ。', ms: 3400 },
-      { y: 330, t: '2027年は、どんな年になるかな。', ms: 3000 },
-      { y: 470, t: '大吉は、ただのきっかけ。', ms: 2800 },
+      { y: 300, t: 'ねえ。「三日坊主」でも、いいんだメェ。', ms: 3000 },
+      { y: 430, t: '4日目に、また始めればいい。それをくりかえせば、ちゃんと一年になるメェ。', ms: 4000 },
       { y: 600, t: 'どんな一年にするかは――きみ次第だメェ。', ms: 3600, spark: true },
       { y: 760, t: '怠け心も、きみの一部。うまく付き合っていこうメェ。', ms: 3600 },
     ];
@@ -1001,10 +1317,13 @@ class Ending extends Phaser.Scene {
     cam.scrollY += (target - cam.scrollY) * Math.min(1, dt * 3);
   }
   farewell() {
-    const T = (ms, f) => this.time.delayedCall(ms, f), sc = (x, y) => [x - this.cameras.main.scrollX, y - this.cameras.main.scrollY];
+    let T = (ms, f) => this.time.delayedCall(ms, f); const sc = (x, y) => [x - this.cameras.main.scrollX, y - this.cameras.main.scrollY];
     this.hero.setTexture('player_back'); bgm('wakare');
     T(300, () => say('…え？', 1700, '主人公'));
     T(2100, () => say('ぼくは、ここまで。この鳥居の先は、きみの一年だメェ。', 4200));
+    const W = RUN.wish >= 0 ? 4200 : 0;
+    if (W) T(6500, () => say(`「${WISHES[RUN.wish]}」――神さまにも、ぼくにも、ちゃんと届いたよ。`, 4000));
+    const T0 = T; T = (ms, f) => T0(ms + (ms >= 6500 ? W : 0), f);
     T(6500, () => {
       this.halo = this.add.image(this.sx, this.sy - 14, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.5).setDepth(this.sy - 2);
       this.tweens.add({ targets: this.halo, scale: 3.4, duration: 1400, ease: 'Sine.out' });
@@ -1013,7 +1332,7 @@ class Ending extends Phaser.Scene {
       say('怠け心がまた出てきても、大丈夫。きみなら、きっと祓えるメェ。', 4400);
     });
     T(11100, () => say('一年間、ずっと応援してるよ！', 3400));
-    T(14600, () => { say('ありがとう！ がんばるよ！', 2800, '主人公'); this.hero.setTexture('player_wave');
+    T(14600, () => { say('ありがとう、ひつじ！ 今年は……あきらめない！', 2800, '主人公'); this.hero.setTexture('player_wave');
       this.waveEv = this.time.addEvent({ delay: 320, loop: true, callback: () => this.hero.setFlipX(!this.hero.flipX) }); });
     T(17600, () => { this.gone = true; this.sparkRing(this.sx, this.sy - 16, 18, 26);
       this.tweens.add({ targets: [this.sheep, this.ss], alpha: 0, duration: 1600 }); this.tweens.add({ targets: this.sheep, y: this.sy - 30, duration: 1600 });
@@ -1035,8 +1354,10 @@ class EndCard extends Phaser.Scene {
     const g = this.add.image(38, 286, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(1.2).setAlpha(0);
     const sp = this.add.image(38, 290, 'sheep').setOrigin(.5, 1).setAlpha(0);
     this.tweens.add({ targets: [g, sp], alpha: { from: 0, to: .9 }, duration: 2000, delay: 3500 });
+    $('eWish').textContent = RUN.wish >= 0 ? `2027年、${WISHES[RUN.wish]}！` : ''; $('eWish').hidden = RUN.wish < 0;
     show('endcard');
-    this.time.delayedCall(5200, () => show('eBtns'));
+    this.time.delayedCall(5200, () => { show('eBtns'); matchMedia('(hover:hover)').matches && $('endShare').focus({ preventScroll: true }); });
+    $('endShare').onclick = () => openShare('end');
     $('endAgain').onclick = () => { bgmStop(); this.scene.start('Play'); };
     $('endTitle').onclick = () => { bgmStop(); this.scene.start('Title'); };
   }
@@ -1045,7 +1366,7 @@ class EndCard extends Phaser.Scene {
 window.__sq = new Phaser.Game({
   type: Phaser.AUTO, parent: 'game', width: GW, height: GH, pixelArt: true, backgroundColor: '#07041a',
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [Boot, Title, Play, Goal, Result, Ending, EndCard],
+  scene: [Boot, Title, Prologue, Play, Goal, Result, Ending, EndCard],
 });
 })();
 </script>
