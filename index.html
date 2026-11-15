@@ -485,7 +485,7 @@ function ensure() {
   if (!ctx) {
     ctx = new (window.AudioContext || window.webkitAudioContext)();
     const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
-    master = ctx.createGain(); master.gain.value = .55; master.connect(comp); comp.connect(ctx.destination);
+    master = ctx.createGain(); master.gain.value = muted ? 0 : .55; master.connect(comp); comp.connect(ctx.destination);
     noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
     const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     const n = 48, re = new Float32Array(n), im = new Float32Array(n);
@@ -744,6 +744,7 @@ let COIN_MAX = 57;
 const RUN = { wish: -1, fortune: '' };
 const CANON_URL = 'https://claudecreative.github.io/sanpai-quest/';
 const SHARE_URL = ['claudecreative.github.io', 'aimania.tech', 'www.aimania.tech'].includes(location.hostname) ? location.origin + location.pathname.replace(/index\.html$/, '') : CANON_URL;
+const buzz = ms => { try { if (!muted && navigator.vibrate && matchMedia('(pointer:coarse)').matches) navigator.vibrate(ms); } catch (e) {} };
 const store = { get(k, d) { try { const v = localStorage.getItem('sq_' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('sq_' + k, JSON.stringify(v)); } catch (e) {} } };
 const fmtTime = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 let storyKey = null, wishKey = null;
@@ -900,7 +901,9 @@ function holdBtn(id, key) {
 holdBtn('btnHarai', 'harai'); holdBtn('btnHashiru', 'hashiru');
 $('pauseBtn').addEventListener('click', () => setPause(true));
 $('pause').addEventListener('click', () => setPause(false));
-$('mute').addEventListener('click', () => { muted = !muted; ensure(); master.gain.value = muted ? 0 : .55; $('mute').textContent = muted ? '音 OFF' : '音 ON'; $('mute').setAttribute('aria-pressed', String(muted)); });
+const muteLabel = () => { $('mute').textContent = muted ? '音 OFF' : '音 ON'; $('mute').setAttribute('aria-pressed', String(muted)); };
+muted = !!store.get('mute', false); muteLabel();
+$('mute').addEventListener('click', () => { muted = !muted; store.set('mute', muted); ensure(); master.gain.value = muted ? 0 : .55; muteLabel(); });
 
 function readMove() {
   let ix = input.x, iy = input.y;
@@ -1232,10 +1235,11 @@ class Play extends Phaser.Scene {
     const v = $('vig'); v.classList.remove('hurt'); void v.offsetWidth; v.classList.add('hurt');
     const s = this.st;
     if (s.shield) { s.shield = false; s.invuln = 1.5; this.shieldFx && this.shieldFx.destroy(); this.shieldFx = null; ringFx(this, this.p.x, this.p.y - 14, 0xff9a8a, 1.4); fx('お守りが守ってくれた！', ...this.scr(this.p.x, this.p.y - 40), '#ff9a8a'); return; }
-    s.hp--; s.dmg++; s.invuln = 1.5;
+    s.hp--; s.dmg++; s.invuln = 1.5; buzz(40);
     if (s.hp === 1) this.once('low', 'あぶないメェ！ 赤いお守りを見つけたら、体力が戻るよ。', 3000, 900);
     if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3; say('負けないでメェ！体力を回復したよ。', 2400); }
-    else if (s.hp <= 0) { s.hp = 3; this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); s.invuln = 2; this.respawnFx(); }
+    else if (s.hp <= 0) { s.hp = 3; this.retries = this.retries || {}; const rz = s.zone, rn = this.retries[rz] = (this.retries[rz] || 0) + 1;
+      if (rn >= 2 && !s.shield) this.time.delayedCall(2800, () => { if (s.shield || s.done) return; s.shield = true; this.shieldFx = this.add.image(this.p.x, this.p.y - 14, 'glow').setTint(0xff9a8a).setBlendMode('ADD').setScale(1.6).setAlpha(.45); fx('お守りバリア！', ...this.scr(this.p.x, this.p.y - 40), '#ff9a8a'); say('ぼくのお守り、貸してあげるメェ。一回だけ守ってくれるよ！', 2800); }); this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); s.invuln = 2; this.respawnFx(); }
     this.updateHud();
   }
   update(_, dms) {
@@ -1244,6 +1248,7 @@ class Play extends Phaser.Scene {
     s.t += dt;
     if (this.hitstop > 0) { this.hitstop -= dt; stepParts(this, dt * .3); return; } // hit-stop: a tiny freeze sells the impact
     { const top = this.cameras.main.scrollY, see = this.enemies.some(e => !e.dead && e.y - top < 92 && e.y - top > -10 && p.y - e.y < 190); if (see !== this.msgSee) { this.msgSee = see; $('msg').classList.toggle('see', see); } }
+    if (readMove().some(v => Math.abs(v) > .2) || s.boss !== 'none' || s.lock > 0 || window.__autopilot) this.idleT = 0; else if ((this.idleT = (this.idleT || 0) + dt) > 7) { this.idleT = -20; say('上のほうへ進むメェ！ 山の上の神社まで、もうひとふんばり！', 2600); const a = this.add.text(p.x, p.y - 46, '▲', { fontSize: '12px', color: '#ffd23f' }).setOrigin(.5).setDepth(3003); this.tweens.add({ targets: a, y: p.y - 60, alpha: 0, duration: 700, repeat: 2, onComplete: () => a.destroy() }); }
     s.invuln = Math.max(0, s.invuln - dt); s.lock = Math.max(0, s.lock - dt); s.cool = Math.max(0, s.cool - dt); s.airCd = Math.max(0, s.airCd - dt);
     // input
     let [ix, iy] = readMove();
@@ -1259,7 +1264,7 @@ class Play extends Phaser.Scene {
       // holding 払 (button or Z) keeps throwing
       const wantHarai = input.harai || input.haraiHeld || keys['z'] || keys['j'];
       if (wantHarai && s.cool <= 0 && this.ofuda.length < (s.power ? 9 : 3)) {
-        s.cool = input.harai ? .26 : .32; se('払（お札）');
+        s.cool = input.harai ? .26 : .32; se('払（お札）'); puff(this, 'twinkle', p.x, p.y - 26, { scale: .25, grow: 2, life: .18, add: true, tint: s.power ? 0xffd23f : 0xffffff, depth: 3001 });
         for (const vx of s.power ? [-55, 0, 55] : [0]) {
           const o = { x: p.x, y: p.y - 26, vx, life: .7, s: this.add.image(p.x, p.y - 26, 'ofuda').setScale(1.5).setDepth(3000) };
           if (s.power) o.s.setTint(0xfff0a0); this.ofuda.push(o);
@@ -1370,7 +1375,7 @@ class Play extends Phaser.Scene {
       }
     }
     if (this.B) this.updateBoss(dt, air);
-    this.ofuda = this.ofuda.filter(o => { if (o.life <= 0) { o.s.destroy(); return false; } return true; });
+    this.ofuda = this.ofuda.filter(o => { if (o.life <= 0) { if (o.life > -.5) puff(this, 'mote', o.x, o.y, { scale: .5, grow: .6, vy: -12, life: .35, add: true, tint: 0xffb060, alpha: .8, depth: 3000 }); o.s.destroy(); return false; } return true; });
     this.enemies = this.enemies.filter(e => { if (e.dead) { e.s.destroy(); e.glow && e.glow.destroy(); e.sh && e.sh.destroy(); return false; } return true; });
     // coins
     for (const c of this.coinsArr) {
@@ -1542,6 +1547,8 @@ class Play extends Phaser.Scene {
     const s = this.st, B = this.B, p = this.p; s.boss = 'done'; show('bossbar', false); bgmStop(); s.lock = 2.6; s.invuln = 3;
     for (const e of this.enemies) if (e.noCoin) { e.dead = true; this.burst(e.x, e.y, 5); }
     B.spr.clearTint().setTexture('lz_down');
+    this.hitstop = .35; buzz([30, 40, 70]); // the final blow lingers for a beat
+    this.time.delayedCall(380, () => banner('怠け心を祓った！'));
     this.cameras.main.flash(600, 255, 246, 232); this.cameras.main.shake(500, .01);
     se('祓った！');
     for (let i = 0; i < 5; i++) this.time.delayedCall(i * 140, () => this.burst(B.x + Phaser.Math.Between(-26, 26), B.y + Phaser.Math.Between(-30, 30), 8));
