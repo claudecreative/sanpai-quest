@@ -1228,6 +1228,13 @@ class Play extends Phaser.Scene {
     if (this.combo >= 3) this.cheerT = .45;
     if (this.combo >= 2) fx(`${this.combo + 1} れんぞく！`, ...this.scr(this.p.x + 20, this.p.y - 36), '#ffe070');
   }
+  // a picked-up coin flies into the HUD counter, so the eye learns where coins go
+  coinFly(c) {
+    const st = $('stage').getBoundingClientRect(), ic = $('coinIcon').getBoundingClientRect(), k = GW / st.width;
+    const tx = (ic.left + ic.width / 2 - st.left) * k, ty = (ic.top + ic.height / 2 - st.top) * k, [sx, sy] = this.scr(c.x, c.y);
+    const f = this.add.image(sx, sy, 'coin').setScrollFactor(0).setScale(c.big ? 2.4 : 1.5).setDepth(4000);
+    this.tweens.add({ targets: f, x: tx, y: ty, scale: 1, duration: 420, ease: 'Cubic.in', onComplete: () => f.destroy() });
+  }
   // each yokai type has its own little defeat voice, so you can tell them apart by ear
   defeatSnd(type) {
     const v = { hitodama: ['A6', 'E7', .05], chochin: ['G4', 'D5', .08], karakasa: ['E5', 'C5', .07], kappa: ['C5', 'G4', .09], yakuiwa: ['D4', 'A3', .1] }[type]; if (!v) return;
@@ -1440,7 +1447,7 @@ class Play extends Phaser.Scene {
       const cs = c.big ? 2.6 : 1.5; c.s.setScale(cs * Math.abs(Math.cos(this.time.now / 260 + c.x)) + .2, cs); if (c.g) c.g.setAlpha(.35 + Math.sin(this.time.now / 180) * .15);
       if (!c.got && Math.random() < dt * .35) puff(this, 'twinkle', c.x + 3, c.y - 3, { scale: .5, life: .5, add: true, tint: 0xfff3b0, va: 90, depth: c.y + 1 });
       { const dx = p.x - c.x, dy = p.y - 8 - c.y, d = Math.hypot(dx, dy); if (!c.got && d < 24 && d > 1) { const k = Math.min(1, 70 * dt / d); c.x += dx * k; c.y += dy * k; c.s.setPosition(c.x, c.y); c.g && c.g.setPosition(c.x, c.y); } }
-      if (!c.got && Math.hypot(p.x - c.x, p.y - 8 - c.y) < (c.big ? 14 : 11)) { c.got = true; c.s.destroy(); this.coinChime();
+      if (!c.got && Math.hypot(p.x - c.x, p.y - 8 - c.y) < (c.big ? 14 : 11)) { c.got = true; c.s.destroy(); this.coinChime(); this.coinFly(c);
         if (c.big) { c.g.destroy(); s.coins += 2; s.big = (s.big || 0) + 1; fx('大判！ +3', ...this.scr(c.x, c.y - 20), '#ffd23f'); ringFx(this, c.x, c.y, 0xffd23f, 1.6); this.once('big', '大判は小判3枚ぶん！ あぶない所にあるけど、そのぶんお得だメェ。', 3200); }
         puff(this, 'twinkle', c.x, c.y, { scale: .3, grow: 2.5, life: .45, add: true, tint: 0xffd23f, va: 240 }); for (let i = 0; i < 4; i++) puff(this, 'mote', c.x, c.y, { scale: .3, vx: (i % 2 ? 1 : -1) * (10 + i * 6), vy: -30 - i * 8, life: .5, add: true, tint: 0xffe070 }); s.coins++; this.lvCheck(); }
     }
@@ -1477,6 +1484,9 @@ class Play extends Phaser.Scene {
     this.pSpr.setAlpha(s.invuln > 0 && s.lock <= 0 ? (Math.floor(s.invuln * 12) % 2 ? .3 : 1) : 1);
     this.pShadow.setPosition(p.x, p.y).setScale(air ? 1 : 1.4).setDepth(p.y);
     // sheep follows
+    if ((this.warnN || 0) < 4 && s.boss === 'none' && (this.warnCd = (this.warnCd || 0) - dt) <= 0 && this.enemies.some(e => !e.dead && e.pure && !e.noCoin && Math.hypot(e.x - p.x, e.y - p.y) < 56)) {
+      this.warnCd = 6; this.warnN = (this.warnN || 0) + 1; const ex = this.add.text(this.sx_, this.sy_ - 34, '！', { fontFamily: 'sans-serif', fontSize: '12px', fontStyle: 'bold', color: '#ffd23f', stroke: '#1a0f2e', strokeThickness: 3 }).setOrigin(.5).setDepth(3003);
+      this.tweens.add({ targets: ex, y: ex.y - 6, duration: 160, yoyo: true, onComplete: () => this.time.delayedCall(500, () => ex.destroy()) }); this.cheerT = .2; }
     const tx = p.x + (p.x > 120 ? -24 : 24), ty = p.y + 14;
     const nx = this.sx_ + (tx - this.sx_) * Math.min(1, dt * 3.5), ny = this.sy_ + (ty - this.sy_) * Math.min(1, dt * 3.5);
     const dir = nx - this.sx_; if (Math.abs(dir) > .05) this.sheep.setFlipX(dir < 0);
@@ -1819,7 +1829,8 @@ class Ending extends Phaser.Scene {
       this.hy = Phaser.Math.Clamp(this.hy, 50, 1100);
       const [b0, b1] = this.hy < 990 ? [62, 130] : [24, 168]; this.hx = Phaser.Math.Clamp(this.hx, b0, b1);
       if (Math.abs(iy) > .2) this.face = iy < 0 ? 'player_back' : 'player_front'; this.face = this.face || 'player_front';
-      if (moving) { this.walkT += dt; if (this.walkT > .16) { this.walkT = 0; this.stepF = !this.stepF; } this.hero.setTexture(this.face + (this.stepF ? '_w1' : '_w2')).setFlipX(false); }
+      if (moving) { this.walkT += dt; if (this.walkT > .16) { this.walkT = 0; this.stepF = !this.stepF;
+          const fp = this.add.rectangle(this.hx + (this.stepF ? 2 : -2), this.hy - 1, 2.5, 1.5, 0x3a3060, .5).setDepth(2); this.tweens.add({ targets: fp, alpha: 0, delay: 2500, duration: 1500, onComplete: () => fp.destroy() }); } this.hero.setTexture(this.face + (this.stepF ? '_w1' : '_w2')).setFlipX(false); }
       else this.hero.setTexture(this.face);
       for (const t of this.talks) if (!t.done && this.hy > t.y) { t.done = true; this.queue.push(t); }
       if (this.hy >= 1080) { this.phase = 'farewell'; show('controls', false); show('touch', false); input.x = input.y = 0; this.hero.setFlipX(false);
