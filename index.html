@@ -219,9 +219,9 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 
 /* ---- HD polish (UI) ---- */
 #loading{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;color:var(--gold);letter-spacing:.2em;animation:blink 1s steps(2) infinite;pointer-events:none}
-#rotate{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);font-size:13px;color:var(--paper);background:rgba(26,15,46,.85);border:1px solid var(--gold);padding:4px 12px;border-radius:6px;pointer-events:none;z-index:9}
+#rotate{position:fixed;left:8px;top:8px;max-width:calc(50vw - 110px);font-size:13px;line-height:1.5;color:var(--paper);background:rgba(26,15,46,.85);border:1px solid var(--gold);padding:4px 12px;border-radius:6px;pointer-events:none;z-index:9}
 #rotate b{color:var(--gold);font-weight:400}
-@media (prefers-reduced-motion: reduce){#zcard,#zcard::before,.stamp,#hearts.low img:first-child{animation-duration:.01s!important}}
+@media (prefers-reduced-motion: reduce){#zcard,#zcard::before,.stamp,#hearts.low img:first-child,#hearts img.lost,#hearts img.gain,#lv.up,#gTap,.t-start{animation-duration:.01s!important;animation-iteration-count:1!important}#ema{animation:none}}
 
 #stats b{font-weight:400}
 .stamp{position:absolute;right:calc(var(--u)*14);top:calc(var(--u)*176);padding:calc(var(--u)*2) calc(var(--u)*4);font-family:var(--display);font-size:calc(var(--u)*10);color:var(--shu);border:calc(var(--u)*1.5) solid var(--shu);border-radius:calc(var(--u)*2);background:rgba(255,246,232,.85);transform:rotate(-14deg);animation:stamp .35s cubic-bezier(.3,1.8,.5,1) both;pointer-events:none;box-shadow:0 0 0 calc(var(--u)*1) rgba(255,246,232,.85)}
@@ -897,7 +897,7 @@ addEventListener('keydown', e => {
   if ((k === 'p' || k === 'escape') && curPlay()) setPause(true);
 });
 // landscape phone hint
-const rot = () => { $('rotate').hidden = !(matchMedia('(pointer:coarse)').matches && innerWidth > innerHeight * 1.2); };
+const rot = () => { $('rotate').hidden = !(matchMedia('(pointer:coarse)').matches && innerWidth > innerHeight * 1.2 && innerHeight < 600); };
 addEventListener('resize', rot); rot();
 // reduced motion: no camera shake
 if (matchMedia('(prefers-reduced-motion: reduce)').matches) Phaser.Cameras.Scene2D.Camera.prototype.shake = function () { return this; };
