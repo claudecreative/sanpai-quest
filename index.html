@@ -211,7 +211,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 /* ---- share sheet ---- */
 #wall{position:absolute;inset:0;pointer-events:auto;background:rgba(7,4,26,.85);display:grid;place-items:center;z-index:6}
 .wl-box{width:calc(var(--u)*170);box-sizing:border-box;padding:calc(var(--u)*7);background:var(--ink);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold);text-align:center;color:var(--paper)}
-.wl-pic{position:relative;width:calc(var(--u)*120);aspect-ratio:1170/2532;margin:calc(var(--u)*5) auto;background:#2a1f3d;border:calc(var(--u)*1) solid var(--paper)}
+.wl-pic{position:relative;width:calc(var(--u)*120);aspect-ratio:1170/2532;max-height:calc(var(--u)*250);margin:calc(var(--u)*5) auto;background:#2a1f3d;border:calc(var(--u)*1) solid var(--paper)}
 .wl-pic img{display:block;width:100%;height:100%;object-fit:cover;-webkit-touch-callout:default;user-select:auto;pointer-events:auto}
 #wallBusy{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--pixel);font-size:calc(var(--u)*6)}
 #wallSave{width:100%;flex:none}
@@ -888,19 +888,22 @@ const FEST_ART = {
 
 // ---------- clear reward: 2027 January 大大吉 calendar wallpaper (phone size) ----------
 async function makeWallpaper() {
-  const W = 1170, H = 2532, k = W / 192, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  // match the player's own screen shape (iPhone ~0.46, many Androids 0.45, older phones 0.56), always portrait
+  const sw = Math.min(screen.width, screen.height), sh = Math.max(screen.width, screen.height), r = Phaser.Math.Clamp(sw && sh ? sw / sh : 1170 / 2532, .42, .6);
+  const H = 2532, W = Math.round(H * r), c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
   try { await Promise.all(['900 80px "Dela Gothic One"', '40px "DotGothic16"'].map(f => document.fonts.load(f, '大吉2027'))); } catch (e) {}
   const img = await new Promise((ok, ng) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ng; i.src = D.end_card; });
-  g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, W, 416 * k);
+  // background scaled evenly (never stretched) to cover the canvas, anchored to the bottom so the path and sun stay
+  { const k = Math.max(W / 192, H / 416), bw = 192 * k, bh = 416 * k; g.imageSmoothingEnabled = false; g.drawImage(img, Math.round((W - bw) / 2), H - bh, bw, bh); }
   const ink = '#1a0f2e', paper = '#fff6e8', gold = '#ffd23f', shu = '#e03a2e';
   const DG = 'Dela Gothic One, DotGothic16, sans-serif', PX = 'DotGothic16, sans-serif';
   const txt = (t, x, y, size, col, font = DG, align = 'center', stroke = 0, sc = ink) => { g.font = `${size}px ${font}`; g.textAlign = align; g.textBaseline = 'middle';
     if (stroke) { g.lineJoin = 'round'; g.lineWidth = stroke; g.strokeStyle = sc; g.strokeText(t, x, y); } g.fillStyle = col; g.fillText(t, x, y); };
   const spr = (rows, x, y, s, flip) => { const cv = spriteCanvas(rows, 1); g.save(); g.translate(x, y); if (flip) g.scale(-1, 1); g.drawImage(cv, -cv.width * s / 2, -cv.height * s, cv.width * s, cv.height * s); g.restore(); };
   // kites in the sky, clear of the lock-screen clock
-  spr(FEST_ART.kite, 150, 860, 9); spr(FEST_ART.kite2, W - 150, 800, 9);
+  spr(FEST_ART.kite, 150, 760, 9); spr(FEST_ART.kite2, W - 150, 700, 9);
   // calendar panel
-  const px = 70, py = 880, pw = W - 140, ph = 720;
+  const px = 70, py = 800, pw = W - 140, ph = 720;
   g.fillStyle = 'rgba(26,15,46,.35)'; g.fillRect(px + 14, py + 18, pw, ph);
   g.fillStyle = 'rgba(255,246,232,.95)'; g.fillRect(px, py, pw, ph);
   g.lineWidth = 10; g.strokeStyle = ink; g.strokeRect(px, py, pw, ph); g.lineWidth = 4; g.strokeStyle = gold; g.strokeRect(px + 16, py + 16, pw - 32, ph - 32);
@@ -919,7 +922,7 @@ async function makeWallpaper() {
   txt('1日 元日　11日 成人の日', px + pw / 2, py + ph - 44, 30, '#5a4f75', PX);
   // the goal you chose, and the two of you walking toward the first sunrise
   const wish = RUN.wish >= 0 ? WL()[RUN.wish] : '';
-  if (wish) txt(`今年の目標：${wish}`, W / 2, 1680, 44, '#fff6e8', PX, 'center', 12);
+  if (wish) txt(`今年の目標：${wish}`, W / 2, 1600, 44, '#fff6e8', PX, 'center', 12);
   spr(D.sprites.player_back, W / 2 - 70, 2240, 11); spr(D.sprites.sheep, W / 2 + 90, 2250, 11);
   txt('ひつじと歩く、最高の一年に。', W / 2, 2330, 46, '#fff6e8', PX, 'center', 12, '#1f5a2a');
   txt('参拝クエスト', W / 2, 2420, 32, gold, DG, 'center', 8);
@@ -928,7 +931,7 @@ async function makeWallpaper() {
 async function openWallpaper() {
   show('wall'); $('wallImg').removeAttribute('src'); $('wallBusy').textContent = 'つくっています…'; $('wallBusy').hidden = false;
   try { const c = await makeWallpaper(); const blob = await new Promise(r => c.toBlob(r, 'image/png'));
-    const url = URL.createObjectURL(blob); $('wallImg').src = url; $('wallBusy').hidden = true;
+    const url = URL.createObjectURL(blob); $('wallImg').parentNode.style.aspectRatio = `${c.width} / ${c.height}`; $('wallImg').src = url; $('wallBusy').hidden = true;
     const name = 'sanpai-quest-2027-01-daidaikichi.png', file = new File([blob], name, { type: 'image/png' });
     $('wallSave').onclick = async () => {
       if (navigator.canShare && matchMedia('(pointer:coarse)').matches && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); return; } catch (e) { if (e.name === 'AbortError') return; } }
