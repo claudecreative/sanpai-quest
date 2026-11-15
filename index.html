@@ -1450,7 +1450,7 @@ class Play extends Phaser.Scene {
     if (s.shield) { s.shield = false; s.invuln = 1.5; this.shieldFx && this.shieldFx.destroy(); this.shieldFx = null; ringFx(this, this.p.x, this.p.y - 14, 0xff9a8a, 1.4); fx('お守りが守ってくれた！', ...this.scr(this.p.x, this.p.y - 40), '#ff9a8a'); return; }
     s.hp--; s.dmg++; s.invuln = 1.5; buzz(40);
     if (s.hp === 1) this.once('low', 'あぶないメェ！ 赤いお守りを見つけたら、体力が戻るよ。', 3000, 900);
-    if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3;
+    if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid' || s.boss === 'awake')) { s.hp = 3;
       if (!RUN.easy && this.B && s.boss === 'fight') { const B = this.B; B.hp = Math.min(B.max, B.hp + Math.ceil(B.max / (B.giant ? 8 : 4))); $('bossFill').style.width = (B.hp / B.max * 100) + '%'; RUN.wipes++; this.retries = this.retries || {}; this.retries.boss = (this.retries.boss || 0) + 1;
         say(this.retries.boss >= 2 ? 'くじけそうでも、一歩ずつ。きみなら、できるメェ！' : '怠け心が勢いを取りもどした…！ 体力は回復したよ、もう一回！', 2800); fx('怠け心 回復…', ...this.scr(B.x, B.y - 60), '#ff7fa8'); }
       else say('負けないでメェ！体力を回復したよ。', 2400); }
@@ -1513,7 +1513,7 @@ class Play extends Phaser.Scene {
     }
     // bounds
     p.y = Phaser.Math.Clamp(p.y, 128, 1332);
-    const inBoss = s.boss === 'intro' || s.boss === 'fight' || s.boss === 'mid';
+    const inBoss = s.boss === 'intro' || s.boss === 'fight' || s.boss === 'mid' || s.boss === 'awake';
     if (inBoss) p.y = Phaser.Math.Clamp(p.y, 240, 360);
     if (s.boss === 'none' && p.y < 262) this.startBoss();
     const [bx0, bx1] = xBounds(p.y);
@@ -1730,7 +1730,7 @@ class Play extends Phaser.Scene {
       const ring = this.add.image(p.x, p.y - 14, 'glow').setTint(0xffd23f).setBlendMode('ADD').setScale(.4).setDepth(3000);
       this.tweens.add({ targets: ring, scale: 4, alpha: 0, duration: 900, onComplete: () => ring.destroy() }); B.tie = .4;
     });
-    T(17900, () => { if (s.boss !== 'mid') return; s.boss = 'fight'; bgm('boss'); B.spr.setTexture('lz_idle'); banner('巨大な怠け心を祓え！'); });
+    T(17900, () => { if (s.boss !== 'mid') return; s.boss = 'fight'; bgm('boss'); B.spr.setTexture('lz_idle'); banner('巨大な怠け心を祓え！'); B.gt = 0; B.dmg0 = s.dmg; });
   }
   // the giant form: dark aura behind, glowing red eyes, sinister purple tint
   evilLook() {
@@ -1758,11 +1758,36 @@ class Play extends Phaser.Scene {
       this.once('wave', 'すきまをさがして、よけるメェ！ お札でも消せるよ。', 2600);
     });
   }
+  // the hero's turn: "this year, I'll change!" — full hearts, golden triple ofuda that hit hard
+  awaken() {
+    const s = this.st, B = this.B, p = this.p, T = (ms, f) => this.time.delayedCall(ms, f); s.boss = 'awake'; s.lock = 3.6; s.awake = true;
+    for (const e of this.enemies) if (e.noCoin) { e.dead = true; this.burst(e.x, e.y, 4); }
+    for (const o of this.ofuda) o.life = 0;
+    bgmStop(); this.cameras.main.flash(500, 255, 230, 140); this.cameras.main.shake(400, .01); buzz([40, 30, 80]);
+    say('……今年こそは、変わるんだ！', 2000, '主人公');
+    sfx((o, T2) => ['D4', 'A4', 'D5', 'F#5', 'A5', 'D6'].forEach((n, i) => T2(i * .07, .5, o, { type: 'square', f: hz(n), peak: .1, rel: .3 })));
+    this.pSpr.setTint(0xffe08a);
+    this.heroAura = this.add.image(p.x, p.y - 14, 'glow').setTint(0xffd23f).setBlendMode('ADD').setScale(.5).setDepth(p.y + 9);
+    this.tweens.add({ targets: this.heroAura, scale: 2.2, duration: 600, ease: 'Back.easeOut' });
+    this.tweens.add({ targets: this.heroAura, alpha: { from: .9, to: .5 }, duration: 500, yoyo: true, repeat: -1, delay: 600 });
+    for (let i = 0; i < 3; i++) T(i * 180, () => ringFx(this, p.x, p.y - 14, 0xffd23f, 1.2 + i * .5));
+    this.burst(p.x, p.y - 16, 16);
+    T(2000, () => { say('その気持ちが、いちばんのお札だメェ！ いけーっ！', 2000); s.hp = 3; s.power = true; this.updateHud(); this.pSpr.clearTint(); banner('覚醒！ お札が3枚に！');
+      sfx((o, T2) => ['A5', 'D6', 'F#6', 'A6', 'D7'].forEach((n, i) => T2(i * .05, .2, o, { type: 'square', f: hz(n), peak: .12, rel: .15 }))); });
+    B.dmgPer = Math.max(2, Math.ceil(B.hp / 9)); // about three volleys of three ofuda
+    T(3600, () => { if (s.boss !== 'awake') return; s.boss = 'fight'; bgm('boss'); B.atk = 1.4; });
+  }
+  awakeHit(o) {
+    const cam = this.cameras.main; cam.shake(160, .014); cam.flash(90, 255, 240, 190);
+    fx('祓！', ...this.scr(o.x + Phaser.Math.Between(-10, 10), o.y - 10), '#ffd23f');
+    ringFx(this, o.x, o.y, 0xffd23f, 1.4); this.burst(o.x, o.y, 10);
+    sfx((oo, T, N, Dr) => { Dr('T', 0, oo, 1.6); N(0, .18, oo, 'lowpass', 1800, 1, .3); T(0, .2, oo, { type: 'square', f: 880, f2: 220, peak: .16 }); T(.04, .2, oo, { type: 'square', f: hz('A6'), peak: .08, rel: .15 }); });
+  }
   zzz(x, y, a, v) { this.enemies.push({ type: 'zzz', x, y, t: 0, r: 5, pure: true, noCoin: true, vx: Math.cos(a) * v * HK(), vy: Math.sin(a) * v * HK(), s: this.add.image(x, y, 'zzz').setScale(1.6) }); }
   // the giant's attack rotation: fans, spirals, rapid bursts, gap rings, a rain of Zzz with homing wisps
   giantAttack() {
     const B = this.B, p = this.p, R = B.rage ? 1.18 : 1, mx = B.x - 2, my = B.y + 10, aim = () => Math.atan2(p.y - 12 - my, p.x - mx), D = (ms, f) => this.time.delayedCall(ms, () => { if (this.st.boss === 'fight' && this.B) f(); });
-    const k = B.n % 6; B.atk = (B.rage ? .62 : .85);
+    const k = B.n % 6; B.atk = (B.rage ? .62 : .85) * (this.st.awake ? 1.8 : 1);
     if (k === 0) { const a0 = aim(); for (let i = -3; i <= 3; i++) this.zzz(mx, my, a0 + i * .2, 100 * R); }
     else if (k === 1) { const rot = Math.random() * 6; for (let r = 0; r < (B.rage ? 4 : 3); r++) D(r * 170, () => { for (let i = 0; i < 12; i++) this.zzz(B.x, B.y + 10, rot + i / 12 * Math.PI * 2 + r * .18, 66 * R); }); B.atk += .5; }
     else if (k === 2) { for (let r = 0; r < (B.rage ? 4 : 3); r++) D(r * 130, () => { const a0 = Math.atan2(p.y - 12 - B.y - 10, p.x - B.x); for (const da of [-.36, -.18, 0, .18, .36]) this.zzz(B.x, B.y + 10, a0 + da, 118 * R); }); B.atk += .3; }
@@ -1790,6 +1815,7 @@ class Play extends Phaser.Scene {
       B.t += B.giant ? dt * .3 : 0;
       B.x = 96 + (B.giant ? Math.sin(B.t * .9) * 46 + Math.sin(B.t * 2.3) * 8 : Math.sin(B.t * .8) * 48); B.y = (B.giant ? 136 : 140) + Math.sin(B.t * 1.7) * (B.giant ? 6 : 10);
       B.atk -= dt; B.face = Math.max(0, B.face - dt);
+      if (B.giant && !s.awake) { B.gt = (B.gt || 0) + dt; if (B.gt > 20 || s.dmg - (B.dmg0 || 0) >= 3) { this.awaken(); return; } }
       if (B.atk <= 0) {
         B.n++; B.face = .5;
         if (B.giant) { this.giantAttack(); } else {
@@ -1806,12 +1832,12 @@ class Play extends Phaser.Scene {
       }
       for (const o of this.ofuda) {
         if (o.life > 0 && (B.giant ? Math.abs(o.x - B.x) < 30 && Math.abs(o.y - B.y) < 60 : Math.abs(o.x - B.x) < 24 && Math.abs(o.y - B.y) < 32)) {
-          o.life = 0; B.hp--; B.flash = .12; B.hitT = .35; this.hitstop = .03; $('bossFill').style.width = (B.hp / B.max * 100) + '%'; { const bb = $('bossbar'); bb.classList.remove('hit'); void bb.offsetWidth; bb.classList.add('hit'); }
+          o.life = 0; B.hp = Math.max(0, B.hp - (s.awake ? B.dmgPer : 1)); B.flash = .12; B.hitT = .35; this.hitstop = s.awake ? .07 : .03; if (s.awake) this.awakeHit(o); $('bossFill').style.width = (B.hp / B.max * 100) + '%'; { const bb = $('bossbar'); bb.classList.remove('hit'); void bb.offsetWidth; bb.classList.add('hit'); }
           sfx((oo, T, N, Dr) => { Dr('k', 0, oo, 1.6); T(0, .12, oo, { type: 'square', f: 300, f2: 120, peak: .14 }); });
           this.burst(o.x, o.y, 4);
           if (B.hp % 4 === 0 && B.hp > 0) fx((B.giant ? ['ぐっ…しぶといヤツ…', 'まだやる気かァ…？', 'やめろ、やめろォ…'] : ['やる気出ない…', 'どうせムリだよ…', 'もう帰ろうよ…'])[(B.hp / 4) % 3 | 0], ...this.scr(B.x, B.y - 50), '#ff7fa8');
           if (B.hp <= 0) { this.defeatBoss(); return; }
-          if (B.giant && B.hp === Math.round(B.max / 2) && !B.rage) { B.rage = true; banner('怠け心が本気を出した！'); say('まだだ…まだ終わらせねェ！ ずっと、ずーっと寝てようぜェ！', 2600, '怠け心'); this.cameras.main.shake(600, .014); this.cameras.main.flash(300, 160, 20, 80); if (B.aura2) B.aura2.setTint(0xff2050); B.atk = 1.2; }
+          if (B.giant && B.hp <= Math.round(B.max / 2) && !B.rage && !s.awake) { B.rage = true; banner('怠け心が本気を出した！'); say('まだだ…まだ終わらせねェ！ ずっと、ずーっと寝てようぜェ！', 2600, '怠け心'); this.cameras.main.shake(600, .014); this.cameras.main.flash(300, 160, 20, 80); if (B.aura2) B.aura2.setTint(0xff2050); B.atk = 1.2; }
           if (B.hp === 20 && !B.giant) { this.bossKujike(); return; }
         }
       }
@@ -1819,6 +1845,7 @@ class Play extends Phaser.Scene {
       B.spr.setTexture(B.hitT > 0 ? 'lz_hit' : B.face > 0 ? 'lz_yawn' : 'lz_idle');
     }
     B.flash = Math.max(0, B.flash - dt);
+    if (this.heroAura) this.heroAura.setPosition(p.x, p.y - 14).setDepth(p.y + 9);
     B.spr.setPosition(B.x, B.y).setDepth(900);
     if (B.aura) { B.aura.setPosition(B.x, B.y + 6); B.aura2.setPosition(B.x, B.y + 6); const k = B.spr.scaleX, bl = Math.sin(this.time.now / 140) > .97;
       for (const e of B.eyes) e.setPosition(B.x + e.dx * k, B.y - 7.6 * k).setScale(e.bs, bl ? .04 : e.bs * .7); }
@@ -1826,7 +1853,7 @@ class Play extends Phaser.Scene {
     this.drawTether();
   }
   defeatBoss() {
-    const s = this.st, B = this.B, p = this.p; s.boss = 'done'; show('bossbar', false); bgmStop(); s.lock = 2.6; s.invuln = 3;
+    const s = this.st, B = this.B, p = this.p; s.boss = 'done'; show('bossbar', false); s.power = false; if (this.heroAura) { const a = this.heroAura; this.heroAura = null; this.tweens.killTweensOf(a); this.tweens.add({ targets: a, alpha: 0, scale: 4, duration: 800, onComplete: () => a.destroy() }); } bgmStop(); s.lock = 2.6; s.invuln = 3;
     for (const e of this.enemies) if (e.noCoin) { e.dead = true; this.burst(e.x, e.y, 5); }
     B.spr.clearTint().setTexture('lz_down');
     if (B.aura) { const fx2 = [B.aura, B.aura2, ...B.eyes]; this.tweens.killTweensOf(fx2); this.tweens.add({ targets: fx2, alpha: 0, duration: 500, onComplete: () => fx2.forEach(o => o.destroy()) }); B.aura = null; }
