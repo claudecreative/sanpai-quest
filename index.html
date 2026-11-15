@@ -1308,7 +1308,10 @@ class Play extends Phaser.Scene {
     if (this.wasAir && !air && !locked) { const wet = p.y > 556 && p.y < 758; puff(this, 'ring', p.x, p.y, { scale: .12, grow: 3, life: .3, tint: wet ? 0xbff4ff : 0xe8d8b0, alpha: .7, depth: p.y }); for (const d of [-1, 1]) puff(this, 'mote', p.x + d * 4, p.y - 1, { scale: .45, vx: d * 22, vy: -6, life: .35, tint: wet ? 0xdffaff : 0xd9c7a0, alpha: .6, depth: p.y }); }
     this.wasAir = air;
     this.dustT = (this.dustT || 0) - dt;
-    if (!air && !locked && (Math.abs(ix) + Math.abs(iy) > .3) && this.dustT <= 0 && !(p.y > 556 && p.y < 758)) { this.dustT = .16; this.stepN = (this.stepN || 0) + 1; if (this.stepN % 2 && !muted) sfx((o, T, N) => N(0, .035, o, 'bandpass', zoneOf(p.y) === 'rock' ? 900 : 1500, 1.5, .05)); puff(this, 'mote', p.x + (Math.random() - .5) * 6, p.y, { scale: .35, grow: 1.2, vy: -5, vx: -ix * 8, life: .4, tint: zoneOf(p.y) === 'rock' ? 0xb8b0d0 : 0xd9c7a0, alpha: .55, depth: p.y - 1 }); }
+    if (!air && !locked && (Math.abs(ix) + Math.abs(iy) > .3) && this.dustT <= 0 && !(p.y > 556 && p.y < 758)) { this.dustT = .16; this.stepN = (this.stepN || 0) + 1; if (this.stepN % 2 && !muted) sfx((o, T, N) => N(0, .035, o, 'bandpass', zoneOf(p.y) === 'rock' ? 900 : 1500, 1.5, .05)); puff(this, 'mote', p.x + (Math.random() - .5) * 6, p.y, { scale: .35, grow: 1.2, vy: -5, vx: -ix * 8, life: .4, tint: zoneOf(p.y) === 'rock' ? 0xb8b0d0 : 0xd9c7a0, alpha: .55, depth: p.y - 1 });
+      if (p.y < 512) { const fp = this.add.rectangle(p.x + (this.stepN % 2 ? 2 : -2), p.y - 1, 2.5, 1.5, 0x5a5078, .45).setDepth(2); this.tweens.add({ targets: fp, alpha: 0, delay: 1400, duration: 900, onComplete: () => fp.destroy() }); } }
+    // 67 white breath in the cold upper trials
+    if (p.y < 512 && !air && (this.breathT = (this.breathT || 0) - dt) <= 0) { this.breathT = 1.6 + Math.random(); puff(this, 'mote', p.x + (this.pSpr.flipX ? -5 : 5), p.y - 22, { scale: .45, grow: 1.6, vy: -6, vx: this.pSpr.flipX ? -6 : 6, life: .8, tint: 0xffffff, alpha: .5, depth: p.y + 20 }); }
     this.ambient(dt); stepParts(this, dt);
     if (s.hp === 1 && (s.boss === 'none' || s.boss === 'done')) { this.beepT = (this.beepT || 0) - dt; if (this.beepT <= 0) { this.beepT = 1.5; sfx((o, T) => { T(0, .07, o, { type: 'square', f: 880, peak: .05 }); T(.12, .07, o, { type: 'square', f: 660, peak: .05 }); }); } }
     // river logs carry
@@ -1398,7 +1401,9 @@ class Play extends Phaser.Scene {
         if (e.dead || o.life <= 0) continue;
         if (Math.hypot(o.x - e.x, o.y - e.y) < e.r + 6) {
           o.life = 0;
-          if (e.pure) { e.dead = true; e.sh && e.sh.destroy(); e.sh = null; this.burst(e.x, e.y, 8); this.poof(e); if (!e.noCoin) { this.hitstop = .05; this.cameras.main.shake(80, .004); } se('祓った！'); this.defeatSnd(e.type); fx('祓！', ...this.scr(e.x, e.y - 8)); if (!e.noCoin) { s.coins++; this.lvCheck(); } }
+          if (e.pure) { e.dead = true; e.sh && e.sh.destroy(); e.sh = null; this.burst(e.x, e.y, 8); this.poof(e); if (!e.noCoin) { this.hitstop = .05; this.cameras.main.shake(80, .004); } se('祓った！'); this.defeatSnd(e.type);
+            if (!e.noCoin) { this.chain = s.t - (this.chainT || -9) < 2.5 ? (this.chain || 1) + 1 : 1; this.chainT = s.t;
+              if (this.chain >= 2) { fx(`${this.chain}れん祓！`, ...this.scr(e.x, e.y - 22), '#ffe070'); sfx((oo, T) => T(.08, .12, oo, { type: 'square', f: hz(['E6', 'G6', 'A6', 'C7', 'D7'][Math.min(4, this.chain - 2)]), peak: .08, rel: .1 })); } } fx('祓！', ...this.scr(e.x, e.y - 8)); if (!e.noCoin) { s.coins++; this.lvCheck(); } }
           else { sfx((oo, T, N, Dr) => Dr('k', 0, oo, 1.4)); fx('カキン', ...this.scr(e.x, e.y - 14), '#cfc6e6'); }
         }
       }
@@ -1486,6 +1491,9 @@ class Play extends Phaser.Scene {
     this.time.delayedCall(2500, () => say('ふぁ〜あ…参拝なんて、明日でいいじゃん…', 2200, '怠け心'));
     this.time.delayedCall(3000, () => B.spr.setTexture('lz_idle'));
     this.time.delayedCall(4500, () => say('きみの中から「怠け心」が出てきたメェ！ お札で祓うんだ！', 3000));
+    if (!this.textures.exists('px')) { const c = document.createElement('canvas'); c.width = c.height = 4; const x = c.getContext('2d'); x.fillStyle = '#fff'; x.fillRect(0, 0, 4, 4); this.textures.addCanvas('px', c); }
+    this.gloom = this.add.image(0, 0, 'px').setOrigin(0).setDisplaySize(GW, GH).setTint(0x1a0830).setAlpha(0).setScrollFactor(0).setDepth(850);
+    this.tweens.add({ targets: this.gloom, alpha: .3, duration: 2000, delay: 1300 });
     this.time.delayedCall(4600, () => { if (s.boss !== 'intro') return; s.boss = 'fight'; bgm('boss'); banner('怠け心を祓え！'); show('bossbar'); $('bossFill').style.width = '100%'; });
   }
   // halfway: the hero answers back, and the ofuda triple
@@ -1578,6 +1586,7 @@ class Play extends Phaser.Scene {
     for (const e of this.enemies) if (e.noCoin) { e.dead = true; this.burst(e.x, e.y, 5); }
     B.spr.clearTint().setTexture('lz_down');
     this.hitstop = .35; buzz([30, 40, 70]); // the final blow lingers for a beat
+    if (this.gloom) this.tweens.add({ targets: this.gloom, alpha: 0, duration: 1600, onComplete: () => { this.gloom.destroy(); this.gloom = null; } });
     this.time.delayedCall(380, () => banner('怠け心を祓った！'));
     this.cameras.main.flash(600, 255, 246, 232); this.cameras.main.shake(500, .01);
     se('祓った！');
