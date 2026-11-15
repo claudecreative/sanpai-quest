@@ -1890,7 +1890,8 @@ class EndCard extends Phaser.Scene {
   constructor() { super('EndCard'); }
   create() { Z(this);
     resetUI(); this.add.image(0, 0, 'end_card').setOrigin(0);
-    { const own = store.get('titles', []); if (!own.includes('約束の見届け人')) { store.set('titles', [...own, '約束の見届け人']); this.time.delayedCall(2200, () => toast('称号「約束の見届け人」を手に入れた！')); } }
+    { const own = store.get('titles', []); if (!own.includes('約束の見届け人')) { store.set('titles', [...own, '約束の見届け人']); this.time.delayedCall(2200, () => toast('称号「約束の見届け人」を手に入れた！')); }
+      else this.time.delayedCall(2200, () => toast(`集めた称号 ${own.length}/${ALL_TITLES}　まだ見ぬ称号をさがそう！`)); }
     for (let i = 0; i < 6; i++) { const b = this.add.image(96, 292, 'beam').setOrigin(.5, 1).setAngle(-75 + i * 30).setScale(1.6, 1.4).setBlendMode('ADD').setAlpha(.12);
       this.tweens.add({ targets: b, angle: b.angle + 12, alpha: .2, duration: 4000, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
     addAmbient(this, .14, () => puff(this, 'mote', Math.random() * GW, 300 + Math.random() * 60, { scale: .3 + Math.random() * .3, add: true, vy: -10 - Math.random() * 8, wob: 5, life: 5, fadeIn: 1, alpha: .8, tint: 0xffe08a }));
