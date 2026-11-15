@@ -1185,6 +1185,8 @@ class Play extends Phaser.Scene {
     if (this.st.zone === z) return; this.st.zone = z; const Z = ZONES[z];
     zoneCard(Z.name); bgm(Z.bgm); ambBed({ bamboo: 'wind', river: 'water', rock: 'gale', stairs: 'wind' }[z]); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動！ 山の上の神社をめざすメェ！' : Z.tip; this.time.delayedCall(z === 'bamboo' ? 900 : 2300, () => say(tip, z === 'bamboo' ? 4200 : 3800));
     this.zoneStart = Z.start;
+    const inner = { river: '……去年のぼくなら、ここで引き返してたかも。', rock: '厄なんて、跳びこえてやる！' }[z];
+    if (inner) this.time.delayedCall(6800, () => { if (this.st.zone === z && $('msg').hidden && this.st.boss === 'none') say(inner, 2600, '主人公'); });
     if (z !== 'bamboo' && z !== 'stairs') this.time.delayedCall(250, () => fx('チェックポイント！', ...this.scr(this.p.x, this.p.y - 44), '#7dff9a'));
   }
   burst(x, y, n = 6) {
@@ -1203,6 +1205,7 @@ class Play extends Phaser.Scene {
     const now = this.time.now; this.combo = now - (this.lastCoin || -9999) < 1200 ? Math.min((this.combo || 0) + 1, 7) : 0; this.lastCoin = now;
     const sc = ['B5', 'D6', 'E6', 'F#6', 'A6', 'B6', 'D7', 'E7'], n = sc[this.combo];
     sfx((o, T) => { T(0, .06, o, { type: 'square', f: hz(n), peak: .13 }); T(.06, .22, o, { type: 'square', f: hz(n) * 1.335, peak: .12, rel: .18 }); });
+    if (this.combo >= 3) this.cheerT = .45;
     if (this.combo >= 2) fx(`${this.combo + 1} れんぞく！`, ...this.scr(this.p.x + 20, this.p.y - 36), '#ffe070');
   }
   // each yokai type has its own little defeat voice, so you can tell them apart by ear
@@ -1449,7 +1452,8 @@ class Play extends Phaser.Scene {
     const nx = this.sx_ + (tx - this.sx_) * Math.min(1, dt * 3.5), ny = this.sy_ + (ty - this.sy_) * Math.min(1, dt * 3.5);
     const dir = nx - this.sx_; if (Math.abs(dir) > .05) this.sheep.setFlipX(dir < 0);
     this.sx_ = nx; this.sy_ = ny;
-    const bob = Math.abs(Math.sin(this.time.now / 160)) * 2;
+    this.cheerT = Math.max(0, (this.cheerT || 0) - dt);
+    const bob = Math.abs(Math.sin(this.time.now / 160)) * 2 + (this.cheerT > 0 ? Math.abs(Math.sin(this.cheerT * 15)) * 7 : 0);
     this.sheep.setPosition(nx, ny - bob).setDepth(ny + 9);
     this.sheepShadow.setPosition(nx, ny).setDepth(ny);
     // camera
@@ -1585,8 +1589,17 @@ class Play extends Phaser.Scene {
       onComplete: () => { B.spr.destroy(); this.tether.clear(); this.B = null; this.burst(p.x, p.y - 16, 10);
         sfx((o, T) => ['D5', 'G5', 'A5', 'D6', 'E6', 'G6', 'A6', 'D7'].forEach((n, i) => T(i * .07, .22, o, { type: 'square', f: hz(n), peak: .12, rel: .15 })));
         s.coins += 5; this.lvCheck(); fx('小判 +5', ...this.scr(p.x, p.y - 40), '#ffd23f');
-        say('……なんだか、体が軽くなった。', 2400, '主人公'); bgm('title');
+        say('……なんだか、体が軽くなった。', 2400, '主人公'); bgm('title'); this.sunrise();
         this.time.delayedCall(2600, () => say('心のモヤモヤが晴れたメェ！ 怠け心も、きみの一部。さあ、参拝へ！', 3400)); } }));
+  }
+  sunrise() {
+    const cx = 96, cy = 40;
+    const sun = this.add.image(cx, cy, 'glow').setTint(0xffc860).setBlendMode('ADD').setScale(.5).setAlpha(0).setDepth(860);
+    this.tweens.add({ targets: sun, alpha: .55, scale: 4, duration: 2600, ease: 'Sine.out' });
+    for (let i = 0; i < 7; i++) { const b = this.add.image(cx, cy, 'beam').setOrigin(.5, 0).setAngle(-54 + i * 18).setScale(1.4, 2.4).setBlendMode('ADD').setAlpha(0).setTint(0xffe0a0).setDepth(861);
+      this.tweens.add({ targets: b, alpha: .16, duration: 2400, delay: 400 + i * 90 });
+      this.tweens.add({ targets: b, angle: b.angle + 6, duration: 5000, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
+    this.time.delayedCall(6200, () => say('見て！ 初日の出だメェ！', 2400));
   }
   autopilot() {
     const p = this.p, s = this.st, cl = (v) => Math.max(-1, Math.min(1, v));
@@ -1609,7 +1622,7 @@ class Play extends Phaser.Scene {
   lvCheck() {
     const lv = 1 + Math.floor(this.st.coins / 5);
     if (lv > this.st.lv) {
-      this.st.lv = lv; const p = this.p; fx('運 Lv.UP！', ...this.scr(p.x, p.y - 40), '#ffd23f');
+      this.st.lv = lv; this.cheerT = .65; const p = this.p; fx('運 Lv.UP！', ...this.scr(p.x, p.y - 40), '#ffd23f');
       sfx((o, T) => ['C6', 'E6', 'G6', 'C7'].forEach((n, i) => T(i * .06, i === 3 ? .3 : .08, o, { type: 'square', f: hz(n), peak: .09, rel: i === 3 ? .25 : .05 })));
       for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; puff(this, 'twinkle', p.x, p.y - 14, { scale: .35, vx: Math.cos(a) * 46, vy: Math.sin(a) * 46 - 10, life: .6, add: true, tint: 0xffd23f, va: 180, depth: 3002 }); }
       const l = $('lv'); l.classList.remove('up'); void l.offsetWidth; l.classList.add('up');
