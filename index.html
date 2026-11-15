@@ -57,6 +57,8 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #bossbar{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);top:calc(var(--u)*36);display:flex;align-items:center;gap:calc(var(--u)*4);font-size:calc(var(--u)*6.5);color:#ff7fa8}
 .bbar{flex:1;height:calc(var(--u)*6);background:var(--ink);border:calc(var(--u)*1) solid var(--paper)}
 #bossFill{height:100%;width:100%;background:linear-gradient(90deg,#9a5cd6,#ff7fa8)}
+#msg{transition:opacity .2s}
+#msg.see{opacity:.42}
 #msg b{display:block;font-weight:400;color:var(--gold);font-size:calc(var(--u)*5.5)}
 
 #controls{position:absolute;inset:0;pointer-events:none}
@@ -140,7 +142,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #storyDate{position:absolute;left:0;right:0;top:calc(var(--u)*150);text-align:center;font-family:var(--display);font-size:calc(var(--u)*16);color:var(--gold);line-height:1.3;animation:fadeIn 1.2s both}
 #storyDate small{display:block;font-family:var(--pixel);font-size:calc(var(--u)*7);color:var(--paper);letter-spacing:.3em}
 /* ---- wish choice ---- */
-#wish{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);top:calc(var(--u)*92);pointer-events:auto;padding:calc(var(--u)*7) calc(var(--u)*7) calc(var(--u)*8);background:rgba(26,15,46,.95);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold);animation:pop2 .35s steps(4) both;text-align:center}
+#wish{position:absolute;left:calc(var(--u)*8);right:calc(var(--u)*8);top:calc(var(--u)*92);pointer-events:auto;padding:calc(var(--u)*7) calc(var(--u)*7) calc(var(--u)*8);background:rgba(26,15,46,.95);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold),0 0 0 100vmax rgba(7,4,26,.45);animation:pop2 .35s steps(4) both;text-align:center}
 .w-q{font-size:calc(var(--u)*7.5);line-height:1.6;margin-bottom:calc(var(--u)*5)}
 .w-q small{display:block;color:var(--gold);font-size:calc(var(--u)*5.5);letter-spacing:.2em}
 #wish button{display:block;width:100%;margin-top:calc(var(--u)*4);padding:calc(var(--u)*4) calc(var(--u)*3);font-family:var(--pixel);font-size:calc(var(--u)*7);color:var(--ink);background:var(--paper);border:calc(var(--u)*1.5) solid var(--ink);box-shadow:0 calc(var(--u)*2) 0 var(--ink);cursor:pointer;text-align:left}
@@ -718,7 +720,7 @@ function fx(text, sx, sy, color) {
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
   $('ui').appendChild(d); setTimeout(() => d.remove(), 1100);
 }
-function resetUI() { ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
+function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
 
 // ---------- run record, wishes, story, share ----------
 const WISHES = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
@@ -1000,6 +1002,18 @@ class Prologue extends Phaser.Scene {
       g.fillStyle(0xcfc6e6); g.fillTriangle(x - 3, 297 - h - 1, x + w / 2, 297 - h - 13, x + w + 3, 297 - h - 1); g.fillStyle(0x0c0820); g.fillTriangle(x, 297 - h, x + w / 2, 297 - h - 10, x + w, 297 - h);
       g.fillStyle(0xffc860); for (let wx = x + 4; wx < x + w - 6; wx += 11) g.fillRect(wx, 297 - h + 6, 6, 6); };
     house(4, 38, 22); house(150, 36, 18);
+    // a snowy road that leads up toward the mountain shrine
+    for (let y = 298; y < 416; y++) { const k = (y - 298) / 118, hw = 8 + k * 44; g.fillStyle(y % 6 < 3 ? 0x2c2250 : 0x281e4a); g.fillRect(96 - hw, y, hw * 2, 1); g.fillStyle(0x5a5080); g.fillRect(96 - hw - 1, y, 1, 1); g.fillRect(96 + hw, y, 1, 1); }
+    g.fillStyle(0x3a3064); for (let i = 0; i < 26; i++) { const y = 300 + (i * 37) % 112, k = (y - 298) / 118, hw = 8 + k * 44; g.fillRect(96 - hw + ((i * 53) % (hw * 2 | 0)), y, 2 + k * 3, 1); }
+    // footprints from where the hero walked in
+    g.fillStyle(0x1a1236); for (let y = 362, i = 0; y < 416; y += 9, i++) g.fillRect(96 + (i % 2 ? 2 : -5), y, 3, 2);
+    // stone lanterns with warm light
+    for (const [lx, ly] of [[46, 334], [146, 334]]) {
+      g.fillStyle(0x0c0820); g.fillRect(lx - 2, ly - 6, 4, 14); g.fillRect(lx - 6, ly + 7, 12, 3); g.fillRect(lx - 5, ly - 14, 10, 8); g.fillTriangle(lx - 8, ly - 14, lx, ly - 20, lx + 8, ly - 14);
+      g.fillStyle(0xcfc6e6); g.fillTriangle(lx - 6, ly - 15, lx, ly - 19, lx + 6, ly - 15); g.fillStyle(0xffc860); g.fillRect(lx - 3, ly - 12, 6, 4);
+      const lg = this.add.image(lx, ly - 10, 'glow').setTint(0xffb040).setBlendMode('ADD').setScale(.9).setAlpha(.55);
+      this.tweens.add({ targets: lg, alpha: .35, duration: 700 + lx * 3, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
+    }
     this.add.image(96, 352, 'shadow').setScale(1.6);
     this.hero = this.add.image(96, 352, 'player_back').setOrigin(.5, 1).setScale(2);
     this.snowT = 0; this.flakes = [];
@@ -1121,9 +1135,9 @@ class Play extends Phaser.Scene {
   }
   enterZone(z) {
     if (this.st.zone === z) return; this.st.zone = z; const Z = ZONES[z];
-    zoneCard(Z.name); bgm(Z.bgm); ambBed({ bamboo: 'wind', river: 'water', rock: 'gale', stairs: 'wind' }[z]); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動！ 山の上の神社をめざすメェ！' : Z.tip; this.time.delayedCall(700, () => say(tip, z === 'bamboo' ? 4200 : 3000));
+    zoneCard(Z.name); bgm(Z.bgm); ambBed({ bamboo: 'wind', river: 'water', rock: 'gale', stairs: 'wind' }[z]); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動！ 山の上の神社をめざすメェ！' : Z.tip; this.time.delayedCall(z === 'bamboo' ? 900 : 2300, () => say(tip, z === 'bamboo' ? 4200 : 3800));
     this.zoneStart = Z.start;
-    if (z !== 'bamboo' && z !== 'stairs') this.time.delayedCall(1500, () => fx('チェックポイント！', ...this.scr(this.p.x, this.p.y - 44), '#7dff9a'));
+    if (z !== 'bamboo' && z !== 'stairs') this.time.delayedCall(250, () => fx('チェックポイント！', ...this.scr(this.p.x, this.p.y - 44), '#7dff9a'));
   }
   burst(x, y, n = 6) {
     ringFx(this, x, y);
@@ -1208,6 +1222,7 @@ class Play extends Phaser.Scene {
     if (s.done) return;
     s.t += dt;
     if (this.hitstop > 0) { this.hitstop -= dt; stepParts(this, dt * .3); return; } // hit-stop: a tiny freeze sells the impact
+    { const top = this.cameras.main.scrollY, see = this.enemies.some(e => !e.dead && e.y - top < 92 && e.y - top > -10); if (see !== this.msgSee) { this.msgSee = see; $('msg').classList.toggle('see', see); } }
     s.invuln = Math.max(0, s.invuln - dt); s.lock = Math.max(0, s.lock - dt); s.cool = Math.max(0, s.cool - dt); s.airCd = Math.max(0, s.airCd - dt);
     // input
     let [ix, iy] = readMove();
@@ -1335,6 +1350,7 @@ class Play extends Phaser.Scene {
     for (const c of this.coinsArr) {
       const cs = c.big ? 2.6 : 1.5; c.s.setScale(cs * Math.abs(Math.cos(this.time.now / 260 + c.x)) + .2, cs); if (c.g) c.g.setAlpha(.35 + Math.sin(this.time.now / 180) * .15);
       if (!c.got && Math.random() < dt * .35) puff(this, 'twinkle', c.x + 3, c.y - 3, { scale: .5, life: .5, add: true, tint: 0xfff3b0, va: 90, depth: c.y + 1 });
+      { const dx = p.x - c.x, dy = p.y - 8 - c.y, d = Math.hypot(dx, dy); if (!c.got && d < 24 && d > 1) { const k = Math.min(1, 70 * dt / d); c.x += dx * k; c.y += dy * k; c.s.setPosition(c.x, c.y); c.g && c.g.setPosition(c.x, c.y); } }
       if (!c.got && Math.hypot(p.x - c.x, p.y - 8 - c.y) < (c.big ? 14 : 11)) { c.got = true; c.s.destroy(); this.coinChime();
         if (c.big) { c.g.destroy(); s.coins += 2; s.big = (s.big || 0) + 1; fx('大判！ +3', ...this.scr(c.x, c.y - 20), '#ffd23f'); ringFx(this, c.x, c.y, 0xffd23f, 1.6); this.once('big', '大判は小判3枚ぶん！ あぶない所にあるけど、そのぶんお得だメェ。', 3200); }
         puff(this, 'twinkle', c.x, c.y, { scale: .3, grow: 2.5, life: .45, add: true, tint: 0xffd23f, va: 240 }); for (let i = 0; i < 4; i++) puff(this, 'mote', c.x, c.y, { scale: .3, vx: (i % 2 ? 1 : -1) * (10 + i * 6), vy: -30 - i * 8, life: .5, add: true, tint: 0xffe070 }); s.coins++; this.lvCheck(); }
