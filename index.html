@@ -220,6 +220,8 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #hearts.low img:first-child{animation:beat .7s ease-in-out infinite}
 @keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.25)}60%{transform:scale(.95)}}
 #lv{text-shadow:0 calc(var(--u)*.8) 0 #7a4a08}
+#lv.up{animation:lvup .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes lvup{0%{transform:scale(1)}30%{transform:scale(1.5);filter:brightness(1.6)}100%{transform:scale(1)}}
 #coins.pop span{animation:cpop .3s ease-out}
 @keyframes cpop{0%{transform:scale(1.5);color:var(--gold)}100%{transform:scale(1)}}
 #coins span{display:inline-block}
@@ -1141,6 +1143,11 @@ class Play extends Phaser.Scene {
     sfx((o, T) => { T(0, .06, o, { type: 'square', f: hz(n), peak: .13 }); T(.06, .22, o, { type: 'square', f: hz(n) * 1.335, peak: .12, rel: .18 }); });
     if (this.combo >= 2) fx(`${this.combo + 1} れんぞく！`, ...this.scr(this.p.x + 20, this.p.y - 36), '#ffe070');
   }
+  // each yokai type has its own little defeat voice, so you can tell them apart by ear
+  defeatSnd(type) {
+    const v = { hitodama: ['A6', 'E7', .05], chochin: ['G4', 'D5', .08], karakasa: ['E5', 'C5', .07], kappa: ['C5', 'G4', .09], yakuiwa: ['D4', 'A3', .1] }[type]; if (!v) return;
+    sfx((o, T) => { T(.03, v[2], o, { type: 'triangle', f: hz(v[0]), peak: .1 }); T(.03 + v[2], v[2] * 1.6, o, { type: 'triangle', f: hz(v[1]), peak: .09, rel: .1 }); });
+  }
   // yokai defeat: a puff of smoke, and a small purified soul floats up
   poof(e) {
     if (e.type === 'sara' || e.type === 'zzz') return;
@@ -1169,16 +1176,22 @@ class Play extends Phaser.Scene {
   hurt(kind) {
     const s = this.st; if (s.invuln > 0 || s.lock > 0 || s.done || window.__autopilot) return;
     if (kind === 'fall' || kind === 'water') {
-      s.lock = .9; s.air = 0;
+      s.lock = .75; s.air = 0;
       this.once(kind, kind === 'water' ? '石の上を「跳」で渡るんだメェ。着地の輪っかが緑ならセーフ！' : '黒い穴は「跳」で飛びこえられるメェ！', 3200, 1000);
       if (kind === 'water') { se('落とし穴'); sfx((o, T, N) => N(0, .35, o, 'lowpass', 900, 1, .5)); fx('ドボン！', ...this.scr(this.p.x, this.p.y - 20), '#7fe8ff'); }
       else { se('落とし穴'); fx('ヒュ〜', ...this.scr(this.p.x, this.p.y - 20), '#fff6e8'); }
-      this.tweens.add({ targets: this.pSpr, scale: 0, angle: 200, duration: 600, onComplete: () => {
-        this.pSpr.setScale(2).setAngle(0); this.p.x = this.lastSafe[0]; this.p.y = this.lastSafe[1]; this.damage(); } });
+      this.tweens.add({ targets: this.pSpr, scale: 0, angle: 200, duration: 480, onComplete: () => {
+        this.pSpr.setAngle(0); this.p.x = this.lastSafe[0]; this.p.y = this.lastSafe[1]; this.damage(); this.respawnFx(); } });
     } else {
       this.once('hit', '妖怪にさわると痛いメェ。「払」のお札で祓おう！', 2800, 600);
       se('ダメージ'); this.cameras.main.shake(160, .012); this.hurtT = .12; ringFx(this, this.p.x, this.p.y - 14, 0xff5a46, .8); this.p.y = Math.min(this.p.y + 16, 1332); this.damage();
     }
+  }
+  // respawn: pop back in on a little ring of light so the retry feels quick and kind
+  respawnFx() {
+    const p = this.p; this.pSpr.setScale(0); this.tweens.add({ targets: this.pSpr, scale: 2, duration: 260, ease: 'Back.easeOut' });
+    ringFx(this, p.x, p.y - 12, 0xfff6e8, 1.1); puff(this, 'twinkle', p.x, p.y - 14, { scale: .3, grow: 2.4, life: .4, add: true, tint: 0xffffff, va: 200, depth: 3002 });
+    sfx((o, T) => { T(0, .05, o, { type: 'square', f: hz('E5'), peak: .07 }); T(.05, .1, o, { type: 'square', f: hz('B5'), peak: .07, rel: .08 }); });
   }
   damage() {
     const v = $('vig'); v.classList.remove('hurt'); void v.offsetWidth; v.classList.add('hurt');
@@ -1187,7 +1200,7 @@ class Play extends Phaser.Scene {
     s.hp--; s.dmg++; s.invuln = 1.5;
     if (s.hp === 1) this.once('low', 'あぶないメェ！ 赤いお守りを見つけたら、体力が戻るよ。', 3000, 900);
     if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3; say('負けないでメェ！体力を回復したよ。', 2400); }
-    else if (s.hp <= 0) { s.hp = 3; this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); }
+    else if (s.hp <= 0) { s.hp = 3; this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); s.invuln = 2; this.respawnFx(); }
     this.updateHud();
   }
   update(_, dms) {
@@ -1310,7 +1323,7 @@ class Play extends Phaser.Scene {
         if (e.dead || o.life <= 0) continue;
         if (Math.hypot(o.x - e.x, o.y - e.y) < e.r + 6) {
           o.life = 0;
-          if (e.pure) { e.dead = true; e.sh && e.sh.destroy(); e.sh = null; this.burst(e.x, e.y, 8); this.poof(e); if (!e.noCoin) { this.hitstop = .05; this.cameras.main.shake(80, .004); } se('祓った！'); fx('祓！', ...this.scr(e.x, e.y - 8)); if (!e.noCoin) { s.coins++; this.lvCheck(); } }
+          if (e.pure) { e.dead = true; e.sh && e.sh.destroy(); e.sh = null; this.burst(e.x, e.y, 8); this.poof(e); if (!e.noCoin) { this.hitstop = .05; this.cameras.main.shake(80, .004); } se('祓った！'); this.defeatSnd(e.type); fx('祓！', ...this.scr(e.x, e.y - 8)); if (!e.noCoin) { s.coins++; this.lvCheck(); } }
           else { sfx((oo, T, N, Dr) => Dr('k', 0, oo, 1.4)); fx('カキン', ...this.scr(e.x, e.y - 14), '#cfc6e6'); }
         }
       }
@@ -1323,7 +1336,7 @@ class Play extends Phaser.Scene {
       const cs = c.big ? 2.6 : 1.5; c.s.setScale(cs * Math.abs(Math.cos(this.time.now / 260 + c.x)) + .2, cs); if (c.g) c.g.setAlpha(.35 + Math.sin(this.time.now / 180) * .15);
       if (!c.got && Math.random() < dt * .35) puff(this, 'twinkle', c.x + 3, c.y - 3, { scale: .5, life: .5, add: true, tint: 0xfff3b0, va: 90, depth: c.y + 1 });
       if (!c.got && Math.hypot(p.x - c.x, p.y - 8 - c.y) < (c.big ? 14 : 11)) { c.got = true; c.s.destroy(); this.coinChime();
-        if (c.big) { c.g.destroy(); s.coins += 2; fx('大判！ +3', ...this.scr(c.x, c.y - 20), '#ffd23f'); ringFx(this, c.x, c.y, 0xffd23f, 1.6); this.once('big', '大判は小判3枚ぶん！ あぶない所にあるけど、そのぶんお得だメェ。', 3200); }
+        if (c.big) { c.g.destroy(); s.coins += 2; s.big = (s.big || 0) + 1; fx('大判！ +3', ...this.scr(c.x, c.y - 20), '#ffd23f'); ringFx(this, c.x, c.y, 0xffd23f, 1.6); this.once('big', '大判は小判3枚ぶん！ あぶない所にあるけど、そのぶんお得だメェ。', 3200); }
         puff(this, 'twinkle', c.x, c.y, { scale: .3, grow: 2.5, life: .45, add: true, tint: 0xffd23f, va: 240 }); for (let i = 0; i < 4; i++) puff(this, 'mote', c.x, c.y, { scale: .3, vx: (i % 2 ? 1 : -1) * (10 + i * 6), vy: -30 - i * 8, life: .5, add: true, tint: 0xffe070 }); s.coins++; this.lvCheck(); }
     }
     this.coinsArr = this.coinsArr.filter(c => !c.got);
@@ -1374,7 +1387,7 @@ class Play extends Phaser.Scene {
     if (p.y <= 136 && !s.done) {
       s.done = true; ambBed(null); show('controls', false); show('touch', false); show('msg', false); bgmStop();
       se('鈴'); const [ex, ey] = this.scr(p.x, p.y - 14);
-      iris(ex, ey, true, 900, () => { this.scene.start('Goal', { coins: s.coins, lv: s.lv, t: s.t, dmg: s.dmg }); setTimeout(() => iris(96, 300, false, 900), 120); });
+      iris(ex, ey, true, 900, () => { this.scene.start('Goal', { coins: s.coins, lv: s.lv, t: s.t, dmg: s.dmg, big: s.big || 0 }); setTimeout(() => iris(96, 300, false, 900), 120); });
     }
   }
   startBoss() {
@@ -1418,6 +1431,22 @@ class Play extends Phaser.Scene {
       banner('気合い！ お札が３まいに！'); say('その意気だメェ！ いっけー！', 2000);
     });
   }
+  // phase 2 special: the boss swells up (warning), then breathes out a ring of Zzz with one gap
+  yawnWave() {
+    const B = this.B, p = this.p; B.wave = true; B.spr.setTexture('lz_yawn');
+    fx('ふぁ〜〜…', ...this.scr(B.x + 30, B.y - 34), '#ff9ad0'); sfx((o, T) => T(0, .7, o, { type: 'triangle', f: 160, f2: 90, peak: .1, rel: .2 }));
+    this.tweens.add({ targets: B.spr, scaleX: B.spr.scaleX * 1.15, scaleY: B.spr.scaleY * 1.15, duration: 320, yoyo: true, repeat: 1 });
+    this.time.delayedCall(750, () => {
+      B.wave = false; if (this.st.boss !== 'fight') return;
+      const mx = B.x, my = B.y + 6, aim = Math.atan2(p.y - 12 - my, p.x - mx), off = (Math.random() < .5 ? -1 : 1) * .45, N = 14;
+      for (let i = 0; i < N; i++) {
+        const a = i / N * Math.PI * 2; let d = Math.atan2(Math.sin(a - aim - off), Math.cos(a - aim - off)); if (Math.abs(d) < .42) continue;
+        this.enemies.push({ type: 'zzz', x: mx, y: my, t: 0, r: 5, pure: true, noCoin: true, vx: Math.cos(a) * 44, vy: Math.sin(a) * 44, s: this.add.image(mx, my, 'zzz').setScale(1.6) });
+      }
+      this.cameras.main.shake(120, .006); sfx((o, T, N2) => N2(0, .4, o, 'lowpass', 600, 1, .4));
+      this.once('wave', 'すきまをさがして、よけるメェ！ お札でも消せるよ。', 2600);
+    });
+  }
   drawTether() {
     const B = this.B, p = this.p, g = this.tether; g.clear(); if (!B || B.tie <= 0) return;
     const x0 = B.x, y0 = B.y + 44, x1 = p.x, y1 = p.y - 16, cx = (x0 + x1) / 2 + Math.sin(this.time.now / 300) * 18, cy = (y0 + y1) / 2;
@@ -1435,6 +1464,7 @@ class Play extends Phaser.Scene {
       B.atk -= dt; B.face = Math.max(0, B.face - dt);
       if (B.atk <= 0) {
         B.n++; B.atk = B.hp > 12 ? 1.6 : 1.15; B.face = .5;
+        if (B.hp <= 12 && B.n % 4 === 2) { this.yawnWave(); B.atk = 2; return; }
         const shots = B.hp > 12 ? [0] : [-.35, 0, .35];
         const mx = B.x - 2, my = B.y + 6, a0 = Math.atan2(p.y - 12 - my, p.x - mx);
         for (const da of shots) {
@@ -1503,7 +1533,14 @@ class Play extends Phaser.Scene {
   }
   lvCheck() {
     const lv = 1 + Math.floor(this.st.coins / 5);
-    if (lv > this.st.lv) { this.st.lv = lv; fx('運 Lv.UP！', ...this.scr(this.p.x, this.p.y - 40), '#ffd23f'); }
+    if (lv > this.st.lv) {
+      this.st.lv = lv; const p = this.p; fx('運 Lv.UP！', ...this.scr(p.x, p.y - 40), '#ffd23f');
+      sfx((o, T) => ['C6', 'E6', 'G6', 'C7'].forEach((n, i) => T(i * .06, i === 3 ? .3 : .08, o, { type: 'square', f: hz(n), peak: .09, rel: i === 3 ? .25 : .05 })));
+      for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2; puff(this, 'twinkle', p.x, p.y - 14, { scale: .35, vx: Math.cos(a) * 46, vy: Math.sin(a) * 46 - 10, life: .6, add: true, tint: 0xffd23f, va: 180, depth: 3002 }); }
+      const l = $('lv'); l.classList.remove('up'); void l.offsetWidth; l.classList.add('up');
+      if (lv === 5) this.once('lv5', '運がどんどん上がってるメェ！ この調子！', 2600, 400);
+      if (lv === 10) this.once('lv10', 'Lv.10！ 神さまも見てくれてるメェ。', 2600, 400);
+    }
   }
 }
 
@@ -1592,6 +1629,7 @@ class Result extends Phaser.Scene {
       requestAnimationFrame(f); };
     const T = [];
     if (data.coins >= COIN_MAX) T.push(['小判コンプリート', 1]); else if (data.coins >= Math.round(COIN_MAX * .75)) T.push(['小判名人', 0]);
+    if (data.big >= 3) T.push(['大判ハンター', 1]);
     if (dmg === 0) T.push(['無傷の参拝者', 1]); else if (dmg <= 2) T.push(['身のこなし上手', 0]);
     if (t <= 100) T.push(['韋駄天', 1]); else if (t <= 150) T.push(['健脚', 0]);
     if (!T.length) T.push(['初もうで達成', 0]);
