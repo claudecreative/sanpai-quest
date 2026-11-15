@@ -186,6 +186,19 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #pauseBtn{pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*5.5);color:var(--paper);background:var(--plum);border:calc(var(--u)*.8) solid var(--mute);padding:calc(var(--u)*1) calc(var(--u)*2.5);cursor:pointer;margin-left:calc(var(--u)*-2)}
 
 /* ---- HD polish (UI) ---- */
+#zcard{position:absolute;left:0;right:0;top:calc(var(--u)*112);height:calc(var(--u)*40);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;animation:zc 2.6s ease-in-out both}
+#zcard::before{content:'';position:absolute;left:-5%;right:-5%;top:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(26,15,46,.88) 18%,rgba(26,15,46,.88) 82%,transparent);border-top:calc(var(--u)*1) solid var(--gold);border-bottom:calc(var(--u)*1) solid var(--gold);transform:skewY(-3deg);animation:zcbar 2.6s ease-in-out both}
+#zcard small{position:relative;font-size:calc(var(--u)*6);letter-spacing:.5em;color:var(--gold)}
+#zcard span{position:relative;font-family:var(--display);font-size:calc(var(--u)*15);color:var(--paper);letter-spacing:.12em;text-shadow:0 calc(var(--u)*1.5) 0 #9c1f1a,0 0 calc(var(--u)*6) rgba(255,210,63,.5)}
+@keyframes zc{0%{opacity:0;transform:translateX(-12%)}15%{opacity:1;transform:none}80%{opacity:1;transform:none}100%{opacity:0;transform:translateX(10%)}}
+@keyframes zcbar{0%{clip-path:inset(0 100% 0 0)}15%{clip-path:inset(0 0 0 0)}85%{clip-path:inset(0 0 0 0)}100%{clip-path:inset(0 0 0 100%)}}
+#bossbar{padding:calc(var(--u)*2) calc(var(--u)*4);background:linear-gradient(180deg,rgba(40,20,64,.9),rgba(20,10,36,.9));border:calc(var(--u)*1) solid #ff7fa8;border-radius:calc(var(--u)*2);box-shadow:0 0 calc(var(--u)*4) rgba(154,92,214,.6);left:calc(var(--u)*6);right:calc(var(--u)*6);font-family:var(--display)}
+.bbar{position:relative;border-radius:calc(var(--u)*2);overflow:hidden;background:#1a0f2e}
+.bbar::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(12.5% - var(--u)*.6),rgba(26,15,46,.9) calc(12.5% - var(--u)*.6) 12.5%);pointer-events:none}
+#bossFill{transition:width .25s cubic-bezier(.2,1.4,.5,1);box-shadow:inset 0 calc(var(--u)*1) 0 rgba(255,255,255,.4)}
+#bossbar.hit{animation:bshake .2s}
+@keyframes bshake{25%{transform:translateX(calc(var(--u)*-2))}75%{transform:translateX(calc(var(--u)*2))}}
+
 #vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 85% 70% at 50% 56%,transparent 58%,rgba(7,4,26,.42) 100%)}
 #vig.hurt{animation:hurt .5s ease-out}
 @keyframes hurt{0%{box-shadow:inset 0 0 calc(var(--u)*36) calc(var(--u)*6) rgba(224,58,46,.85)}100%{box-shadow:inset 0 0 0 0 rgba(224,58,46,0)}}
@@ -237,6 +250,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
       <div class="prog"><span style="color:var(--mute)">入口</span><div class="bar"><div id="progFill"></div><div class="tick" style="left:33%"></div><div class="tick" style="left:66%"></div></div><span style="color:var(--gold)">神社</span></div>
     </div>
     <div id="banner" class="outline" hidden></div>
+    <div id="zcard" hidden><small id="zcNo"></small><span id="zcName"></span></div>
     <div id="controls" hidden>
       <div id="stick"><div id="knob"></div><span id="stickLabel">どこでも<br>ドラッグで移動</span></div>
       <button id="btnHashiru" class="btn" type="button" aria-label="跳ぶ（ジャンプ）">跳</button>
@@ -669,13 +683,14 @@ let msgTimer = 0;
 let SHEEP_ICON = '', BOSS_ICON = '', HERO_ICON = '';
 function say(text, ms = 3200, who = 'ひつじ') { $('msgText').textContent = text; $('msgName').textContent = who; $('msgIcon').src = who === 'ひつじ' ? SHEEP_ICON : who === '主人公' ? HERO_ICON : BOSS_ICON; $('msgName').style.color = who === '怠け心' ? '#ff7fa8' : who === '主人公' ? '#7fe8ff' : ''; show('msg'); clearTimeout(msgTimer); msgTimer = setTimeout(() => show('msg', false), ms); }
 let bannerTimer = 0;
+function zoneCard(name) { const [no, nm] = name.split('　'); $('zcNo').textContent = no; $('zcName').textContent = nm || ''; const z = $('zcard'); z.hidden = true; void z.offsetWidth; z.hidden = false; clearTimeout(zoneCard.t); zoneCard.t = setTimeout(() => z.hidden = true, 2700); }
 function banner(text) { const b = $('banner'); b.hidden = true; b.textContent = text; void b.offsetWidth; b.hidden = false; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.hidden = true, 2200); }
 function fx(text, sx, sy, color) {
   const d = document.createElement('div'); d.className = 'fx outline'; d.textContent = text;
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
   $('ui').appendChild(d); setTimeout(() => d.remove(), 1100);
 }
-function resetUI() { ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
+function resetUI() { ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
 
 // ---------- run record, wishes, story, share ----------
 const WISHES = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
@@ -1065,7 +1080,7 @@ class Play extends Phaser.Scene {
   }
   enterZone(z) {
     if (this.st.zone === z) return; this.st.zone = z; const Z = ZONES[z];
-    banner(Z.name); bgm(Z.bgm); ambBed({ bamboo: 'wind', river: 'water', rock: 'gale', stairs: 'wind' }[z]); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動、Zでお札、Xでジャンプ。神社をめざすメェ！' : Z.tip; this.time.delayedCall(700, () => say(tip, z === 'bamboo' ? 4200 : 3000));
+    zoneCard(Z.name); bgm(Z.bgm); ambBed({ bamboo: 'wind', river: 'water', rock: 'gale', stairs: 'wind' }[z]); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動、Zでお札、Xでジャンプ。神社をめざすメェ！' : Z.tip; this.time.delayedCall(700, () => say(tip, z === 'bamboo' ? 4200 : 3000));
     this.zoneStart = Z.start;
     if (z !== 'bamboo' && z !== 'stairs') this.time.delayedCall(1500, () => fx('チェックポイント！', ...this.scr(this.p.x, this.p.y - 44), '#7dff9a'));
   }
@@ -1379,7 +1394,7 @@ class Play extends Phaser.Scene {
       }
       for (const o of this.ofuda) {
         if (o.life > 0 && Math.abs(o.x - B.x) < 30 && Math.abs(o.y - B.y) < 40) {
-          o.life = 0; B.hp--; B.flash = .12; B.hitT = .35; $('bossFill').style.width = (B.hp / B.max * 100) + '%';
+          o.life = 0; B.hp--; B.flash = .12; B.hitT = .35; $('bossFill').style.width = (B.hp / B.max * 100) + '%'; { const bb = $('bossbar'); bb.classList.remove('hit'); void bb.offsetWidth; bb.classList.add('hit'); }
           sfx((oo, T, N, Dr) => { Dr('k', 0, oo, 1.6); T(0, .12, oo, { type: 'square', f: 300, f2: 120, peak: .14 }); });
           this.burst(o.x, o.y, 4);
           if (B.hp % 4 === 0 && B.hp > 0) fx(['やる気出ない…', 'どうせムリだよ…', 'もう帰ろうよ…'][(B.hp / 4) % 3 | 0], ...this.scr(B.x, B.y - 50), '#ff7fa8');
