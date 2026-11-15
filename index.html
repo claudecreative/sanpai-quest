@@ -370,10 +370,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
     <button id="storySkip" type="button" hidden>スキップ ▶▶</button>
     <div id="wish" hidden role="dialog" aria-label="今年の目標をえらぶ">
       <div class="w-q"><small>神さまに伝えよう</small>2027年、きみは<br>なにをがんばる？</div>
-      <button type="button" data-w="0"><i>1</i>べんきょうをがんばる</button>
-      <button type="button" data-w="1"><i>2</i>スポーツ・習いごと</button>
-      <button type="button" data-w="2"><i>3</i>友だち・家族を大切に</button>
-      <button type="button" data-w="3"><i>4</i>新しいことにチャレンジ</button>
+      <div id="wishBtns"></div>
     </div>
     <div id="pause" hidden role="dialog" aria-label="一時停止"><div>一時停止<div id="pInfo"></div><small>タップ / P キーで再開</small><button id="pTitle" type="button">タイトルへもどる</button></div></div>
     <div id="share" hidden role="dialog" aria-label="シェア">
@@ -793,9 +790,13 @@ function fx(text, sx, sy, color) {
 function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause', 'gTap', 'ema', 'modeLuck'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
 
 // ---------- run record, wishes, story, share ----------
-const WISHES = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
+// 修行 (kids) keeps the school-style goals; 試練 gets goals adults can pick too
+const WISHES_KID = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
+const WISHES_KID_BTN = ['べんきょうをがんばる', 'スポーツ・習いごと', '友だち・家族を大切に', '新しいことにチャレンジ'];
+const WISHES_ADULT = ['新しいことに挑戦する', '毎日すこしずつ続ける', '先のばしをやめる', '大切な人を大事にする', 'からだと心をいたわる'];
+const WL = () => RUN.easy ? WISHES_KID : WISHES_ADULT;
 let COIN_MAX = 57;
-const RUN = { wish: -1, fortune: '', easy: false };
+const RUN = { wish: -1, fortune: '', easy: false }; window.__run = RUN; // test hook
 const HK = () => RUN.easy ? .7 : 1; // 修行モード (やさしい): yokai move and throw more slowly
 const CANON_URL = 'https://claudecreative.github.io/sanpai-quest/';
 const SHARE_URL = ['claudecreative.github.io', 'aimania.tech', 'www.aimania.tech'].includes(location.hostname) ? location.origin + location.pathname.replace(/index\.html$/, '') : CANON_URL;
@@ -829,6 +830,8 @@ function runStory(lines, done) {
   next();
 }
 function showWish(done) {
+  const labels = RUN.easy ? WISHES_KID_BTN : WISHES_ADULT;
+  $('wishBtns').innerHTML = labels.map((t, i) => `<button type="button" data-w="${i}"><i>${i + 1}</i>${t}</button>`).join('');
   show('wish'); const bs = [...document.querySelectorAll('#wish button')];
   const pick = i => { wishKey = null; show('wish', false); bs.forEach(b => b.onclick = null); se('鈴'); done(i); };
   bs.forEach(b => b.onclick = () => pick(+b.dataset.w)); wishKey = pick;
@@ -836,7 +839,7 @@ function showWish(done) {
 }
 function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = true; void el.offsetWidth; el.hidden = false; clearTimeout(toast.tm); toast.tm = setTimeout(() => el.hidden = true, 1800); }
 function shareText(kind) {
-  const w = RUN.wish >= 0 ? WISHES[RUN.wish] : '';
+  const w = RUN.wish >= 0 ? WL()[RUN.wish] : '';
   if (kind === 'end') return `参拝クエストをさいごまでクリア！🐑⛩️\n${w ? `2027年の目標は「${w}」！\n` : ''}ひつじと約束した一年が、はじまる。\n#参拝クエスト`;
   const meta = [RUN.time && `${RUN.easy ? '修行' : '試練'}モード　タイム ${RUN.time}`, RUN.titles && RUN.titles.length && `称号：${RUN.titles.join('・')}`].filter(Boolean).join('\n');
   return `参拝クエストをクリア！⛩️\n2027年の運勢は【${RUN.fortune || '大吉'}】でした✨\n${meta ? meta + '\n' : ''}${w ? `今年の目標は「${w}」！\n` : ''}#参拝クエスト`;
@@ -914,7 +917,7 @@ addEventListener('keydown', e => {
   if (!$('share').hidden) { if (k === 'escape') show('share', false); return; }
   if (!$('pause').hidden) { if (k === 'p' || k === 'escape' || act) { setPause(false); e.preventDefault(); } return; }
   if (!$('title').hidden && (k === 'arrowleft' || k === 'arrowright')) { (k === 'arrowleft' ? $('mShiren') : $('mShugyo')).focus(); return; }
-  if (wishKey && /^[1-4]$/.test(k)) { wishKey(+k - 1); return; }
+  if (wishKey && /^[1-9]$/.test(k) && +k <= WL().length) { wishKey(+k - 1); return; }
   if (storyKey && act && !e.repeat) { e.preventDefault(); storyKey(); return; }
   if (act && !e.repeat && document.activeElement && document.activeElement.tagName === 'BUTTON' && !document.activeElement.hidden && document.activeElement.offsetParent && k !== 'z') return; // native button activation
   if (act && !e.repeat) {
@@ -1333,7 +1336,7 @@ class Play extends Phaser.Scene {
     s.hp--; s.dmg++; s.invuln = 1.5; buzz(40);
     if (s.hp === 1) this.once('low', 'あぶないメェ！ 赤いお守りを見つけたら、体力が戻るよ。', 3000, 900);
     if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3;
-      if (!RUN.easy && this.B && s.boss === 'fight') { const B = this.B; B.hp = Math.min(B.max, B.hp + Math.ceil(B.max / 2)); $('bossFill').style.width = (B.hp / B.max * 100) + '%'; this.retries = this.retries || {}; this.retries.boss = (this.retries.boss || 0) + 1;
+      if (!RUN.easy && this.B && s.boss === 'fight') { const B = this.B; B.hp = Math.min(B.max, B.hp + Math.ceil(B.max / (B.giant ? 8 : 4))); $('bossFill').style.width = (B.hp / B.max * 100) + '%'; this.retries = this.retries || {}; this.retries.boss = (this.retries.boss || 0) + 1;
         say(this.retries.boss >= 2 ? 'くじけそうでも、一歩ずつ。きみなら、できるメェ！' : '怠け心が勢いを取りもどした…！ 体力は回復したよ、もう一回！', 2800); fx('怠け心 回復…', ...this.scr(B.x, B.y - 60), '#ff7fa8'); }
       else say('負けないでメェ！体力を回復したよ。', 2400); }
     else if (s.hp <= 0) { s.hp = 3; this.retries = this.retries || {}; const rz = s.zone, rn = this.retries[rz] = (this.retries[rz] || 0) + 1;
@@ -1455,7 +1458,7 @@ class Play extends Phaser.Scene {
         }
       }
       else if (e.type === 'sara') { e.x += e.vx * dt; e.y += e.vy * dt; e.s.setAngle(e.t * 720); if (Math.random() < dt * 14) puff(this, 'mote', e.x, e.y, { scale: .35, vy: 14, vx: (Math.random() - .5) * 10, life: .4, tint: 0xbff4ff, alpha: .8, depth: e.y + 9 }); e.life -= dt; if (e.life <= 0 || e.x < -10 || e.x > 202) e.dead = true; }
-      else if (e.type === 'zzz') { e.x += e.vx * dt; e.y += e.vy * dt; e.s.setAngle(Math.sin(e.t * 8) * 15); if (e.y > 430) e.dead = true; }
+      else if (e.type === 'zzz') { e.x += e.vx * dt; e.y += e.vy * dt; e.s.setAngle(Math.sin(e.t * 8) * 15); if (e.y > 430 || e.y < -30 || e.x < -24 || e.x > 216 || e.t > 9) e.dead = true; }
       else if (e.type === 'yakuiwa') { e.y += e.vy * dt; e.s.setAngle(e.t * 160);
         if (!e.sh) { e.sh = this.add.image(e.x, e.y, 'shadow').setScale(1.3).setAlpha(.7); e.shy = 14; }
         if (Math.random() < dt * 16) puff(this, 'mote', e.x + (Math.random() - .5) * 20, e.y + 12, { scale: .6, grow: 1.4, vy: -8, vx: (Math.random() - .5) * 16, life: .5, tint: 0xb0a0c8, alpha: .55, depth: e.y - 1 }); if (e.y > 530 || e.y > cam.scrollY + GH + 40) e.dead = true; }
@@ -1550,7 +1553,7 @@ class Play extends Phaser.Scene {
     const s = this.st, p = this.p; s.boss = 'intro'; s.lock = 4.6; bgmStop(); show('msg', false);
     for (const e of this.enemies) if (e.y < 440) e.dead = true;
     this.tether = this.add.graphics().setDepth(880);
-    this.B = { x: 96, y: 140, hp: 30, max: 30, k: 1, giant: false, t: 0, atk: 2.2, n: 0, flash: 0, face: 0, spr: this.add.image(96, 140, 'lz_idle').setScale(2).setAlpha(0).setDepth(900), tie: 0 };
+    this.B = { x: 96, y: 140, hp: 60, max: 60, k: 1, giant: false, t: 0, atk: 2.2, n: 0, flash: 0, face: 0, spr: this.add.image(96, 140, 'lz_idle').setScale(2).setAlpha(0).setDepth(900), tie: 0 };
     const B = this.B;
     fx('ふぁ〜…', ...this.scr(p.x, p.y - 40), '#cfc6e6');
     sfx((o, T) => T(0, 1.4, o, { type: 'triangle', f: 330, f2: 140, peak: .12, rel: .4 }));
@@ -1592,7 +1595,7 @@ class Play extends Phaser.Scene {
       // ...then the mask slips: the sweet voice turns low and the scene goes dark
       say('ケケケ…その怠け心、ぜんぶもらったぜェ……！', 2300, '怠け心'); this.cameras.main.shake(1100, .012); this.cameras.main.flash(400, 90, 20, 120); buzz([60, 40, 120]);
       sfx((o, T2, N2, Dr) => { T2(0, 1.2, o, { type: 'sawtooth', f: 110, f2: 45, peak: .12, rel: .3 }); for (let k = 0; k < 6; k++) Dr('T', k * .16, o, .8); });
-      B.giant = true; B.k = 2; B.max = B.hp = 36; this.tweens.add({ targets: B.spr, scale: 3.6, y: 136, duration: 1000, ease: 'Back.easeOut', onUpdate: () => { B.y = B.spr.y; } });
+      B.giant = true; B.k = 2; B.max = B.hp = RUN.easy ? 56 : 80; this.tweens.add({ targets: B.spr, scale: 3.6, y: 136, duration: 1000, ease: 'Back.easeOut', onUpdate: () => { B.y = B.spr.y; } });
       this.evilLook();
       if (this.gloom) this.tweens.add({ targets: this.gloom, alpha: .62, duration: 900 });
       $('bossFill').style.width = '100%'; { const bb = $('bossbar'); bb.classList.add('giant'); bb.classList.remove('hit'); void bb.offsetWidth; bb.classList.add('hit'); }
@@ -1629,14 +1632,31 @@ class Play extends Phaser.Scene {
     this.tweens.add({ targets: B.spr, scaleX: B.spr.scaleX * 1.15, scaleY: B.spr.scaleY * 1.15, duration: 320, yoyo: true, repeat: 1 });
     this.time.delayedCall(750, () => {
       B.wave = false; if (this.st.boss !== 'fight') return;
-      const mx = B.x, my = B.y + 6, aim = Math.atan2(p.y - 12 - my, p.x - mx), off = (Math.random() < .5 ? -1 : 1) * .45, N = B.giant ? 18 : 14;
+      const mx = B.x, my = B.y + 6, aim = Math.atan2(p.y - 12 - my, p.x - mx), off = (Math.random() < .5 ? -1 : 1) * .45, N = B.giant ? 26 : 14;
       for (let i = 0; i < N; i++) {
-        const a = i / N * Math.PI * 2; let d = Math.atan2(Math.sin(a - aim - off), Math.cos(a - aim - off)); if (Math.abs(d) < (B.giant ? .36 : .42)) continue;
-        this.enemies.push({ type: 'zzz', x: mx, y: my, t: 0, r: 5, pure: true, noCoin: true, vx: Math.cos(a) * 44, vy: Math.sin(a) * 44, s: this.add.image(mx, my, 'zzz').setScale(1.6) });
+        const a = i / N * Math.PI * 2; let d = Math.atan2(Math.sin(a - aim - off), Math.cos(a - aim - off)); if (Math.abs(d) < (B.giant ? .27 : .42)) continue;
+        this.enemies.push({ type: 'zzz', x: mx, y: my, t: 0, r: 5, pure: true, noCoin: true, vx: Math.cos(a) * (B.giant ? 56 : 44) * HK(), vy: Math.sin(a) * (B.giant ? 56 : 44) * HK(), s: this.add.image(mx, my, 'zzz').setScale(1.6) });
       }
       this.cameras.main.shake(120, .006); sfx((o, T, N2) => N2(0, .4, o, 'lowpass', 600, 1, .4));
       this.once('wave', 'すきまをさがして、よけるメェ！ お札でも消せるよ。', 2600);
     });
+  }
+  zzz(x, y, a, v) { this.enemies.push({ type: 'zzz', x, y, t: 0, r: 5, pure: true, noCoin: true, vx: Math.cos(a) * v * HK(), vy: Math.sin(a) * v * HK(), s: this.add.image(x, y, 'zzz').setScale(1.6) }); }
+  // the giant's attack rotation: fans, spirals, rapid bursts, gap rings, a rain of Zzz with homing wisps
+  giantAttack() {
+    const B = this.B, p = this.p, R = B.rage ? 1.18 : 1, mx = B.x - 2, my = B.y + 10, aim = () => Math.atan2(p.y - 12 - my, p.x - mx), D = (ms, f) => this.time.delayedCall(ms, () => { if (this.st.boss === 'fight' && this.B) f(); });
+    const k = B.n % 6; B.atk = (B.rage ? .62 : .85);
+    if (k === 0) { const a0 = aim(); for (let i = -3; i <= 3; i++) this.zzz(mx, my, a0 + i * .2, 100 * R); }
+    else if (k === 1) { const rot = Math.random() * 6; for (let r = 0; r < (B.rage ? 4 : 3); r++) D(r * 170, () => { for (let i = 0; i < 12; i++) this.zzz(B.x, B.y + 10, rot + i / 12 * Math.PI * 2 + r * .18, 66 * R); }); B.atk += .5; }
+    else if (k === 2) { for (let r = 0; r < (B.rage ? 4 : 3); r++) D(r * 130, () => { const a0 = Math.atan2(p.y - 12 - B.y - 10, p.x - B.x); for (const da of [-.36, -.18, 0, .18, .36]) this.zzz(B.x, B.y + 10, a0 + da, 118 * R); }); B.atk += .3; }
+    else if (k === 3) { this.yawnWave(); if (B.rage) D(900, () => this.yawnWave()); B.atk = B.rage ? 2.1 : 1.5; }
+    else if (k === 4) { fx('ザザァ…', ...this.scr(96, 100), '#c080ff');
+      for (let i = 0; i < (B.rage ? 14 : 10); i++) D(i * 90, () => this.zzz(10 + Math.random() * 172, 96, Math.PI / 2 + (Math.random() - .5) * .3, (80 + Math.random() * 30) * R));
+      for (const dx of B.rage ? [-56, 0, 56] : [-46, 46]) {
+        const m = { type: 'hitodama', x: B.x + dx, y: B.y + 30, x0: B.x + dx, y0: B.y + 30, t: 0, r: 8, pure: true, noCoin: true, s: this.add.image(B.x + dx, B.y + 30, 'hitodama').setScale(2).setTint(0xc080ff) };
+        m.glow = this.add.image(m.x, m.y, 'glow').setScale(1.4).setBlendMode('ADD').setTint(0xc080ff); this.enemies.push(m); }
+      B.atk += .6; }
+    else { const a0 = aim(); for (let i = -4; i <= 4; i++) this.zzz(mx, my, a0 + i * .17, 92 * R); if (B.rage) D(260, () => { const a1 = Math.atan2(p.y - 12 - B.y - 10, p.x - B.x); for (let i = -4; i <= 4; i++) this.zzz(B.x, B.y + 10, a1 + i * .17 + .085, 92 * R); }); }
   }
   drawTether() {
     const B = this.B, p = this.p, g = this.tether; g.clear(); if (!B || B.tie <= 0) return;
@@ -1651,31 +1671,30 @@ class Play extends Phaser.Scene {
     if (s.boss === 'fight') {
       B.t += dt;
       B.t += B.giant ? dt * .3 : 0;
-      B.x = 96 + Math.sin(B.t * .8) * (B.giant ? 16 : 48); B.y = (B.giant ? 136 : 140) + Math.sin(B.t * 1.7) * (B.giant ? 6 : 10);
+      B.x = 96 + (B.giant ? Math.sin(B.t * .9) * 46 + Math.sin(B.t * 2.3) * 8 : Math.sin(B.t * .8) * 48); B.y = (B.giant ? 136 : 140) + Math.sin(B.t * 1.7) * (B.giant ? 6 : 10);
       B.atk -= dt; B.face = Math.max(0, B.face - dt);
       if (B.atk <= 0) {
-        B.n++; B.atk = B.giant ? 1.0 : 1.5; B.face = .5;
-        if (B.giant && B.n % 3 === 0) { this.yawnWave(); B.atk = 1.6; return; }
-        const shots = B.giant ? [-.6, -.3, 0, .3, .6] : B.hp <= 25 ? [-.25, .25] : [0];
-        const mx = B.x - 2, my = B.y + 6, a0 = Math.atan2(p.y - 12 - my, p.x - mx);
-        for (const da of shots) {
-          const e = { type: 'zzz', x: mx, y: my, t: 0, r: 5, pure: true, noCoin: true, vx: Math.cos(a0 + da) * (B.giant ? 78 : 62) * HK(), vy: Math.sin(a0 + da) * (B.giant ? 78 : 62) * HK(), s: this.add.image(mx, my, 'zzz').setScale(1.6) };
-          this.enemies.push(e);
+        B.n++; B.face = .5;
+        if (B.giant) { this.giantAttack(); } else {
+          // phase 1: moderate, but long enough to feel like a real fight
+          const mx = B.x - 2, my = B.y + 6, a0 = Math.atan2(p.y - 12 - my, p.x - mx), k = B.n % 4; B.atk = 1.35;
+          if (k === 0) for (const da of [-.3, 0, .3]) this.zzz(mx, my, a0 + da, 66);
+          else if (k === 1) { for (let r = 0; r < 2; r++) this.time.delayedCall(r * 220, () => { if (this.st.boss !== 'fight' || !this.B) return; const a1 = Math.atan2(p.y - 12 - B.y - 6, p.x - B.x); for (const da of [-.16, .16]) this.zzz(B.x, B.y + 6, a1 + da, 76); }); B.atk = 1.5; }
+          else if (k === 2) { this.yawnWave(); B.atk = 1.8; }
+          else { for (const da of [-.12, .12]) this.zzz(mx, my, a0 + da, 70);
+            for (const dx of [-44, 44]) { const m = { type: 'hitodama', x: B.x + dx, y: B.y + 24, x0: B.x + dx, y0: B.y + 24, t: 0, r: 8, pure: true, noCoin: true, s: this.add.image(B.x + dx, B.y + 24, 'hitodama').setScale(2).setTint(0xc080ff) };
+              m.glow = this.add.image(m.x, m.y, 'glow').setScale(1.4).setBlendMode('ADD').setTint(0xc080ff); this.enemies.push(m); } }
         }
         fx((B.giant ? ['明日でいいだろォ？', 'ケケケ…', 'あきらめちまえよ', 'ずっと寝てろ…'] : ['Zzz…', 'めんどい…', 'ダラ〜', 'あと5分…'])[B.n % 4], ...this.scr(B.x + 34, B.y - 30), '#cfc6e6');
-        if (B.giant && B.n % 4 === 1) for (const dx of [-40, 40]) {
-          const m = { type: 'hitodama', x: B.x + dx, y: B.y + 24, x0: B.x + dx, y0: B.y + 24, t: 0, r: 8, pure: true, noCoin: true, s: this.add.image(B.x + dx, B.y + 24, 'hitodama').setScale(2).setTint(0xc080ff) };
-          m.glow = this.add.image(m.x, m.y, 'glow').setScale(1.4).setBlendMode('ADD').setTint(0xc080ff);
-          this.enemies.push(m);
-        }
       }
       for (const o of this.ofuda) {
-        if (o.life > 0 && Math.abs(o.x - B.x) < 30 * B.k * .8 && Math.abs(o.y - B.y) < 40 * B.k * .8) {
+        if (o.life > 0 && (B.giant ? Math.abs(o.x - B.x) < 30 && Math.abs(o.y - B.y) < 60 : Math.abs(o.x - B.x) < 24 && Math.abs(o.y - B.y) < 32)) {
           o.life = 0; B.hp--; B.flash = .12; B.hitT = .35; this.hitstop = .03; $('bossFill').style.width = (B.hp / B.max * 100) + '%'; { const bb = $('bossbar'); bb.classList.remove('hit'); void bb.offsetWidth; bb.classList.add('hit'); }
           sfx((oo, T, N, Dr) => { Dr('k', 0, oo, 1.6); T(0, .12, oo, { type: 'square', f: 300, f2: 120, peak: .14 }); });
           this.burst(o.x, o.y, 4);
           if (B.hp % 4 === 0 && B.hp > 0) fx((B.giant ? ['ぐっ…しぶといヤツ…', 'まだやる気かァ…？', 'やめろ、やめろォ…'] : ['やる気出ない…', 'どうせムリだよ…', 'もう帰ろうよ…'])[(B.hp / 4) % 3 | 0], ...this.scr(B.x, B.y - 50), '#ff7fa8');
           if (B.hp <= 0) { this.defeatBoss(); return; }
+          if (B.giant && B.hp === Math.round(B.max / 2) && !B.rage) { B.rage = true; banner('怠け心が本気を出した！'); say('まだだ…まだ終わらせねェ！ ずっと、ずーっと寝てようぜェ！', 2600, '怠け心'); this.cameras.main.shake(600, .014); this.cameras.main.flash(300, 160, 20, 80); if (B.aura2) B.aura2.setTint(0xff2050); B.atk = 1.2; }
           if (B.hp === 20 && !B.giant) { this.bossKujike(); return; }
         }
       }
@@ -1790,7 +1809,7 @@ class Goal extends Phaser.Scene {
     // hands together: tell the kami this year's goal
     const wishStep = () => { fx('いのる…', 96, 268, '#fff6e8'); showWish(i => {
       RUN.wish = i; fx('願いをこめて', 96, 250, '#ffd23f');
-      { const em = $('ema'); em.innerHTML = `<b>絵馬</b>${rubify(WISHES[i])}`; em.hidden = true; void em.offsetWidth; em.hidden = false; setTimeout(() => em.hidden = true, 2600); }
+      { const em = $('ema'); em.innerHTML = `<b>絵馬</b>${rubify(WL()[i])}`; em.hidden = true; void em.offsetWidth; em.hidden = false; setTimeout(() => em.hidden = true, 2600); }
       const gl = this.add.image(96, 300, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.4);
       this.tweens.add({ targets: gl, y: 150, scale: 3, alpha: 0, duration: 1400, ease: 'Sine.out', onComplete: () => gl.destroy() });
       sfx((o, T2) => ['G5', 'B5', 'D6', 'G6'].forEach((n, k) => T2(k * .12, .5, o, { type: 'triangle', f: hz(n), peak: .08, rel: .4 })));
@@ -1853,7 +1872,7 @@ class Result extends Phaser.Scene {
     RUN.titles = T.map(x => x[0]); RUN.time = fmtTime(t);
     const owned = store.get('titles', []), fresh = T.filter(([n]) => !owned.includes(n)).map(x => x[0]); store.set('titles', [...owned, ...fresh]);
     $('titles').innerHTML = T.map(([n, g]) => `<span class="${g ? 'g' : ''}">${n}${fresh.includes(n) && owned.length ? '<em>NEW</em>' : ''}</span>`).join('');
-    $('wishLine').textContent = RUN.wish >= 0 ? `今年の目標：${WISHES[RUN.wish]}` : '';
+    $('wishLine').textContent = RUN.wish >= 0 ? `今年の目標：${WL()[RUN.wish]}` : '';
     this.time.delayedCall(4300, () => { show('stats'); countUp(); sfx((o, T2) => T2(0, .08, o, { type: 'square', f: hz('A5'), peak: .1 })); });
     this.time.delayedCall(4900, () => { show('titles'); sfx((o, T2) => ['E6', 'A6'].forEach((n, i) => T2(i * .08, .12, o, { type: 'square', f: hz(n), peak: .1 }))); });
     this.time.delayedCall(5500, () => {
@@ -1931,7 +1950,7 @@ class Ending extends Phaser.Scene {
     T(300, () => say('…え？', 1700, '主人公'));
     T(2100, () => say('ぼくは、ここまで。この鳥居の先は、きみの一年だメェ。', 4200));
     const W = RUN.wish >= 0 ? 4200 : 0;
-    if (W) T(6500, () => say(`「${WISHES[RUN.wish]}」――神さまにも、ぼくにも、ちゃんと届いたよ。`, 4000));
+    if (W) T(6500, () => say(`「${WL()[RUN.wish]}」――神さまにも、ぼくにも、ちゃんと届いたよ。`, 4000));
     const T0 = T; T = (ms, f) => T0(ms + (ms >= 6500 ? W : 0), f);
     T(6500, () => {
       this.halo = this.add.image(this.sx, this.sy - 14, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.5).setDepth(this.sy - 2);
@@ -1968,7 +1987,7 @@ class EndCard extends Phaser.Scene {
     const g = this.add.image(38, 286, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(1.2).setAlpha(0);
     const sp = this.add.image(38, 290, 'sheep').setOrigin(.5, 1).setAlpha(0);
     this.tweens.add({ targets: [g, sp], alpha: { from: 0, to: .9 }, duration: 2000, delay: 3500 });
-    $('eWish').textContent = RUN.wish >= 0 ? `2027年、${WISHES[RUN.wish]}！` : ''; $('eWish').hidden = RUN.wish < 0;
+    $('eWish').textContent = RUN.wish >= 0 ? `2027年、${WL()[RUN.wish]}！` : ''; $('eWish').hidden = RUN.wish < 0;
     show('endcard');
     this.time.delayedCall(5200, () => { show('eBtns'); matchMedia('(hover:hover)').matches && $('endShare').focus({ preventScroll: true }); });
     $('endShare').onclick = () => openShare('end');
