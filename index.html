@@ -89,6 +89,9 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #steps div{flex:1;padding:calc(var(--u)*3) 0;text-align:center;font-size:calc(var(--u)*5.5);background:rgba(26,15,46,.8);border:calc(var(--u)*1) solid #8a809e;color:var(--mute)}
 #steps div.on{background:var(--shu);border-color:var(--gold);color:var(--paper);box-shadow:calc(var(--u)*1.5) calc(var(--u)*1.5) 0 var(--ink)}
 #steps div.done{color:var(--gold)}
+#gTap{position:absolute;left:50%;bottom:calc(var(--u)*40);transform:translateX(-50%);white-space:nowrap;padding:calc(var(--u)*3.5) calc(var(--u)*8);font-size:calc(var(--u)*8);color:var(--ink);background:var(--gold);border:calc(var(--u)*1.5) solid var(--ink);border-radius:calc(var(--u)*3);box-shadow:0 calc(var(--u)*2) 0 var(--ink);animation:gtap 1s ease-in-out infinite}
+#gTap::before{content:'▶ '}
+@keyframes gtap{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.07)}}
 
 .fx{position:absolute;transform:translate(-50%,-50%);font-family:var(--display);font-size:calc(var(--u)*9);color:var(--gold);white-space:nowrap;animation:fx 1s ease-out forwards;pointer-events:none}
 @keyframes fx{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-90%)}}
@@ -287,6 +290,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
     </div>
     <div id="msg" hidden><img id="msgIcon" alt=""><div><b id="msgName">ひつじ</b><span id="msgText"></span></div></div>
     <div id="bossbar" hidden><span>怠け心</span><div class="bbar"><div id="bossFill"></div></div></div>
+    <div id="gTap" hidden></div>
     <div id="steps" hidden><div id="st1">① お賽銭</div><div id="st2">② 鈴を鳴らす</div><div id="st3">③ 二礼二拍手一礼</div></div>
     <div id="result" hidden>
       <div class="r-head" id="rHead"></div>
@@ -549,6 +553,7 @@ function drum(tok, t, out, v) {
 function play(i) {
   ensure(); stop(true);
   const tr = TRACKS[i], step = 60 / tr.bpm / tr.spb, out = ctx.createGain(); out.connect(master);
+  out.gain.setValueAtTime(0, ctx.currentTime); out.gain.linearRampToValueAtTime(1, ctx.currentTime + .6);
   cur = { i, tr, step, out, start: ctx.currentTime + .08, next: 0 };
   cur.timer = setInterval(tick, 25); tick(); render();
 }
@@ -572,7 +577,7 @@ function tick() {
 function stop(silent) {
   if (cur) {
     clearInterval(cur.timer);
-    const o = cur.out; o.gain.setTargetAtTime(0, ctx.currentTime, .03); setTimeout(() => o.disconnect(), 400);
+    const o = cur.out; o.gain.cancelScheduledValues(ctx.currentTime); o.gain.setTargetAtTime(0, ctx.currentTime, silent === 'cut' ? .03 : .22); setTimeout(() => o.disconnect(), 1600);
     cur = null; hitQ.forEach(q => q.length = 0);
   }
   if (!silent) render();
@@ -731,7 +736,7 @@ function fx(text, sx, sy, color) {
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
   $('ui').appendChild(d); setTimeout(() => d.remove(), 1100);
 }
-function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
+function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause', 'gTap'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
 
 // ---------- run record, wishes, story, share ----------
 const WISHES = ['べんきょうをがんばる', 'スポーツ・習いごとをがんばる', '友だち・家族を大切にする', '新しいことにチャレンジする'];
@@ -776,7 +781,8 @@ function toast(t) { const el = $('toast'); el.textContent = t; el.hidden = true;
 function shareText(kind) {
   const w = RUN.wish >= 0 ? WISHES[RUN.wish] : '';
   if (kind === 'end') return `参拝クエストをさいごまでクリア！🐑⛩️\n${w ? `2027年の目標は「${w}」！\n` : ''}ひつじと約束した一年が、はじまる。\n#参拝クエスト`;
-  return `参拝クエストをクリア！⛩️\n2027年の運勢は【${RUN.fortune || '大吉'}】でした✨\n${w ? `今年の目標は「${w}」！\n` : ''}#参拝クエスト`;
+  const meta = [RUN.time && `タイム ${RUN.time}`, RUN.titles && RUN.titles.length && `称号：${RUN.titles.join('・')}`].filter(Boolean).join('\n');
+  return `参拝クエストをクリア！⛩️\n2027年の運勢は【${RUN.fortune || '大吉'}】でした✨\n${meta ? meta + '\n' : ''}${w ? `今年の目標は「${w}」！\n` : ''}#参拝クエスト`;
 }
 function openShare(kind) {
   const text = shareText(kind);
@@ -1596,23 +1602,29 @@ class Goal extends Phaser.Scene {
     this.tweens.add({ targets: [sp, ssh], y: 356, duration: 1900, ease: 'Sine.out' });
     const walk = this.time.addEvent({ delay: 150, loop: true, callback: () => pl.setFlipX(!pl.flipX) });
     const T = (ms, f) => this.time.delayedCall(ms, f);
-    T(1900, () => { walk.remove(); pl.setFlipX(false); $('st1').className = 'on';
-      const c = this.add.image(96, 318, 'coin').setScale(2);
-      this.tweens.add({ targets: c, x: 96, duration: 700, ease: 'Linear' });
-      this.tweens.add({ targets: c, y: { from: 318, to: 262 }, duration: 350, ease: 'Sine.out', yoyo: false, onComplete: () => this.tweens.add({ targets: c, y: 236, duration: 350, ease: 'Sine.in', onComplete: () => { c.destroy(); se('小判'); fx('チャリン', 96, 218, '#ffd23f'); } }) });
-    });
-    T(3100, () => { $('st1').className = 'done'; $('st2').className = 'on'; bgm('sanpai');
-      fx('ガランガラン♪', 128, 160, '#ffd23f');
-      for (let i = 0; i < 3; i++) T(i * 380, () => { for (let k = 0; k < 4; k++) { const s = this.add.image(96 + Phaser.Math.Between(-14, 14), 172 + Phaser.Math.Between(-10, 10), 'spark'); this.tweens.add({ targets: s, alpha: 0, scale: 2, duration: 500, onComplete: () => s.destroy() }); } });
-    });
     const bow = (ms, hold = 560) => { T(ms, () => { pl.setTexture('player_bow'); fx('礼', 96, 268, '#fff6e8'); }); T(ms + hold, () => pl.setTexture('player_back')); };
     const clap = (ms, x) => T(ms, () => { sfx((o, T2, N, Dr) => Dr('c', 0, o, 1)); fx('パン！', x, 282, '#fff6e8');
       for (let k = 0; k < 4; k++) { const sp2 = this.add.image(96 + Phaser.Math.Between(-10, 10), 316 + Phaser.Math.Between(-6, 6), 'spark'); this.tweens.add({ targets: sp2, alpha: 0, scale: 1.8, duration: 380, onComplete: () => sp2.destroy() }); } });
-    T(4600, () => { $('st2').className = 'done'; $('st3').className = 'on'; });
-    bow(4700); bow(5800);
-    clap(6900, 66); clap(7500, 126);
+    // the ritual is played, not watched: each step waits for a tap (or goes on by itself after a while)
+    const tap = (label, act, next, wait = 7000) => {
+      const g = $('gTap'); g.textContent = label; g.hidden = false; let done = false;
+      const go = () => { if (done) return; done = true; g.hidden = true; document.removeEventListener('pointerdown', go, true); document.removeEventListener('keydown', key, true); act(); next && next(); };
+      const key = ev => { if (['Space', 'Enter', 'KeyZ', 'KeyJ', 'KeyX', 'KeyK'].includes(ev.code)) { ev.preventDefault(); go(); } };
+      T(250, () => { if (done) return; document.addEventListener('pointerdown', go, true); document.addEventListener('keydown', key, true); });
+      T(window.__autopilot ? 700 : wait, go);
+    };
+    const coinToss = () => { const c = this.add.image(96, 318, 'coin').setScale(2);
+      this.tweens.add({ targets: c, y: { from: 318, to: 262 }, duration: 350, ease: 'Sine.out', onComplete: () => this.tweens.add({ targets: c, y: 236, duration: 350, ease: 'Sine.in', onComplete: () => { c.destroy(); se('小判'); fx('チャリン', 96, 218, '#ffd23f'); } }) }); };
+    const ringBell = () => { bgm('sanpai'); fx('ガランガラン♪', 128, 160, '#ffd23f');
+      for (let i = 0; i < 3; i++) T(i * 380, () => { for (let k = 0; k < 4; k++) { const s = this.add.image(96 + Phaser.Math.Between(-14, 14), 172 + Phaser.Math.Between(-10, 10), 'spark'); this.tweens.add({ targets: s, alpha: 0, scale: 2, duration: 500, onComplete: () => s.destroy() }); } }); };
+    const toWish = () => T(700, () => { $('st3').className = 'on'; wishStep(); });
+    const claps = () => tap('タップで パン！', () => clap(0, 66), () => T(350, () => tap('もう一回 パン！', () => clap(0, 126), toWish)));
+    T(1900, () => { walk.remove(); pl.setFlipX(false); $('st1').className = 'on';
+      tap('タップで お賽銭を入れる', coinToss, () => T(1000, () => { $('st1').className = 'done'; $('st2').className = 'on';
+        tap('タップで 鈴を鳴らす', ringBell, () => T(1500, () => { $('st2').className = 'done'; $('st3').className = 'on';
+          tap('タップで 二礼（2回おじぎ）', () => { bow(0); bow(1100); }, () => T(2000, claps)); })); })); });
     // hands together: tell the kami this year's goal
-    T(8100, () => { fx('いのる…', 96, 268, '#fff6e8'); showWish(i => {
+    const wishStep = () => { fx('いのる…', 96, 268, '#fff6e8'); showWish(i => {
       RUN.wish = i; fx('願いをこめて', 96, 250, '#ffd23f');
       const gl = this.add.image(96, 300, 'glow').setTint(0xffe08a).setBlendMode('ADD').setScale(.4);
       this.tweens.add({ targets: gl, y: 150, scale: 3, alpha: 0, duration: 1400, ease: 'Sine.out', onComplete: () => gl.destroy() });
@@ -1620,7 +1632,7 @@ class Goal extends Phaser.Scene {
       bow(900, 900);
       T(2200, () => { $('st3').className = 'done'; });
       T(2700, () => { this.cameras.main.fadeOut(800, 255, 230, 160); this.cameras.main.once('camerafadeoutcomplete', () => this.scene.start('Result', this.data_)); });
-    }); });
+    }); };
   }
 }
 
@@ -1669,6 +1681,7 @@ class Result extends Phaser.Scene {
     if (dmg === 0) T.push(['無傷の参拝者', 1]); else if (dmg <= 2) T.push(['身のこなし上手', 0]);
     if (t <= 100) T.push(['韋駄天', 1]); else if (t <= 150) T.push(['健脚', 0]);
     if (!T.length) T.push(['初もうで達成', 0]);
+    RUN.titles = T.map(x => x[0]); RUN.time = fmtTime(t);
     $('titles').innerHTML = T.map(([n, g]) => `<span class="${g ? 'g' : ''}">${n}</span>`).join('');
     $('wishLine').textContent = RUN.wish >= 0 ? `今年の目標：${WISHES[RUN.wish]}` : '';
     this.time.delayedCall(4300, () => { show('stats'); countUp(); sfx((o, T2) => T2(0, .08, o, { type: 'square', f: hz('A5'), peak: .1 })); });
