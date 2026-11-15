@@ -210,6 +210,10 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #pause{position:absolute;inset:0;pointer-events:auto;background:rgba(7,4,26,.7);display:grid;place-items:center;font-family:var(--display);font-size:calc(var(--u)*14);color:var(--gold);border:0;cursor:pointer}
 #pInfo{font-family:var(--pixel);font-size:calc(var(--u)*6);color:var(--paper);line-height:1.8;margin-top:calc(var(--u)*6);padding:calc(var(--u)*4) calc(var(--u)*7);background:rgba(26,15,46,.85);border:calc(var(--u)*1) solid rgba(255,210,63,.5);border-radius:calc(var(--u)*2);text-align:left}
 #pInfo b{color:var(--gold);font-weight:400}
+#pause>div{text-align:center}
+#pInfo{display:block;width:fit-content;margin-left:auto;margin-right:auto}
+#pTitle{display:block;margin:calc(var(--u)*8) auto 0;font-family:var(--pixel);font-size:calc(var(--u)*6);color:var(--paper);background:rgba(26,15,46,.9);border:calc(var(--u)*1) solid var(--mute);border-radius:calc(var(--u)*2);padding:calc(var(--u)*2) calc(var(--u)*6);cursor:pointer}
+#pTitle.sure{background:var(--shu);border-color:var(--gold)}
 #pause small{display:block;font-family:var(--pixel);font-size:calc(var(--u)*6.5);color:var(--paper);margin-top:calc(var(--u)*4);text-align:center}
 #pauseBtn{pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*5.5);color:var(--paper);background:var(--plum);border:calc(var(--u)*.8) solid var(--mute);padding:calc(var(--u)*1) calc(var(--u)*2.5);cursor:pointer;margin-left:calc(var(--u)*-2)}
 
@@ -351,7 +355,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
       <button type="button" data-w="2"><i>3</i>友だち・家族を大切に</button>
       <button type="button" data-w="3"><i>4</i>新しいことにチャレンジ</button>
     </div>
-    <button id="pause" type="button" hidden><div>一時停止<div id="pInfo"></div><small>タップ / P キーで再開</small></div></button>
+    <div id="pause" hidden role="dialog" aria-label="一時停止"><div>一時停止<div id="pInfo"></div><small>タップ / P キーで再開</small><button id="pTitle" type="button">タイトルへもどる</button></div></div>
     <div id="share" hidden role="dialog" aria-label="シェア">
       <div class="sh-box">
         <div class="sh-h">シェアする</div>
@@ -834,6 +838,7 @@ function setPause(on) {
   if (on) { if (!curPlay() || sc.st.done || !$('pause').hidden) return; sc.scene.pause();
     { const st = sc.st, kb = $('stage').classList.contains('kb');
       $('pInfo').innerHTML = `いま：<b>${ZONES[st.zone] ? ZONES[st.zone].name.replace('　', ' ') : ''}</b><br>小判：<b>${st.coins}</b> / ${COIN_MAX}　大判：<b>${st.big || 0}</b> / 3<br>` + (kb ? '移動：矢印キー　払：Z　跳：X' : '移動：左下をドラッグ<br>払：赤ボタン　跳：青ボタン'); }
+    $('pTitle').classList.remove('sure'); $('pTitle').textContent = 'タイトルへもどる';
     show('pause'); if (ctx && ctx.state === 'running') ctx.suspend(); }
   else { if ($('pause').hidden) return; show('pause', false); sc.scene.resume(); ensure(); }
 }
@@ -927,6 +932,10 @@ function holdBtn(id, key) {
 holdBtn('btnHarai', 'harai'); holdBtn('btnHashiru', 'hashiru');
 $('pauseBtn').addEventListener('click', () => setPause(true));
 $('pause').addEventListener('click', () => setPause(false));
+// back to title from pause: a second tap confirms, so a stray tap never throws a run away
+$('pTitle').addEventListener('click', ev => { ev.stopPropagation(); const b = $('pTitle');
+  if (!b.classList.contains('sure')) { b.classList.add('sure'); b.textContent = '本当にもどる？（もう一度タップ）'; return; }
+  show('pause', false); ensure(); bgmStop(); ambBed(null); const g = window.__sq.scene; g.stop('Play'); g.start('Title'); });
 const muteLabel = () => { $('mute').textContent = muted ? '音 OFF' : '音 ON'; $('mute').setAttribute('aria-pressed', String(muted)); };
 muted = !!store.get('mute', false); muteLabel();
 $('mute').addEventListener('click', () => { muted = !muted; store.set('mute', muted); ensure(); master.gain.value = muted ? 0 : .55; muteLabel(); });
