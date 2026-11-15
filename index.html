@@ -1637,8 +1637,8 @@ class Play extends Phaser.Scene {
     if (moving) { s.walkT += dt; if (s.walkT > .14) { s.walkT = 0; s.flip = !s.flip; } }
     if (s.lock <= 0 || this.pSpr.scale === 2) {
       const idle = !moving && !air ? Math.sin(this.time.now / 380) * .6 : 0;
-      this.pSpr.setTexture(air ? 'player_back_j' : moving ? (s.flip ? 'player_back_w1' : 'player_back_w2') : 'player_back');
-      this.pSpr.setPosition(p.x, p.y - h + (moving && s.flip ? -1 : 0) + idle).setFlipX(false).setDepth(p.y + 10);
+      this.pSpr.setTexture(this.pose || (air ? 'player_back_j' : moving ? (s.flip ? 'player_back_w1' : 'player_back_w2') : 'player_back'));
+      this.pSpr.setPosition(p.x, p.y - h + (moving && s.flip ? -1 : 0) + idle).setFlipX(false).setDepth(this.pose || this.heroAura ? 2000 : p.y + 10);
       if (this.hurtT > 0) { this.hurtT -= dt; this.pSpr.setTintFill(0xff5a46); if (this.hurtT <= 0) this.pSpr.clearTint(); }
     } else this.pSpr.setPosition(p.x, p.y - 8);
     this.pSpr.setAlpha(s.invuln > 0 && s.lock <= 0 ? (Math.floor(s.invuln * 12) % 2 ? .3 : 1) : 1);
@@ -1758,13 +1758,35 @@ class Play extends Phaser.Scene {
       this.once('wave', 'すきまをさがして、よけるメェ！ お札でも消せるよ。', 2600);
     });
   }
+  // the darkest moment first: a crushing blow, one heart left, the boss swells back to full... then the comeback
+  pinch() {
+    const s = this.st, B = this.B, p = this.p, T = (ms, f) => this.time.delayedCall(ms, f), cam = this.cameras.main; s.boss = 'awake'; s.lock = 9; s.awake = true;
+    for (const e of this.enemies) if (e.noCoin) { e.dead = true; this.burst(e.x, e.y, 4); }
+    for (const o of this.ofuda) o.life = 0;
+    bgmStop(); say('ケケケ……これで、終わりだァ！', 1800, '怠け心'); B.spr.setTexture('lz_yawn');
+    if (this.gloom) this.tweens.add({ targets: this.gloom, alpha: .7, duration: 700 });
+    this.tweens.add({ targets: B.spr, scale: 4.3, duration: 900, ease: 'Sine.in' });
+    sfx((o, T2) => T2(0, 1.1, o, { type: 'sawtooth', f: 70, f2: 140, peak: .1, rel: .2 }));
+    // a wall of Zzz closes in on the hero
+    for (let i = 0; i < 22; i++) { const a = i / 22 * Math.PI * 2, x = p.x + Math.cos(a) * 120, y = p.y - 12 + Math.sin(a) * 120, z = this.add.image(x, y, 'zzz').setScale(1.8).setDepth(3000).setTint(0xc080ff);
+      this.tweens.add({ targets: z, x: p.x, y: p.y - 12, duration: 1000, delay: 200, ease: 'Sine.in', onComplete: () => z.destroy() }); }
+    T(1250, () => { cam.shake(700, .025); cam.flash(250, 120, 20, 60); buzz([80, 40, 160]); const v = $('vig'); v.classList.remove('hurt'); void v.offsetWidth; v.classList.add('hurt');
+      s.hp = 1; this.updateHud(); this.pose = 'player_bow'; this.pSpr.setTint(0x8a84a8); this.burst(p.x, p.y - 14, 14); se('ダメージ');
+      // the boss swells back to full strength
+      B.hp = B.max; $('bossFill').style.width = '100%'; fx('怠け心 全回復…', ...this.scr(B.x, B.y - 50), '#ff7fa8'); B.spr.setTexture('lz_idle');
+      this.time.addEvent({ delay: 800, repeat: 4, callback: () => sfx((o, T2) => { T2(0, .12, o, { type: 'sine', f: 70, peak: .22, rel: .1 }); T2(.18, .12, o, { type: 'sine', f: 60, peak: .16, rel: .1 }); }) }); });
+    T(1900, () => say('……やっぱり、ムリなのかな……。また、去年みたいに……', 2600, '主人公'));
+    T(4600, () => say('……！', 1000));
+    T(5600, () => this.awaken());
+  }
   // the hero's turn: "this year, I'll change!" — full hearts, golden triple ofuda that hit hard
   awaken() {
     const s = this.st, B = this.B, p = this.p, T = (ms, f) => this.time.delayedCall(ms, f); s.boss = 'awake'; s.lock = 3.6; s.awake = true;
     for (const e of this.enemies) if (e.noCoin) { e.dead = true; this.burst(e.x, e.y, 4); }
     for (const o of this.ofuda) o.life = 0;
+    this.pose = null; this.tweens.add({ targets: B.spr, scale: 3.6, duration: 600 }); if (this.gloom) this.tweens.add({ targets: this.gloom, alpha: .35, duration: 500 });
     bgmStop(); this.cameras.main.flash(500, 255, 230, 140); this.cameras.main.shake(400, .01); buzz([40, 30, 80]);
-    say('……今年こそは、変わるんだ！', 2000, '主人公');
+    say('……いやだ。今年こそは、変わるんだ！', 2000, '主人公');
     sfx((o, T2) => ['D4', 'A4', 'D5', 'F#5', 'A5', 'D6'].forEach((n, i) => T2(i * .07, .5, o, { type: 'square', f: hz(n), peak: .1, rel: .3 })));
     this.pSpr.setTint(0xffe08a);
     this.heroAura = this.add.image(p.x, p.y - 14, 'glow').setTint(0xffd23f).setBlendMode('ADD').setScale(.5).setDepth(p.y + 9);
@@ -1815,7 +1837,7 @@ class Play extends Phaser.Scene {
       B.t += B.giant ? dt * .3 : 0;
       B.x = 96 + (B.giant ? Math.sin(B.t * .9) * 46 + Math.sin(B.t * 2.3) * 8 : Math.sin(B.t * .8) * 48); B.y = (B.giant ? 136 : 140) + Math.sin(B.t * 1.7) * (B.giant ? 6 : 10);
       B.atk -= dt; B.face = Math.max(0, B.face - dt);
-      if (B.giant && !s.awake) { B.gt = (B.gt || 0) + dt; if (B.gt > 20 || s.dmg - (B.dmg0 || 0) >= 3) { this.awaken(); return; } }
+      if (B.giant && !s.awake) { B.gt = (B.gt || 0) + dt; if (B.gt > 20 || s.dmg - (B.dmg0 || 0) >= 3) { this.pinch(); return; } }
       if (B.atk <= 0) {
         B.n++; B.face = .5;
         if (B.giant) { this.giantAttack(); } else {
@@ -1845,7 +1867,7 @@ class Play extends Phaser.Scene {
       B.spr.setTexture(B.hitT > 0 ? 'lz_hit' : B.face > 0 ? 'lz_yawn' : 'lz_idle');
     }
     B.flash = Math.max(0, B.flash - dt);
-    if (this.heroAura) this.heroAura.setPosition(p.x, p.y - 14).setDepth(p.y + 9);
+    if (this.heroAura) this.heroAura.setPosition(p.x, p.y - 14).setDepth(1999);
     B.spr.setPosition(B.x, B.y).setDepth(900);
     if (B.aura) { B.aura.setPosition(B.x, B.y + 6); B.aura2.setPosition(B.x, B.y + 6); const k = B.spr.scaleX, bl = Math.sin(this.time.now / 140) > .97;
       for (const e of B.eyes) e.setPosition(B.x + e.dx * k, B.y - 7.6 * k).setScale(e.bs, bl ? .04 : e.bs * .7); }
