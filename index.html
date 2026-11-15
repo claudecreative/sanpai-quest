@@ -1321,8 +1321,11 @@ class Play extends Phaser.Scene {
         e.x = e.x0 + Math.sin(e.t * 1.3) * 20; e.y = e.y0 + Math.sin(e.t * 2.1) * 8;
         const d = Math.hypot(p.x - e.x0, p.y - e.y0); if (d < 110 && d > 4) { e.x0 += (p.x - e.x0) / d * 14 * dt; e.y0 += (p.y - 12 - e.y0) / d * 14 * dt; }
         e.glow.setPosition(e.x, e.y).setAlpha(.6 + Math.sin(e.t * 9) * .25);
-      } else if (e.type === 'chochin') { e.x = e.x0 + Math.sin(e.t * 1.4) * 16; e.s.setAngle(Math.sin(e.t * 2.8) * 6); }
-      else if (e.type === 'karakasa') { e.x += e.dir * 38 * dt; if (e.x < e.a) e.dir = 1; if (e.x > e.b) e.dir = -1; e.s.setFlipX(e.dir < 0); e.hop = -Math.abs(Math.sin(e.t * 6)) * 8; }
+        if (Math.random() < dt * 9) puff(this, 'mote', e.x + (Math.random() - .5) * 4, e.y + 4, { scale: .5, grow: .4, vy: -10, life: .5, add: true, tint: e.noCoin ? 0xc080ff : 0x8fd8ff, alpha: .6, depth: e.y + 9 });
+      } else if (e.type === 'chochin') { e.x = e.x0 + Math.sin(e.t * 1.4) * 16; e.s.setAngle(Math.sin(e.t * 2.8) * 6);
+        if (!e.glow) e.glow = this.add.image(e.x, e.y, 'glow').setTint(0xffa040).setBlendMode('ADD').setScale(1.3);
+        e.glow.setPosition(e.x, e.y + 2).setAlpha(.35 + Math.sin(e.t * 13) * .08 + Math.sin(e.t * 31) * .05).setDepth(e.y + 9); }
+      else if (e.type === 'karakasa') { e.x += e.dir * 38 * dt; if (e.x < e.a) e.dir = 1; if (e.x > e.b) e.dir = -1; e.s.setFlipX(e.dir < 0); const ph = Math.abs(Math.sin(e.t * 6)); if (ph < .12 && (e.lastPh || 1) >= .12) puff(this, 'mote', e.x, e.y + 14, { scale: .5, grow: 1.2, vx: -e.dir * 10, vy: -4, life: .35, tint: 0xe8d8b0, alpha: .6, depth: e.y }); e.lastPh = ph; e.hop = -ph * 8; }
       else if (e.type === 'kappa') {
         if (e === this.enemies.find(k => k.type === 'kappa')) this.kappaCd = (this.kappaCd || 0) - dt;
         e.y = e.y0 + Math.sin(e.t * 2.2) * 2; e.s.setFlipX(p.x < e.x);
@@ -1337,9 +1340,11 @@ class Play extends Phaser.Scene {
           fx('ヒュッ', ...this.scr(e.x, e.y - 22), '#7fe8ff');
         }
       }
-      else if (e.type === 'sara') { e.x += e.vx * dt; e.y += e.vy * dt; e.s.setAngle(e.t * 720); e.life -= dt; if (e.life <= 0 || e.x < -10 || e.x > 202) e.dead = true; }
+      else if (e.type === 'sara') { e.x += e.vx * dt; e.y += e.vy * dt; e.s.setAngle(e.t * 720); if (Math.random() < dt * 14) puff(this, 'mote', e.x, e.y, { scale: .35, vy: 14, vx: (Math.random() - .5) * 10, life: .4, tint: 0xbff4ff, alpha: .8, depth: e.y + 9 }); e.life -= dt; if (e.life <= 0 || e.x < -10 || e.x > 202) e.dead = true; }
       else if (e.type === 'zzz') { e.x += e.vx * dt; e.y += e.vy * dt; e.s.setAngle(Math.sin(e.t * 8) * 15); if (e.y > 430) e.dead = true; }
-      else if (e.type === 'yakuiwa') { e.y += e.vy * dt; e.s.setAngle(e.t * 160); if (e.y > 530 || e.y > cam.scrollY + GH + 40) e.dead = true; }
+      else if (e.type === 'yakuiwa') { e.y += e.vy * dt; e.s.setAngle(e.t * 160);
+        if (!e.sh) { e.sh = this.add.image(e.x, e.y, 'shadow').setScale(1.3).setAlpha(.7); e.shy = 14; }
+        if (Math.random() < dt * 16) puff(this, 'mote', e.x + (Math.random() - .5) * 20, e.y + 12, { scale: .6, grow: 1.4, vy: -8, vx: (Math.random() - .5) * 16, life: .5, tint: 0xb0a0c8, alpha: .55, depth: e.y - 1 }); if (e.y > 530 || e.y > cam.scrollY + GH + 40) e.dead = true; }
       e.s.setPosition(e.x, e.y + (e.hop || 0)).setDepth(e.y + 10);
       if (e.sh) e.sh.setPosition(e.x, e.y + e.shy).setDepth(e.y - 2).setScale((e.type === 'hitodama' ? .9 : 1.3) * (1 + (e.hop || 0) / 40));
       if (!e.dead && Math.hypot(p.x - e.x, p.y - 12 - e.y) < e.r + 7) {
