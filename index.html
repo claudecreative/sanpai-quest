@@ -186,6 +186,11 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #pauseBtn{pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*5.5);color:var(--paper);background:var(--plum);border:calc(var(--u)*.8) solid var(--mute);padding:calc(var(--u)*1) calc(var(--u)*2.5);cursor:pointer;margin-left:calc(var(--u)*-2)}
 
 /* ---- HD polish (UI) ---- */
+#loading{position:absolute;inset:0;display:grid;place-items:center;font-size:16px;color:var(--gold);letter-spacing:.2em;animation:blink 1s steps(2) infinite;pointer-events:none}
+#rotate{position:fixed;left:50%;bottom:8px;transform:translateX(-50%);font-size:13px;color:var(--paper);background:rgba(26,15,46,.85);border:1px solid var(--gold);padding:4px 12px;border-radius:6px;pointer-events:none;z-index:9}
+#rotate b{color:var(--gold);font-weight:400}
+@media (prefers-reduced-motion: reduce){#zcard,#zcard::before,.stamp,#hearts.low img:first-child{animation-duration:.01s!important}}
+
 #stats b{font-weight:400}
 .stamp{position:absolute;right:calc(var(--u)*14);top:calc(var(--u)*176);padding:calc(var(--u)*2) calc(var(--u)*4);font-family:var(--display);font-size:calc(var(--u)*10);color:var(--shu);border:calc(var(--u)*1.5) solid var(--shu);border-radius:calc(var(--u)*2);background:rgba(255,246,232,.85);transform:rotate(-14deg);animation:stamp .35s cubic-bezier(.3,1.8,.5,1) both;pointer-events:none;box-shadow:0 0 0 calc(var(--u)*1) rgba(255,246,232,.85)}
 @keyframes stamp{from{transform:rotate(-14deg) scale(3);opacity:0}to{transform:rotate(-14deg) scale(1);opacity:1}}
@@ -245,6 +250,8 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 
 <div id="stage">
   <div id="game"></div>
+  <div id="loading">よみこみ中…</div>
+  <div id="rotate" hidden>スマホは<b>たて向き</b>がおすすめ</div>
   <div id="ui">
     <div id="vig"></div>
     <div id="touch" hidden></div>
@@ -833,6 +840,11 @@ addEventListener('keydown', e => {
   }
   if ((k === 'p' || k === 'escape') && curPlay()) setPause(true);
 });
+// landscape phone hint
+const rot = () => { $('rotate').hidden = !(matchMedia('(pointer:coarse)').matches && innerWidth > innerHeight * 1.2); };
+addEventListener('resize', rot); rot();
+// reduced motion: no camera shake
+if (matchMedia('(prefers-reduced-motion: reduce)').matches) Phaser.Cameras.Scene2D.Camera.prototype.shake = function () { return this; };
 function setKb(on) { $('stage').classList.toggle('kb', on); $('keyhint').hidden = !on; }
 if (matchMedia('(hover:hover) and (pointer:fine)').matches) setKb(true);
 addEventListener('pointerdown', e => { if (e.pointerType === 'touch') setKb(false); }, true);
@@ -882,6 +894,7 @@ function placeTorii(scene, list) {
 }
 // tiny particle helper shared by scenes: { s, vx, vy, va, life, max, a0, grow }
 function puff(sc, key, x, y, o = {}) {
+  if (sc.parts && sc.parts.length > 160) { const q = sc.parts.shift(); q.s.destroy(); } // keep phones smooth
   const im = sc.add.image(x, y, key).setDepth(o.depth ?? 2900).setScale(o.scale ?? 1).setAlpha(o.alpha ?? 1);
   if (o.tint) im.setTint(o.tint); if (o.add) im.setBlendMode('ADD'); if (o.angle) im.setAngle(o.angle);
   const q = { s: im, vx: o.vx || 0, vy: o.vy || 0, va: o.va || 0, life: o.life || 1, max: o.life || 1, a0: o.alpha ?? 1, sc0: o.scale ?? 1, grow: o.grow || 0, wob: o.wob || 0, t: Math.random() * 6, fadeIn: o.fadeIn || 0 };
@@ -936,6 +949,7 @@ class Boot extends Phaser.Scene {
       this.textures.addCanvas('log' + w, lc);
     }
     document.fonts && document.fonts.load('16px DotGothic16').catch(() => {});
+    const ld = document.getElementById('loading'); ld && ld.remove();
     this.scene.start('Title');
   }
 }
