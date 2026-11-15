@@ -915,8 +915,22 @@ const muteLabel = () => { $('mute').textContent = muted ? '音 OFF' : '音 ON'; 
 muted = !!store.get('mute', false); muteLabel();
 $('mute').addEventListener('click', () => { muted = !muted; store.set('mute', muted); ensure(); master.gain.value = muted ? 0 : .55; muteLabel(); });
 
+const pad = { x: 0, y: 0, h: false, j: false };
+function pollPad() {
+  const gp = navigator.getGamepads ? [...navigator.getGamepads()].find(g => g && g.connected) : null; if (!gp) { pad.x = pad.y = 0; pad.h = false; return; }
+  const b = i => gp.buttons[i] && gp.buttons[i].pressed, dz = v => Math.abs(v) > .25 ? v : 0;
+  pad.x = dz(gp.axes[0] || 0) || (b(15) ? 1 : b(14) ? -1 : 0); pad.y = dz(gp.axes[1] || 0) || (b(13) ? 1 : b(12) ? -1 : 0);
+  const j = b(0); if (j && !pad.j) input.hashiru = true; pad.j = j;
+  const h = b(1) || b(2) || b(7); if (h && !pad.h) input.harai = true; pad.h = h; input.padHeld = h;
+}
+addEventListener('gamepadconnected', () => toast('🎮 コントローラーOK！ 左スティック移動・A 跳・B 払'));
+// Start button toggles pause (polled outside the scene so it also works while paused)
+setInterval(() => { const gp = navigator.getGamepads ? [...navigator.getGamepads()].find(g => g && g.connected) : null; const st = !!(gp && gp.buttons[9] && gp.buttons[9].pressed);
+  if (st && !pad.st && (curPlay() || !$('pause').hidden)) setPause($('pause').hidden); pad.st = st;
+  // outside of play, A works like Enter (title, story, shrine steps, menus)
+  const a = !!(gp && gp.buttons[0] && gp.buttons[0].pressed); if (a && !pad.a && (!curPlay() || !$('pause').hidden)) { const t = { key: 'Enter', code: 'Enter', bubbles: true }; document.dispatchEvent(new KeyboardEvent('keydown', t)); document.dispatchEvent(new KeyboardEvent('keyup', t)); } pad.a = a; }, 80);
 function readMove() {
-  let ix = input.x, iy = input.y;
+  let ix = input.x || pad.x, iy = input.y || pad.y;
   if (keys['arrowleft'] || keys['a']) ix = -1; if (keys['arrowright'] || keys['d']) ix = 1;
   if (keys['arrowup'] || keys['w']) iy = -1; if (keys['arrowdown'] || keys['s']) iy = 1;
   const L = Math.hypot(ix, iy); if (L > 1) { ix /= L; iy /= L; }
@@ -1256,6 +1270,7 @@ class Play extends Phaser.Scene {
   update(_, dms) {
     const dt = Math.min(dms / 1000, .05), s = this.st, p = this.p;
     if (s.done) return;
+    pollPad();
     s.t += dt;
     if (this.hitstop > 0) { this.hitstop -= dt; stepParts(this, dt * .3); return; } // hit-stop: a tiny freeze sells the impact
     { const top = this.cameras.main.scrollY, see = this.enemies.some(e => !e.dead && e.y - top < 92 && e.y - top > -10 && p.y - e.y < 190); if (see !== this.msgSee) { this.msgSee = see; $('msg').classList.toggle('see', see); } }
@@ -1273,7 +1288,7 @@ class Play extends Phaser.Scene {
       if (input.hashiru) s.jbuf = .2; s.jbuf = Math.max(0, (s.jbuf || 0) - dt);
       if (s.jbuf > 0 && s.air <= 0 && s.airCd <= 0) { s.jbuf = 0; s.air = .55; se('跳（ジャンプ）'); }
       // holding 払 (button or Z) keeps throwing
-      const wantHarai = input.harai || input.haraiHeld || keys['z'] || keys['j'];
+      const wantHarai = input.harai || input.haraiHeld || input.padHeld || keys['z'] || keys['j'];
       if (wantHarai && s.cool <= 0 && this.ofuda.length < (s.power ? 9 : 3)) {
         s.cool = input.harai ? .26 : .32; se('払（お札）'); puff(this, 'twinkle', p.x, p.y - 26, { scale: .25, grow: 2, life: .18, add: true, tint: s.power ? 0xffd23f : 0xffffff, depth: 3001 });
         for (const vx of s.power ? [-55, 0, 55] : [0]) {
