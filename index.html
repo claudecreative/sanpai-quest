@@ -752,6 +752,13 @@ D.sprites.kappa = [
   '....KKKKKKK.....',
 ];
 D.sprites.sara = ['.KKKKK.', 'KWwwwWK', 'KwBBBwK', 'KWwwwWK', '.KKKKK.'];
+// walk / jump frames derived from the standing poses (legs only)
+for (const k of ['player_back', 'player_front']) {
+  const r = D.sprites[k], n = r.length;
+  D.sprites[k + '_w1'] = [...r.slice(0, n - 2), '....KKKKKbbK....', '.........KKK....'];
+  D.sprites[k + '_w2'] = [...r.slice(0, n - 2), '....KbbKKKKK....', '....KKK.........'];
+  D.sprites[k + '_j'] = [...r.slice(0, n - 2), '....KKbbbbKK....', '.....KKKKKK.....'];
+}
 // omamori (charm): heals one heart, or gives a one-hit shield when full
 D.sprites.omamori = ['...KK...', '..KYYK..', '.KKKKKK.', 'KRRRRRRK', 'KRYYYYRK', 'KRYRRYRK', 'KRRYYRRK', 'KRRRRRRK', 'KRWWWWRK', 'KRRRRRRK', 'KrrrrrrK', '.KKKKKK.'];
 // icons from the same pixel data
@@ -1084,7 +1091,7 @@ class Play extends Phaser.Scene {
       this.tweens.add({ targets: this.pSpr, scale: 0, angle: 200, duration: 600, onComplete: () => {
         this.pSpr.setScale(2).setAngle(0); this.p.x = this.lastSafe[0]; this.p.y = this.lastSafe[1]; this.damage(); } });
     } else {
-      se('ダメージ'); this.cameras.main.shake(160, .012); this.p.y = Math.min(this.p.y + 16, 1332); this.damage();
+      se('ダメージ'); this.cameras.main.shake(160, .012); this.hurtT = .12; ringFx(this, this.p.x, this.p.y - 14, 0xff5a46, .8); this.p.y = Math.min(this.p.y + 16, 1332); this.damage();
     }
   }
   damage() {
@@ -1242,7 +1249,10 @@ class Play extends Phaser.Scene {
     const moving = !locked && (Math.abs(ix) + Math.abs(iy) > .1);
     if (moving) { s.walkT += dt; if (s.walkT > .14) { s.walkT = 0; s.flip = !s.flip; } }
     if (s.lock <= 0 || this.pSpr.scale === 2) {
-      this.pSpr.setPosition(p.x, p.y - h + (moving && s.flip ? -1 : 0)).setFlipX(s.flip).setDepth(p.y + 10);
+      const idle = !moving && !air ? Math.sin(this.time.now / 380) * .6 : 0;
+      this.pSpr.setTexture(air ? 'player_back_j' : moving ? (s.flip ? 'player_back_w1' : 'player_back_w2') : 'player_back');
+      this.pSpr.setPosition(p.x, p.y - h + (moving && s.flip ? -1 : 0) + idle).setFlipX(false).setDepth(p.y + 10);
+      if (this.hurtT > 0) { this.hurtT -= dt; this.pSpr.setTintFill(0xff5a46); if (this.hurtT <= 0) this.pSpr.clearTint(); }
     } else this.pSpr.setPosition(p.x, p.y - 8);
     this.pSpr.setAlpha(s.invuln > 0 && s.lock <= 0 ? (Math.floor(s.invuln * 12) % 2 ? .3 : 1) : 1);
     this.pShadow.setPosition(p.x, p.y).setScale(air ? 1 : 1.4).setDepth(p.y);
@@ -1525,7 +1535,9 @@ class Ending extends Phaser.Scene {
       this.hx += ix * 56 * dt; this.hy += iy * 56 * dt;
       this.hy = Phaser.Math.Clamp(this.hy, 50, 1100);
       const [b0, b1] = this.hy < 990 ? [62, 130] : [24, 168]; this.hx = Phaser.Math.Clamp(this.hx, b0, b1);
-      if (moving) { this.walkT += dt; if (this.walkT > .16) { this.walkT = 0; this.hero.setFlipX(!this.hero.flipX); } if (Math.abs(iy) > .2) this.hero.setTexture(iy < 0 ? 'player_back' : 'player_front'); }
+      if (Math.abs(iy) > .2) this.face = iy < 0 ? 'player_back' : 'player_front'; this.face = this.face || 'player_front';
+      if (moving) { this.walkT += dt; if (this.walkT > .16) { this.walkT = 0; this.stepF = !this.stepF; } this.hero.setTexture(this.face + (this.stepF ? '_w1' : '_w2')).setFlipX(false); }
+      else this.hero.setTexture(this.face);
       for (const t of this.talks) if (!t.done && this.hy > t.y) { t.done = true; this.queue.push(t); }
       if (this.hy >= 1080) { this.phase = 'farewell'; show('controls', false); show('touch', false); input.x = input.y = 0; this.hero.setFlipX(false);
         this.tweens.add({ targets: this, hx: 96, duration: 500 }); this.queue = []; this.farewell(); }
