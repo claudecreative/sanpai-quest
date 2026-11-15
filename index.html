@@ -59,6 +59,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #bossFill{height:100%;width:100%;background:linear-gradient(90deg,#9a5cd6,#ff7fa8)}
 #msg{transition:opacity .2s}
 #msg.see{opacity:.42}
+rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #msg b{display:block;font-weight:400;color:var(--gold);font-size:calc(var(--u)*5.5)}
 
 #controls{position:absolute;inset:0;pointer-events:none}
@@ -81,6 +82,8 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 .t-start{position:absolute;bottom:calc(var(--u)*134);padding:calc(var(--u)*2) calc(var(--u)*6);background:rgba(26,15,46,.7);font-size:calc(var(--u)*9);letter-spacing:.15em;animation:blink 1s steps(2) infinite}
 .t-note{position:absolute;bottom:calc(var(--u)*6);font-size:calc(var(--u)*5);color:var(--mute)}
 @keyframes blink{50%{opacity:.15}}
+@keyframes tpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(.96)}}
+.t-start{animation:tpulse 1.4s ease-in-out infinite!important;color:var(--gold);border:calc(var(--u)*1) solid rgba(255,210,63,.7);border-radius:calc(var(--u)*2)}
 
 #steps{position:absolute;left:calc(var(--u)*6);right:calc(var(--u)*6);top:calc(var(--u)*7);display:flex;gap:calc(var(--u)*3)}
 #steps div{flex:1;padding:calc(var(--u)*3) 0;text-align:center;font-size:calc(var(--u)*5.5);background:rgba(26,15,46,.8);border:calc(var(--u)*1) solid #8a809e;color:var(--mute)}
@@ -184,6 +187,8 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #stage.kb #stick,#stage.kb .btn{opacity:.45}
 #stage.kb #stickLabel{display:none}
 #pause{position:absolute;inset:0;pointer-events:auto;background:rgba(7,4,26,.7);display:grid;place-items:center;font-family:var(--display);font-size:calc(var(--u)*14);color:var(--gold);border:0;cursor:pointer}
+#pInfo{font-family:var(--pixel);font-size:calc(var(--u)*6);color:var(--paper);line-height:1.8;margin-top:calc(var(--u)*6);padding:calc(var(--u)*4) calc(var(--u)*7);background:rgba(26,15,46,.85);border:calc(var(--u)*1) solid rgba(255,210,63,.5);border-radius:calc(var(--u)*2);text-align:left}
+#pInfo b{color:var(--gold);font-weight:400}
 #pause small{display:block;font-family:var(--pixel);font-size:calc(var(--u)*6.5);color:var(--paper);margin-top:calc(var(--u)*4);text-align:center}
 #pauseBtn{pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*5.5);color:var(--paper);background:var(--plum);border:calc(var(--u)*.8) solid var(--mute);padding:calc(var(--u)*1) calc(var(--u)*2.5);cursor:pointer;margin-left:calc(var(--u)*-2)}
 
@@ -220,6 +225,10 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #hud{background:linear-gradient(180deg,rgba(52,32,86,.96),rgba(22,12,42,.93));border-bottom:calc(var(--u)*1) solid var(--gold);box-shadow:0 calc(var(--u)*1) 0 #9c6a12,0 calc(var(--u)*2.5) calc(var(--u)*3) rgba(0,0,0,.45),inset 0 calc(var(--u)*.8) 0 rgba(255,255,255,.1)}
 #hearts img{filter:drop-shadow(0 calc(var(--u)*.8) 0 rgba(0,0,0,.5))}
 #hearts.low img:first-child{animation:beat .7s ease-in-out infinite}
+#hearts img.lost{animation:hlost .5s steps(5)}
+#hearts img.gain{animation:hgain .5s cubic-bezier(.3,1.8,.5,1)}
+@keyframes hlost{0%{transform:scale(1.5);filter:brightness(3)}25%{transform:translateX(-20%)}50%{transform:translateX(20%)}75%{transform:translateX(-10%)}100%{transform:none}}
+@keyframes hgain{0%{transform:scale(.2)}60%{transform:scale(1.5);filter:brightness(1.8)}100%{transform:scale(1)}}
 @keyframes beat{0%,100%{transform:scale(1)}30%{transform:scale(1.25)}60%{transform:scale(.95)}}
 #lv{text-shadow:0 calc(var(--u)*.8) 0 #7a4a08}
 #lv.up{animation:lvup .6s cubic-bezier(.3,1.6,.5,1)}
@@ -317,7 +326,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
       <button type="button" data-w="2"><i>3</i>友だち・家族を大切に</button>
       <button type="button" data-w="3"><i>4</i>新しいことにチャレンジ</button>
     </div>
-    <button id="pause" type="button" hidden><div>一時停止<small>タップ / P キーで再開</small></div></button>
+    <button id="pause" type="button" hidden><div>一時停止<div id="pInfo"></div><small>タップ / P キーで再開</small></div></button>
     <div id="share" hidden role="dialog" aria-label="シェア">
       <div class="sh-box">
         <div class="sh-h">シェアする</div>
@@ -702,7 +711,7 @@ for (const proto of [Phaser.GameObjects.Image.prototype, Phaser.GameObjects.Spri
 }
 let msgTimer = 0;
 let SHEEP_ICON = '', BOSS_ICON = '', HERO_ICON = '';
-function say(text, ms = 3200, who = 'ひつじ') { $('msgText').textContent = text; $('msgName').textContent = who; $('msgIcon').src = who === 'ひつじ' ? SHEEP_ICON : who === '主人公' ? HERO_ICON : BOSS_ICON; $('msgName').style.color = who === '怠け心' ? '#ff7fa8' : who === '主人公' ? '#7fe8ff' : ''; show('msg'); clearTimeout(msgTimer); msgTimer = setTimeout(() => show('msg', false), ms); }
+function say(text, ms = 3200, who = 'ひつじ') { $('msgText').innerHTML = rubify(text); $('msgName').textContent = who; $('msgIcon').src = who === 'ひつじ' ? SHEEP_ICON : who === '主人公' ? HERO_ICON : BOSS_ICON; $('msgName').style.color = who === '怠け心' ? '#ff7fa8' : who === '主人公' ? '#7fe8ff' : ''; show('msg'); clearTimeout(msgTimer); msgTimer = setTimeout(() => show('msg', false), ms); }
 let bannerTimer = 0;
 // iris wipe centred on a stage point (logical px): close → cb → open
 function iris(x, y, closing, ms, cb) {
@@ -713,8 +722,10 @@ function iris(x, y, closing, ms, cb) {
     if (k < 1) requestAnimationFrame(step); else { if (!closing) w.hidden = true; cb && cb(); } };
   requestAnimationFrame(step);
 }
-function zoneCard(name) { const [no, nm] = name.split('　'); $('zcNo').textContent = no; $('zcName').textContent = nm || ''; const z = $('zcard'); z.hidden = true; void z.offsetWidth; z.hidden = false; clearTimeout(zoneCard.t); zoneCard.t = setTimeout(() => z.hidden = true, 2700); }
-function banner(text) { const b = $('banner'); b.hidden = true; b.textContent = text; void b.offsetWidth; b.hidden = false; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.hidden = true, 2200); }
+function zoneCard(name) { const [no, nm] = name.split('　'); $('zcNo').textContent = no; $('zcName').innerHTML = rubify(nm || ''); const z = $('zcard'); z.hidden = true; void z.offsetWidth; z.hidden = false; clearTimeout(zoneCard.t); zoneCard.t = setTimeout(() => z.hidden = true, 2700); }
+const RUBY = [['御縁川', 'ごえんがわ'], ['怠け心', 'なまけごころ'], ['厄岩', 'やくいわ'], ['竹林', 'ちくりん'], ['試練', 'しれん'], ['石段', 'いしだん'], ['祓', 'はら'], ['干支', 'えと'], ['除夜', 'じょや']];
+const rubify = t => RUBY.reduce((a, [w, r]) => a.split(w).join(`<ruby>${w}<rt>${r}</rt></ruby>`), String(t).replace(/[<&]/g, c => c === '<' ? '&lt;' : '&amp;'));
+function banner(text) { const b = $('banner'); b.hidden = true; b.innerHTML = rubify(text); void b.offsetWidth; b.hidden = false; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.hidden = true, 2200); }
 function fx(text, sx, sy, color) {
   const d = document.createElement('div'); d.className = 'fx outline'; d.textContent = text;
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
@@ -740,7 +751,7 @@ function runStory(lines, done) {
   show('story'); show('storySkip');
   const finish = () => { clearInterval(typing); typing = null; storyKey = null; show('story', false); show('storySkip', false); $('story').onclick = $('storySkip').onclick = null; done && done(); };
   const next = () => {
-    if (typing) { clearInterval(typing); typing = null; txt.textContent = full; $('storyNext').hidden = false; return; }
+    if (typing) { clearInterval(typing); typing = null; txt.innerHTML = rubify(full); $('storyNext').hidden = false; return; }
     if (++i >= lines.length) return finish();
     const L = lines[i], who = L.who || '';
     L.fn && L.fn();
@@ -749,7 +760,7 @@ function runStory(lines, done) {
     if (who) $('storyIcon').src = iconOf(who);
     full = L.t; txt.textContent = ''; $('storyNext').hidden = true; let k = 0;
     typing = setInterval(() => { k++; txt.textContent = full.slice(0, k); if (who && k % 3 === 1) blip(who);
-      if (k >= full.length) { clearInterval(typing); typing = null; $('storyNext').hidden = false; } }, 42);
+      if (k >= full.length) { clearInterval(typing); typing = null; txt.innerHTML = rubify(full); $('storyNext').hidden = false; } }, 42);
   };
   storyKey = next; $('story').onclick = next;
   $('storySkip').onclick = e => { e.stopPropagation(); i = lines.length; finish(); };
@@ -788,7 +799,10 @@ function legacyCopy(t) { const a = document.createElement('textarea'); a.value =
 function curPlay() { const g = window.__sq; return g && g.scene.isActive('Play') ? g.scene.getScene('Play') : null; }
 function setPause(on) {
   const sc = window.__sq && window.__sq.scene.getScene('Play'); if (!sc) return;
-  if (on) { if (!curPlay() || sc.st.done || !$('pause').hidden) return; sc.scene.pause(); show('pause'); if (ctx && ctx.state === 'running') ctx.suspend(); }
+  if (on) { if (!curPlay() || sc.st.done || !$('pause').hidden) return; sc.scene.pause();
+    { const st = sc.st, kb = $('stage').classList.contains('kb');
+      $('pInfo').innerHTML = `いま：<b>${ZONES[st.zone] ? ZONES[st.zone].name.replace('　', ' ') : ''}</b><br>小判：<b>${st.coins}</b> / ${COIN_MAX}　大判：<b>${st.big || 0}</b> / 3<br>` + (kb ? '移動：矢印キー　払：Z　跳：X' : '移動：左下をドラッグ<br>払：赤ボタン　跳：青ボタン'); }
+    show('pause'); if (ctx && ctx.state === 'running') ctx.suspend(); }
   else { if ($('pause').hidden) return; show('pause', false); sc.scene.resume(); ensure(); }
 }
 
@@ -1127,8 +1141,9 @@ class Play extends Phaser.Scene {
     this.cameras.main.fadeIn(400, 7, 4, 26);
   }
   updateHud() {
-    const s = this.st; $('hearts').innerHTML = '';
-    for (let i = 0; i < 3; i++) { const im = document.createElement('img'); im.src = i < s.hp ? HEART : HEART_E; im.alt = i === 0 ? `体力 ${s.hp}/3` : ''; $('hearts').appendChild(im); }
+    const s = this.st, prev = this.prevHp ?? s.hp; this.prevHp = s.hp; $('hearts').innerHTML = '';
+    for (let i = 0; i < 3; i++) { const im = document.createElement('img'); im.src = i < s.hp ? HEART : HEART_E; im.alt = i === 0 ? `体力 ${s.hp}/3` : '';
+      if (s.hp < prev && i >= s.hp && i < prev) im.className = 'lost'; if (s.hp > prev && i < s.hp && i >= prev) im.className = 'gain'; $('hearts').appendChild(im); }
     $('hearts').classList.toggle('low', s.hp === 1);
     $('lv').textContent = '運 Lv.' + s.lv; const cn = '×' + String(s.coins).padStart(2, '0'); if ($('coinNum').textContent !== cn) { $('coinNum').textContent = cn; const c = $('coins'); c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); }
     $('progFill').style.width = Math.max(0, Math.min(100, (1314 - this.p.y) / (1314 - 136) * 100)) + '%';
@@ -1222,7 +1237,7 @@ class Play extends Phaser.Scene {
     if (s.done) return;
     s.t += dt;
     if (this.hitstop > 0) { this.hitstop -= dt; stepParts(this, dt * .3); return; } // hit-stop: a tiny freeze sells the impact
-    { const top = this.cameras.main.scrollY, see = this.enemies.some(e => !e.dead && e.y - top < 92 && e.y - top > -10); if (see !== this.msgSee) { this.msgSee = see; $('msg').classList.toggle('see', see); } }
+    { const top = this.cameras.main.scrollY, see = this.enemies.some(e => !e.dead && e.y - top < 92 && e.y - top > -10 && p.y - e.y < 190); if (see !== this.msgSee) { this.msgSee = see; $('msg').classList.toggle('see', see); } }
     s.invuln = Math.max(0, s.invuln - dt); s.lock = Math.max(0, s.lock - dt); s.cool = Math.max(0, s.cool - dt); s.airCd = Math.max(0, s.airCd - dt);
     // input
     let [ix, iy] = readMove();
