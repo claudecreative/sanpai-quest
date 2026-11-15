@@ -209,6 +209,14 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #endcard .r-btns{flex-wrap:wrap;row-gap:calc(var(--u)*5)}
 #endcard .cta.gold{flex-basis:100%}
 /* ---- share sheet ---- */
+#wall{position:absolute;inset:0;pointer-events:auto;background:rgba(7,4,26,.85);display:grid;place-items:center;z-index:6}
+.wl-box{width:calc(var(--u)*170);box-sizing:border-box;padding:calc(var(--u)*7);background:var(--ink);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold);text-align:center;color:var(--paper)}
+.wl-pic{position:relative;width:calc(var(--u)*120);aspect-ratio:1170/2532;margin:calc(var(--u)*5) auto;background:#2a1f3d;border:calc(var(--u)*1) solid var(--paper)}
+.wl-pic img{display:block;width:100%;height:100%;object-fit:cover;-webkit-touch-callout:default;user-select:auto;pointer-events:auto}
+#wallBusy{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--pixel);font-size:calc(var(--u)*6)}
+#wallSave{width:100%;flex:none}
+.wl-note{margin-top:calc(var(--u)*3);font-family:var(--pixel);font-size:calc(var(--u)*5);opacity:.8}
+#endWall{flex-basis:100%;animation:recpulse 1.6s ease-in-out infinite}
 #share{position:absolute;inset:0;pointer-events:auto;background:rgba(7,4,26,.8);display:grid;place-items:center;z-index:5}
 .sh-box{width:calc(var(--u)*170);box-sizing:border-box;padding:calc(var(--u)*8) calc(var(--u)*8) calc(var(--u)*9);background:var(--ink);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold);animation:pop2 .3s steps(3) both;display:flex;flex-direction:column;gap:calc(var(--u)*4)}
 .sh-h{font-family:var(--display);font-size:calc(var(--u)*10);color:var(--gold);text-align:center}
@@ -358,6 +366,7 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
       <div class="e-msg">あなたの一年を、<br>心から応援しています。</div>
       <div class="e-foot">参拝クエスト ─ おしまい</div>
       <div class="r-btns" id="eBtns" hidden>
+        <button class="cta red" id="endWall" type="button">🎁 クリア特典　大大吉カレンダー壁紙</button>
         <button class="cta gold" id="endShare" type="button">この一年の決意をシェアする</button>
         <button class="cta red" id="endAgain" type="button">もう一度あそぶ</button>
         <button class="cta white" id="endTitle" type="button">タイトルへ</button>
@@ -383,6 +392,15 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
         <button class="sh-btn copy" id="shCopy" type="button"><svg viewBox="0 0 24 24"><path d="M8 3h11v13h-3v-2h1V5h-7v1H8zM4 8h11v13H4zm2 2v9h7v-9z"/></svg>URL をコピー</button>
         <div class="sh-url" id="shUrl"></div>
         <button class="sh-close" id="shClose" type="button">とじる</button>
+      </div>
+    </div>
+    <div id="wall" hidden role="dialog" aria-label="壁紙カレンダー">
+      <div class="wl-box">
+        <div class="sh-h">クリア特典　2027年1月 大大吉カレンダー</div>
+        <div class="wl-pic"><img id="wallImg" alt="2027年1月 大大吉カレンダーの壁紙"><span id="wallBusy">つくっています…</span></div>
+        <button class="cta red" id="wallSave" type="button">スマホに保存する</button>
+        <div class="wl-note">保存できないときは、画像を長押しして保存してね。</div>
+        <button class="sh-close" id="wallClose" type="button">とじる</button>
       </div>
     </div>
     <div id="toast" hidden></div>
@@ -802,7 +820,7 @@ function fx(text, sx, sy, color) {
   d.style.left = (sx / GW * 100) + '%'; d.style.top = (sy / GH * 100) + '%'; if (color) d.style.color = color;
   $('ui').appendChild(d); setTimeout(() => d.remove(), 1100);
 }
-function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'pause', 'gTap', 'ema', 'modeLuck'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
+function resetUI() { $('msg').classList.remove('see'); ['hud', 'controls', 'touch', 'msg', 'banner', 'steps', 'bossbar', 'zcard', 'result', 'title', 'gate', 'endcard', 'eBtns', 'slip', 'best', 'stats', 'titles', 'wishLine', 'hint', 'rBtns', 'story', 'storySkip', 'storyDate', 'wish', 'share', 'wall', 'pause', 'gTap', 'ema', 'modeLuck'].forEach(id => show(id, false)); storyKey = null; wishKey = null; }
 
 // ---------- run record, wishes, story, share ----------
 // 修行 (kids) keeps the school-style goals; 試練 gets goals adults can pick too
@@ -858,6 +876,64 @@ function shareText(kind) {
   if (kind === 'end') return `参拝クエストをさいごまでクリア！🐑⛩️\n${w ? `2027年の目標は「${w}」！\n` : ''}ひつじと約束した一年が、はじまる。\n#参拝クエスト`;
   const meta = [RUN.time && `${RUN.easy ? '修行' : '試練'}モード　タイム ${RUN.time}`, RUN.titles && RUN.titles.length && `称号：${RUN.titles.join('・')}`].filter(Boolean).join('\n');
   return `参拝クエストをクリア！⛩️\n2027年の運勢は【${RUN.fortune || '大吉'}】でした✨\n${meta ? meta + '\n' : ''}${w ? `今年の目標は「${w}」！\n` : ''}#参拝クエスト`;
+}
+const FEST_ART = {
+      shishi: ['..KKKK..................', '.KRRRRK.................', 'KRYRRYRK.KKKKKKKKKKK....', 'KRkRRkRKKEEWEEEEWEEEK...', 'KRRRRRRKEEEEEWEEEEEWEK..', 'KWkWkWkKEWEEEEEEWEEEEEK.', 'KRRRRRRKEEEEWEEEEEEWEEK.', '.KWWWWKKEEEEEEEWEEEEEEK.', '..KKKK.KeeeeeeeeeeeeeK..', '........KbbK.....KbbK...', '........KbbK.....KbbK...', '........KKK......KKK....'],
+      kite: ['....KK....', '...KRRK...', '..KRWWRK..', '.KRWYYWRK.', 'KRWYRRYWRK', '.KRWYYWRK.', '..KRWWRK..', '...KRRK...', '....KK....', '....y.....', '.....y....', '....y.....', '.....y....', '....y.....'],
+      kite2: ['....KK....', '...KBBK...', '..KBWWBK..', '.KBWPPWBK.', 'KBWPBBPWBK', '.KBWPPWBK.', '..KBWWBK..', '...KBBK...', '....KK....', '....P.....', '.....P....', '....P.....', '.....P....', '....P.....'],
+      yatai: ['KKKKKKKKKKKKKKKKKKKKKKKKKKKK', 'KRRRWWWRRRWWWRRRWWWRRRWWWRRK', 'KRRRWWWRRRWWWRRRWWWRRRWWWRRK', 'KKRRKWWKRRKWWKRRKWWKRRKWWKKK', '.KN.KbbbbbbbbbbbbbbbbbbK.NK.', '.KN.KbbWWbbbbbbbbbbWWbbK.NK.', '.KN.KbbbbbbbbbbbbbbbbbbK.NK.', '.KN..KbKbKbKbKbKbKbKbK...NK.', '.KN......................NK.', '.KN......................NK.', '.KNKKKKKKKKKKKKKKKKKKKKKKNK.', 'KnnnnOYnnOYnnPPnnOYnnPPnnnnK', 'KnnnnnnnnnnnnnnnnnnnnnnnnnnK', 'KNNNNNNNNNNNNNNNNNNNNNNNNNNK', '.KN......................NK.', '.KN......................NK.', '.KKK....................KKK.'],
+      lantern: ['.KKK.', 'KRRRK', 'KRYRK', 'KRRRK', 'KRYRK', 'KRRRK', '.KKK.'],
+      omamo: ['..KKK..', '.KYYYK.', 'KRRRRRK', 'KRYYYRK', 'KRYRYRK', 'KRYYYRK', 'KRRRRRK', 'KRRRRRK', '.KKKKK.'],
+};
+
+// ---------- clear reward: 2027 January 大大吉 calendar wallpaper (phone size) ----------
+async function makeWallpaper() {
+  const W = 1170, H = 2532, k = W / 192, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  try { await Promise.all(['900 80px "Dela Gothic One"', '40px "DotGothic16"'].map(f => document.fonts.load(f, '大吉2027'))); } catch (e) {}
+  const img = await new Promise((ok, ng) => { const i = new Image(); i.onload = () => ok(i); i.onerror = ng; i.src = D.end_card; });
+  g.imageSmoothingEnabled = false; g.drawImage(img, 0, 0, W, 416 * k);
+  const ink = '#1a0f2e', paper = '#fff6e8', gold = '#ffd23f', shu = '#e03a2e';
+  const DG = 'Dela Gothic One, DotGothic16, sans-serif', PX = 'DotGothic16, sans-serif';
+  const txt = (t, x, y, size, col, font = DG, align = 'center', stroke = 0, sc = ink) => { g.font = `${size}px ${font}`; g.textAlign = align; g.textBaseline = 'middle';
+    if (stroke) { g.lineJoin = 'round'; g.lineWidth = stroke; g.strokeStyle = sc; g.strokeText(t, x, y); } g.fillStyle = col; g.fillText(t, x, y); };
+  const spr = (rows, x, y, s, flip) => { const cv = spriteCanvas(rows, 1); g.save(); g.translate(x, y); if (flip) g.scale(-1, 1); g.drawImage(cv, -cv.width * s / 2, -cv.height * s, cv.width * s, cv.height * s); g.restore(); };
+  // kites in the sky, clear of the lock-screen clock
+  spr(FEST_ART.kite, 150, 860, 9); spr(FEST_ART.kite2, W - 150, 800, 9);
+  // calendar panel
+  const px = 70, py = 880, pw = W - 140, ph = 720;
+  g.fillStyle = 'rgba(26,15,46,.35)'; g.fillRect(px + 14, py + 18, pw, ph);
+  g.fillStyle = 'rgba(255,246,232,.95)'; g.fillRect(px, py, pw, ph);
+  g.lineWidth = 10; g.strokeStyle = ink; g.strokeRect(px, py, pw, ph); g.lineWidth = 4; g.strokeStyle = gold; g.strokeRect(px + 16, py + 16, pw - 32, ph - 32);
+  txt('2027', px + 70, py + 82, 54, shu, DG, 'left');
+  txt('1月', px + 290, py + 80, 92, ink, DG, 'left'); txt('睦月', px + 480, py + 92, 36, '#5a4f75', PX, 'left');
+  // 大大吉 omikuji badge
+  { const bw = 300, bh = 112, bx = px + pw - bw - 40, by = py + 28; g.fillStyle = shu; g.fillRect(bx, by, bw, bh); g.lineWidth = 8; g.strokeStyle = ink; g.strokeRect(bx, by, bw, bh);
+    g.lineWidth = 4; g.strokeStyle = gold; g.strokeRect(bx + 10, by + 10, bw - 20, bh - 20); txt('大大吉', bx + bw / 2, by + bh / 2 + 4, 72, '#fff6e8', DG, 'center', 10, '#9c1f1a'); }
+  // grid: Jan 1, 2027 is a Friday
+  const days = ['日', '月', '火', '水', '木', '金', '土'], gx = px + 50, gw = pw - 100, cw = gw / 7, gy = py + 190, rh = 68, red = new Set([1, 11]);
+  days.forEach((d, i) => txt(d, gx + cw * (i + .5), gy, 38, i === 0 ? shu : i === 6 ? '#2f6fe0' : ink, PX));
+  g.fillStyle = ink; g.fillRect(gx, gy + 30, gw, 4);
+  for (let d = 1; d <= 31; d++) { const idx = 5 + d - 1, col = idx % 7, row = Math.floor(idx / 7), cx = gx + cw * (col + .5), cy = gy + 80 + row * rh;
+    if (d === 1) { g.fillStyle = gold; g.beginPath(); g.arc(cx, cy, 34, 0, Math.PI * 2); g.fill(); g.lineWidth = 4; g.strokeStyle = shu; g.stroke(); }
+    txt(String(d), cx, cy, 44, col === 0 || red.has(d) ? shu : col === 6 ? '#2f6fe0' : ink, PX); }
+  txt('1日 元日　11日 成人の日', px + pw / 2, py + ph - 44, 30, '#5a4f75', PX);
+  // the goal you chose, and the two of you walking toward the first sunrise
+  const wish = RUN.wish >= 0 ? WL()[RUN.wish] : '';
+  if (wish) txt(`今年の目標：${wish}`, W / 2, 1680, 44, '#fff6e8', PX, 'center', 12);
+  spr(D.sprites.player_back, W / 2 - 70, 2240, 11); spr(D.sprites.sheep, W / 2 + 90, 2250, 11);
+  txt('ひつじと歩く、最高の一年に。', W / 2, 2330, 46, '#fff6e8', PX, 'center', 12, '#1f5a2a');
+  txt('参拝クエスト', W / 2, 2420, 32, gold, DG, 'center', 8);
+  return c;
+}
+async function openWallpaper() {
+  show('wall'); $('wallImg').removeAttribute('src'); $('wallBusy').textContent = 'つくっています…'; $('wallBusy').hidden = false;
+  try { const c = await makeWallpaper(); const blob = await new Promise(r => c.toBlob(r, 'image/png'));
+    const url = URL.createObjectURL(blob); $('wallImg').src = url; $('wallBusy').hidden = true;
+    const name = 'sanpai-quest-2027-01-daidaikichi.png', file = new File([blob], name, { type: 'image/png' });
+    $('wallSave').onclick = async () => {
+      if (navigator.canShare && matchMedia('(pointer:coarse)').matches && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file] }); return; } catch (e) { if (e.name === 'AbortError') return; } }
+      const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); toast('壁紙を保存しました！'); };
+  } catch (e) { $('wallBusy').textContent = 'うまく作れませんでした。もう一度おためしください。'; }
 }
 function openShare(kind) {
   const text = shareText(kind);
@@ -1066,15 +1142,7 @@ class Boot extends Phaser.Scene {
     [['B', 'N', 'D'], ['P', 'H', 'b'], ['E', 'G', 'N'], ['O', 'N', 'b'], ['V', 'H', 'D'], ['Y', 'G', 'e']].forEach(([cl, hr, pt], i) => {
       addHD(this, 'vil' + i, hdCanvas(swap(D.sprites.player_front, { R: cl, H: hr, b: pt })), HDK);
       addHD(this, 'vilw' + i, hdCanvas(swap(D.sprites.player_wave, { R: cl, H: hr, b: pt })), HDK); });
-    const ART = {
-      shishi: ['..KKKK..................', '.KRRRRK.................', 'KRYRRYRK.KKKKKKKKKKK....', 'KRkRRkRKKEEWEEEEWEEEK...', 'KRRRRRRKEEEEEWEEEEEWEK..', 'KWkWkWkKEWEEEEEEWEEEEEK.', 'KRRRRRRKEEEEWEEEEEEWEEK.', '.KWWWWKKEEEEEEEWEEEEEEK.', '..KKKK.KeeeeeeeeeeeeeK..', '........KbbK.....KbbK...', '........KbbK.....KbbK...', '........KKK......KKK....'],
-      kite: ['....KK....', '...KRRK...', '..KRWWRK..', '.KRWYYWRK.', 'KRWYRRYWRK', '.KRWYYWRK.', '..KRWWRK..', '...KRRK...', '....KK....', '....y.....', '.....y....', '....y.....', '.....y....', '....y.....'],
-      kite2: ['....KK....', '...KBBK...', '..KBWWBK..', '.KBWPPWBK.', 'KBWPBBPWBK', '.KBWPPWBK.', '..KBWWBK..', '...KBBK...', '....KK....', '....P.....', '.....P....', '....P.....', '.....P....', '....P.....'],
-      yatai: ['KKKKKKKKKKKKKKKKKKKKKKKKKKKK', 'KRRRWWWRRRWWWRRRWWWRRRWWWRRK', 'KRRRWWWRRRWWWRRRWWWRRRWWWRRK', 'KKRRKWWKRRKWWKRRKWWKRRKWWKKK', '.KN.KbbbbbbbbbbbbbbbbbbK.NK.', '.KN.KbbWWbbbbbbbbbbWWbbK.NK.', '.KN.KbbbbbbbbbbbbbbbbbbK.NK.', '.KN..KbKbKbKbKbKbKbKbK...NK.', '.KN......................NK.', '.KN......................NK.', '.KNKKKKKKKKKKKKKKKKKKKKKKNK.', 'KnnnnOYnnOYnnPPnnOYnnPPnnnnK', 'KnnnnnnnnnnnnnnnnnnnnnnnnnnK', 'KNNNNNNNNNNNNNNNNNNNNNNNNNNK', '.KN......................NK.', '.KN......................NK.', '.KKK....................KKK.'],
-      lantern: ['.KKK.', 'KRRRK', 'KRYRK', 'KRRRK', 'KRYRK', 'KRRRK', '.KKK.'],
-      omamo: ['..KKK..', '.KYYYK.', 'KRRRRRK', 'KRYYYRK', 'KRYRYRK', 'KRYYYRK', 'KRRRRRK', 'KRRRRRK', '.KKKKK.'],
-    };
-    for (const [k, rows] of Object.entries(ART)) addHD(this, k, hdCanvas(rows), HDK);
+    for (const [k, rows] of Object.entries(FEST_ART)) addHD(this, k, hdCanvas(rows), HDK);
     const g = this.make.graphics({ x: 0, y: 0, add: false });
     { const c = document.createElement('canvas'); c.width = 64; c.height = 24; const x = c.getContext('2d'); const rg = x.createRadialGradient(32, 12, 2, 32, 12, 32);
       rg.addColorStop(0, 'rgba(20,8,40,.62)'); rg.addColorStop(.7, 'rgba(20,8,40,.38)'); rg.addColorStop(1, 'rgba(20,8,40,0)'); x.setTransform(1, 0, 0, .375, 0, 7.5); x.fillStyle = rg; x.beginPath(); x.arc(32, 12, 32, 0, 7); x.fill(); addHD(this, 'shadow', c, 4); }
@@ -2175,6 +2243,7 @@ class EndCard extends Phaser.Scene {
     show('endcard');
     this.time.delayedCall(5200, () => { show('eBtns'); matchMedia('(hover:hover)').matches && $('endShare').focus({ preventScroll: true }); });
     $('endShare').onclick = () => openShare('end');
+    $('endWall').onclick = () => openWallpaper(); $('wallClose').onclick = () => show('wall', false);
     $('endAgain').onclick = () => { bgmStop(); this.scene.start('Play'); };
     $('endTitle').onclick = () => { bgmStop(); this.scene.start('Title'); };
   }
