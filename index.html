@@ -752,6 +752,8 @@ D.sprites.kappa = [
   '....KKKKKKK.....',
 ];
 D.sprites.sara = ['.KKKKK.', 'KWwwwWK', 'KwBBBwK', 'KWwwwWK', '.KKKKK.'];
+// omamori (charm): heals one heart, or gives a one-hit shield when full
+D.sprites.omamori = ['...KK...', '..KYYK..', '.KKKKKK.', 'KRRRRRRK', 'KRYYYYRK', 'KRYRRYRK', 'KRRYYRRK', 'KRRRRRRK', 'KRWWWWRK', 'KRRRRRRK', 'KrrrrrrK', '.KKKKKK.'];
 // icons from the same pixel data
 $('coinIcon').src = hdCanvas(D.sprites.coin).toDataURL();
 SHEEP_ICON = hdCanvas(D.sprites.sheep).toDataURL(); HERO_ICON = hdCanvas(D.sprites.player_front).toDataURL(); BOSS_ICON = D.lz_idle;
@@ -1029,6 +1031,8 @@ class Play extends Phaser.Scene {
       this.tweens.add({ targets: sg, alpha: .4, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
     for (let i = 0; i < 4; i++) { const m = this.add.image(Math.random() * GW, 590 + i * 45, 'mote').setScale(8, 2.2).setTint(0xdffaff).setAlpha(.1).setDepth(2950);
       this.tweens.add({ targets: m, x: m.x + 50, alpha: .18, duration: 5000 + i * 900, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
+    this.charms = [[96, 790], [96, 532]].map(([x, y]) => ({ x, y, s: this.add.image(x, y, 'omamori').setScale(1.6).setDepth(y), g: this.add.image(x, y - 2, 'glow').setTint(0xff9a8a).setBlendMode('ADD').setScale(1.1).setAlpha(.5).setDepth(y - 1) }));
+    this.marker = this.add.image(0, 0, 'ring').setScale(.18, .1).setAlpha(0).setDepth(700);
     this.updateHud(); this.enterZone('bamboo');
     this.cameras.main.fadeIn(400, 7, 4, 26);
   }
@@ -1043,6 +1047,7 @@ class Play extends Phaser.Scene {
     if (this.st.zone === z) return; this.st.zone = z; const Z = ZONES[z];
     banner(Z.name); bgm(Z.bgm); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動、Zでお札、Xでジャンプ。神社をめざすメェ！' : Z.tip; this.time.delayedCall(700, () => say(tip, z === 'bamboo' ? 4200 : 3000));
     this.zoneStart = Z.start;
+    if (z !== 'bamboo' && z !== 'stairs') this.time.delayedCall(1500, () => fx('チェックポイント！', ...this.scr(this.p.x, this.p.y - 44), '#7dff9a'));
   }
   burst(x, y, n = 6) {
     ringFx(this, x, y);
@@ -1084,9 +1089,11 @@ class Play extends Phaser.Scene {
   }
   damage() {
     const v = $('vig'); v.classList.remove('hurt'); void v.offsetWidth; v.classList.add('hurt');
-    const s = this.st; s.hp--; s.dmg++; s.invuln = 1.5;
+    const s = this.st;
+    if (s.shield) { s.shield = false; s.invuln = 1.5; this.shieldFx && this.shieldFx.destroy(); this.shieldFx = null; ringFx(this, this.p.x, this.p.y - 14, 0xff9a8a, 1.4); fx('お守りが守ってくれた！', ...this.scr(this.p.x, this.p.y - 40), '#ff9a8a'); return; }
+    s.hp--; s.dmg++; s.invuln = 1.5;
     if (s.hp <= 0 && (s.boss === 'fight' || s.boss === 'intro' || s.boss === 'mid')) { s.hp = 3; say('負けないでメェ！体力を回復したよ。', 2400); }
-    else if (s.hp <= 0) { s.hp = 3; this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！体力を回復したよ。', 2600); }
+    else if (s.hp <= 0) { s.hp = 3; this.p.x = this.zoneStart[0]; this.p.y = this.zoneStart[1]; this.lastSafe = [...this.zoneStart]; say('まだまだメェ！この試練のはじめから、もう一回！', 2600); this.cameras.main.flash(300, 255, 246, 232); }
     this.updateHud();
   }
   update(_, dms) {
@@ -1214,6 +1221,23 @@ class Play extends Phaser.Scene {
         puff(this, 'twinkle', c.x, c.y, { scale: .3, grow: 2.5, life: .45, add: true, tint: 0xffd23f, va: 240 }); for (let i = 0; i < 4; i++) puff(this, 'mote', c.x, c.y, { scale: .3, vx: (i % 2 ? 1 : -1) * (10 + i * 6), vy: -30 - i * 8, life: .5, add: true, tint: 0xffe070 }); s.coins++; se('小判'); this.lvCheck(); }
     }
     this.coinsArr = this.coinsArr.filter(c => !c.got);
+    // charms
+    for (const c of this.charms) {
+      if (c.got) continue; const bob = Math.sin(this.time.now / 300 + c.y) * 2; c.s.setY(c.y + bob); c.g.setY(c.y - 2 + bob).setAlpha(.4 + Math.sin(this.time.now / 200) * .15);
+      if (Math.hypot(p.x - c.x, p.y - 8 - c.y) < 12) { c.got = true; c.s.destroy(); c.g.destroy(); ringFx(this, c.x, c.y, 0xff9a8a, 1.3);
+        sfx((o, T) => ['E5', 'A5', 'C#6', 'E6'].forEach((n, i) => T(i * .07, .25, o, { type: 'triangle', f: hz(n), peak: .12, rel: .2 })));
+        if (s.hp < 3) { s.hp++; fx('体力 +1', ...this.scr(p.x, p.y - 40), '#ff7fa8'); }
+        else if (!s.shield) { s.shield = true; fx('お守りバリア！', ...this.scr(p.x, p.y - 40), '#ff9a8a'); this.shieldFx = this.add.image(p.x, p.y - 14, 'glow').setTint(0xff9a8a).setBlendMode('ADD').setScale(1.6).setAlpha(.45); }
+        this.updateHud(); }
+    }
+    if (this.shieldFx) this.shieldFx.setPosition(p.x, p.y - 14 - h).setDepth(p.y + 11).setAlpha(.35 + Math.sin(this.time.now / 150) * .12);
+    // landing guide over the river while airborne
+    if (air && p.y > 556 && p.y < 760) {
+      const lx = p.x + ix * 70 * 1.3 * s.air, ly = p.y + iy * 70 * 1.3 * s.air;
+      const safe = D.stones.some(([cx, cy, sw = 18, sh = 10]) => ((lx - cx) / (sw / 2 + 4)) ** 2 + ((ly - cy) / (sh / 2 + 7)) ** 2 < 1)
+        || this.lanes.some(l => Math.abs(ly - l.y) < 7 && l.logs.some(lg => Math.abs(lx - lg.x - l.v * s.air) < l.w / 2 - 1)) || ly <= 563 || ly >= 750;
+      this.marker.setPosition(lx, ly).setAlpha(.85).setTint(safe ? 0x7dff9a : 0xff6a5a);
+    } else this.marker.setAlpha(0);
     // draw player
     const moving = !locked && (Math.abs(ix) + Math.abs(iy) > .1);
     if (moving) { s.walkT += dt; if (s.walkT > .14) { s.walkT = 0; s.flip = !s.flip; } }
