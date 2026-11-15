@@ -159,9 +159,11 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #stats div{background:rgba(26,15,46,.82);border:calc(var(--u)*1) solid rgba(255,246,232,.5);padding:calc(var(--u)*2) 0;text-align:center;font-size:calc(var(--u)*5);color:var(--mute);line-height:1.35}
 #stats div span{display:block;font-size:calc(var(--u)*8);color:var(--paper);font-variant-numeric:tabular-nums}
 #stats div.new span{color:var(--gold)}
+#stats div.big{grid-column:1/-1;color:var(--gold);font-size:calc(var(--u)*5.5);padding:calc(var(--u)*1) 0;letter-spacing:.1em}
 #titles{margin-top:calc(var(--u)*3);display:flex;flex-wrap:wrap;justify-content:center;gap:calc(var(--u)*2);max-width:calc(var(--u)*176)}
 #titles span{font-size:calc(var(--u)*5.5);padding:calc(var(--u)*1) calc(var(--u)*3.5);background:var(--shu);color:var(--paper);border:calc(var(--u)*1) solid var(--ink);animation:pop2 .4s steps(4) both}
 #titles span.g{background:var(--gold);color:var(--ink)}
+#titles span em{font-style:normal;font-size:.7em;margin-left:.4em;padding:0 .35em;background:#2a8a3a;color:#fff;border-radius:calc(var(--u)*1);vertical-align:.1em}
 #wishLine{margin-top:calc(var(--u)*3);font-size:calc(var(--u)*6.5);padding:calc(var(--u)*1.5) calc(var(--u)*5);background:rgba(255,246,232,.92);color:var(--ink);border:calc(var(--u)*1) solid var(--ink)}
 .r-btns.three .cta{font-size:calc(var(--u)*6.5)}
 .cta.gold{background:var(--gold);color:var(--ink)}
@@ -745,6 +747,7 @@ const RUN = { wish: -1, fortune: '' };
 const CANON_URL = 'https://claudecreative.github.io/sanpai-quest/';
 const SHARE_URL = ['claudecreative.github.io', 'aimania.tech', 'www.aimania.tech'].includes(location.hostname) ? location.origin + location.pathname.replace(/index\.html$/, '') : CANON_URL;
 const buzz = ms => { try { if (!muted && navigator.vibrate && matchMedia('(pointer:coarse)').matches) navigator.vibrate(ms); } catch (e) {} };
+const ALL_TITLES = 10; // 小判コンプリート・小判名人・強運の持ち主・大判ハンター・無傷の参拝者・身のこなし上手・韋駄天・健脚・初もうで達成・約束の見届け人
 const store = { get(k, d) { try { const v = localStorage.getItem('sq_' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem('sq_' + k, JSON.stringify(v)); } catch (e) {} } };
 const fmtTime = t => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 let storyKey = null, wishKey = null;
@@ -989,7 +992,7 @@ class Title extends Phaser.Scene {
     const sg = this.add.image(96, 196, 'glow').setTint(0xffd23f).setBlendMode('ADD').setScale(2.2).setAlpha(.35);
     this.tweens.add({ targets: sg, alpha: .7, scale: 2.8, duration: 1800, yoyo: true, repeat: -1, ease: 'Sine.inOut' });
     const t = $('title');
-    { const b = store.get('best', {}); $('tBest').hidden = !b.clears; if (b.clears) $('tBest').textContent = `自己ベスト ${fmtTime(b.t)}　小判 ${b.coins}/${COIN_MAX}　参拝 ${b.clears}回`; }
+    { const b = store.get('best', {}); $('tBest').hidden = !b.clears; if (b.clears) $('tBest').textContent = `自己ベスト ${fmtTime(b.t)}　小判 ${b.coins}/${COIN_MAX}　参拝 ${b.clears}回　称号 ${store.get('titles', []).length}/${ALL_TITLES}`; }
     const startTitle = () => { show('gate', false); show('title'); bgm('title'); if (muted && master) master.gain.value = 0; };
     ensure();
     if (ctx.state === 'running') startTitle();
@@ -1212,7 +1215,8 @@ class Play extends Phaser.Scene {
   }
   scr(x, y) { return [x - this.cameras.main.scrollX, y - this.cameras.main.scrollY]; }
   hurt(kind) {
-    const s = this.st; if (s.invuln > 0 || s.lock > 0 || s.done || window.__autopilot) return;
+    const s = this.st; if (s.invuln > 0 || s.lock > 0 || s.done) return;
+    if (window.__autopilot) { const h = window.__apHits = window.__apHits || {}; const k = (s.zone || '?') + ':' + kind; h[k] = (h[k] || 0) + 1; s.invuln = 1.5; return; } // test hook: count what would have hurt
     if (kind === 'fall' || kind === 'water') {
       s.lock = .75; s.air = 0;
       this.once(kind, kind === 'water' ? '石の上を「跳」で渡るんだメェ。着地の輪っかが緑ならセーフ！' : '黒い穴は「跳」で飛びこえられるメェ！', 3200, 1000);
@@ -1676,7 +1680,7 @@ class Result extends Phaser.Scene {
     const newT = !best.t || t < best.t, newC = !(best.coins >= data.coins);
     store.set('best', { t: newT ? t : best.t, coins: newC ? data.coins : best.coins, clears: (best.clears || 0) + 1 });
     const cell = (label, v, isNew) => `<div class="${isNew ? 'new' : ''}">${label}${isNew && best.clears ? ' NEW' : ''}<span>${v}</span></div>`;
-    $('stats').innerHTML = cell('タイム', '<b id="cuT">0:00</b>', newT) + cell('小判', `<b id="cuC">0</b><small>/${COIN_MAX}</small>`, newC) + cell('ダメージ', `<b id="cuD">0</b>`, false);
+    $('stats').innerHTML = cell('タイム', '<b id="cuT">0:00</b>', newT) + cell('小判', `<b id="cuC">0</b><small>/${COIN_MAX}</small>`, newC) + cell('ダメージ', `<b id="cuD">0</b>`, false) + (data.big ? `<div class="big">大判 ${'◆'.repeat(data.big)}${'◇'.repeat(3 - data.big)}</div>` : '');
     const countUp = () => { const t0 = performance.now(), D1 = 900; const f = now => { const k = Math.min(1, (now - t0) / D1), e = 1 - (1 - k) ** 3;
       $('cuT').textContent = fmtTime(t * e); $('cuC').textContent = Math.round(data.coins * e); $('cuD').textContent = Math.round(dmg * e);
       if (k < 1) { if (Math.random() < .35) sfx((o, T2) => T2(0, .02, o, { type: 'square', f: 1200 + k * 800, peak: .04 })); requestAnimationFrame(f); }
@@ -1684,12 +1688,14 @@ class Result extends Phaser.Scene {
       requestAnimationFrame(f); };
     const T = [];
     if (data.coins >= COIN_MAX) T.push(['小判コンプリート', 1]); else if (data.coins >= Math.round(COIN_MAX * .75)) T.push(['小判名人', 0]);
+    if (dd) T.push(['強運の持ち主', 1]);
     if (data.big >= 3) T.push(['大判ハンター', 1]);
     if (dmg === 0) T.push(['無傷の参拝者', 1]); else if (dmg <= 2) T.push(['身のこなし上手', 0]);
     if (t <= 100) T.push(['韋駄天', 1]); else if (t <= 150) T.push(['健脚', 0]);
     if (!T.length) T.push(['初もうで達成', 0]);
     RUN.titles = T.map(x => x[0]); RUN.time = fmtTime(t);
-    $('titles').innerHTML = T.map(([n, g]) => `<span class="${g ? 'g' : ''}">${n}</span>`).join('');
+    const owned = store.get('titles', []), fresh = T.filter(([n]) => !owned.includes(n)).map(x => x[0]); store.set('titles', [...owned, ...fresh]);
+    $('titles').innerHTML = T.map(([n, g]) => `<span class="${g ? 'g' : ''}">${n}${fresh.includes(n) && owned.length ? '<em>NEW</em>' : ''}</span>`).join('');
     $('wishLine').textContent = RUN.wish >= 0 ? `今年の目標：${WISHES[RUN.wish]}` : '';
     this.time.delayedCall(4300, () => { show('stats'); countUp(); sfx((o, T2) => T2(0, .08, o, { type: 'square', f: hz('A5'), peak: .1 })); });
     this.time.delayedCall(4900, () => { show('titles'); sfx((o, T2) => ['E6', 'A6'].forEach((n, i) => T2(i * .08, .12, o, { type: 'square', f: hz(n), peak: .1 }))); });
@@ -1793,6 +1799,7 @@ class EndCard extends Phaser.Scene {
   constructor() { super('EndCard'); }
   create() { Z(this);
     resetUI(); this.add.image(0, 0, 'end_card').setOrigin(0);
+    { const own = store.get('titles', []); if (!own.includes('約束の見届け人')) { store.set('titles', [...own, '約束の見届け人']); this.time.delayedCall(2200, () => toast('称号「約束の見届け人」を手に入れた！')); } }
     for (let i = 0; i < 6; i++) { const b = this.add.image(96, 292, 'beam').setOrigin(.5, 1).setAngle(-75 + i * 30).setScale(1.6, 1.4).setBlendMode('ADD').setAlpha(.12);
       this.tweens.add({ targets: b, angle: b.angle + 12, alpha: .2, duration: 4000, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
     addAmbient(this, .14, () => puff(this, 'mote', Math.random() * GW, 300 + Math.random() * 60, { scale: .3 + Math.random() * .3, add: true, vy: -10 - Math.random() * 8, wob: 5, life: 5, fadeIn: 1, alpha: .8, tint: 0xffe08a }));
