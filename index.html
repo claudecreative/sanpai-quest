@@ -558,6 +558,19 @@ window.__sqAudio = () => ({ ctx, master });
 let muted = false, curBgm = -1;
 function bgm(k) { const i = BGM[k]; if (i === curBgm && cur) return; curBgm = i; play(i); if (muted && master) master.gain.value = 0; }
 function bgmStop() { curBgm = -1; stop(true); }
+// ambient bed: looping filtered noise (bamboo wind / river water / shrine wind), crossfaded
+let bed = null;
+function ambBed(kind) {
+  if (!ctx || (bed && bed.kind === kind)) return;
+  if (bed) { const b = bed; b.g.gain.setTargetAtTime(0, ctx.currentTime, .4); setTimeout(() => { try { b.src.stop(); } catch (e) {} b.g.disconnect(); }, 1600); bed = null; }
+  if (!kind) return;
+  const cfg = { wind: ['bandpass', 700, .6, .05], water: ['lowpass', 900, .7, .09], gale: ['bandpass', 300, .8, .06] }[kind]; if (!cfg) return;
+  const src = ctx.createBufferSource(); src.buffer = noiseBuf; src.loop = true;
+  const f = ctx.createBiquadFilter(); f.type = cfg[0]; f.frequency.value = cfg[1]; f.Q.value = cfg[2];
+  const lfo = ctx.createOscillator(), lg = ctx.createGain(); lfo.frequency.value = kind === 'water' ? .35 : .12; lg.gain.value = cfg[1] * .45; lfo.connect(lg); lg.connect(f.frequency); lfo.start();
+  const g = ctx.createGain(); g.gain.value = 0; g.gain.setTargetAtTime(cfg[3], ctx.currentTime, .8);
+  src.connect(f); f.connect(g); g.connect(master); src.start(); bed = { kind, src, g, lfo };
+}
 function se(name) { const i = SE_DEF.findIndex(s => s[0] === name); if (i >= 0) fireSE(i); }
 function sfx(fn) { ensure(); const base = ctx.currentTime + .02, o = ctx.createGain(); o.connect(master);
   fn(o, (t, ...r) => tone(base + t, ...r), (t, ...r) => noise(base + t, ...r), (k, t, ...r) => drum(k, base + t, ...r)); setTimeout(() => o.disconnect(), 2500); }
@@ -1052,7 +1065,7 @@ class Play extends Phaser.Scene {
   }
   enterZone(z) {
     if (this.st.zone === z) return; this.st.zone = z; const Z = ZONES[z];
-    banner(Z.name); bgm(Z.bgm); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動、Zでお札、Xでジャンプ。神社をめざすメェ！' : Z.tip; this.time.delayedCall(700, () => say(tip, z === 'bamboo' ? 4200 : 3000));
+    banner(Z.name); bgm(Z.bgm); ambBed({ bamboo: 'wind', river: 'water', rock: 'gale', stairs: 'wind' }[z]); const tip = z === 'bamboo' && $('stage').classList.contains('kb') ? '矢印キーで移動、Zでお札、Xでジャンプ。神社をめざすメェ！' : Z.tip; this.time.delayedCall(700, () => say(tip, z === 'bamboo' ? 4200 : 3000));
     this.zoneStart = Z.start;
     if (z !== 'bamboo' && z !== 'stairs') this.time.delayedCall(1500, () => fx('チェックポイント！', ...this.scr(this.p.x, this.p.y - 44), '#7dff9a'));
   }
@@ -1063,6 +1076,13 @@ class Play extends Phaser.Scene {
       const a = Math.PI * 2 * i / n;
       this.tweens.add({ targets: sp, x: x + Math.cos(a) * 18, y: y + Math.sin(a) * 18, alpha: 0, scale: 1.6, duration: 420, onComplete: () => sp.destroy() });
     }
+  }
+  // consecutive coins climb a pentatonic scale
+  coinChime() {
+    const now = this.time.now; this.combo = now - (this.lastCoin || -9999) < 1200 ? Math.min((this.combo || 0) + 1, 7) : 0; this.lastCoin = now;
+    const sc = ['B5', 'D6', 'E6', 'F#6', 'A6', 'B6', 'D7', 'E7'], n = sc[this.combo];
+    sfx((o, T) => { T(0, .06, o, { type: 'square', f: hz(n), peak: .13 }); T(.06, .22, o, { type: 'square', f: hz(n) * 1.335, peak: .12, rel: .18 }); });
+    if (this.combo >= 2) fx(`${this.combo + 1} れんぞく！`, ...this.scr(this.p.x + 20, this.p.y - 36), '#ffe070');
   }
   // yokai defeat: a puff of smoke, and a small purified soul floats up
   poof(e) {
@@ -1144,8 +1164,9 @@ class Play extends Phaser.Scene {
     if (this.wasAir && !air && !locked) { const wet = p.y > 556 && p.y < 758; puff(this, 'ring', p.x, p.y, { scale: .12, grow: 3, life: .3, tint: wet ? 0xbff4ff : 0xe8d8b0, alpha: .7, depth: p.y }); for (const d of [-1, 1]) puff(this, 'mote', p.x + d * 4, p.y - 1, { scale: .45, vx: d * 22, vy: -6, life: .35, tint: wet ? 0xdffaff : 0xd9c7a0, alpha: .6, depth: p.y }); }
     this.wasAir = air;
     this.dustT = (this.dustT || 0) - dt;
-    if (!air && !locked && (Math.abs(ix) + Math.abs(iy) > .3) && this.dustT <= 0 && !(p.y > 556 && p.y < 758)) { this.dustT = .16; puff(this, 'mote', p.x + (Math.random() - .5) * 6, p.y, { scale: .35, grow: 1.2, vy: -5, vx: -ix * 8, life: .4, tint: zoneOf(p.y) === 'rock' ? 0xb8b0d0 : 0xd9c7a0, alpha: .55, depth: p.y - 1 }); }
+    if (!air && !locked && (Math.abs(ix) + Math.abs(iy) > .3) && this.dustT <= 0 && !(p.y > 556 && p.y < 758)) { this.dustT = .16; this.stepN = (this.stepN || 0) + 1; if (this.stepN % 2 && !muted) sfx((o, T, N) => N(0, .035, o, 'bandpass', zoneOf(p.y) === 'rock' ? 900 : 1500, 1.5, .05)); puff(this, 'mote', p.x + (Math.random() - .5) * 6, p.y, { scale: .35, grow: 1.2, vy: -5, vx: -ix * 8, life: .4, tint: zoneOf(p.y) === 'rock' ? 0xb8b0d0 : 0xd9c7a0, alpha: .55, depth: p.y - 1 }); }
     this.ambient(dt); stepParts(this, dt);
+    if (s.hp === 1 && (s.boss === 'none' || s.boss === 'done')) { this.beepT = (this.beepT || 0) - dt; if (this.beepT <= 0) { this.beepT = 1.5; sfx((o, T) => { T(0, .07, o, { type: 'square', f: 880, peak: .05 }); T(.12, .07, o, { type: 'square', f: 660, peak: .05 }); }); } }
     // river logs carry
     let onLog = false;
     for (const l of this.lanes) for (const lg of l.logs) {
@@ -1234,8 +1255,8 @@ class Play extends Phaser.Scene {
     for (const c of this.coinsArr) {
       c.s.setScale(1.5 * Math.abs(Math.cos(this.time.now / 260 + c.x)) + .2, 1.5);
       if (!c.got && Math.random() < dt * .35) puff(this, 'twinkle', c.x + 3, c.y - 3, { scale: .5, life: .5, add: true, tint: 0xfff3b0, va: 90, depth: c.y + 1 });
-      if (!c.got && Math.hypot(p.x - c.x, p.y - 8 - c.y) < 11) { c.got = true; c.s.destroy();
-        puff(this, 'twinkle', c.x, c.y, { scale: .3, grow: 2.5, life: .45, add: true, tint: 0xffd23f, va: 240 }); for (let i = 0; i < 4; i++) puff(this, 'mote', c.x, c.y, { scale: .3, vx: (i % 2 ? 1 : -1) * (10 + i * 6), vy: -30 - i * 8, life: .5, add: true, tint: 0xffe070 }); s.coins++; se('小判'); this.lvCheck(); }
+      if (!c.got && Math.hypot(p.x - c.x, p.y - 8 - c.y) < 11) { c.got = true; c.s.destroy(); this.coinChime();
+        puff(this, 'twinkle', c.x, c.y, { scale: .3, grow: 2.5, life: .45, add: true, tint: 0xffd23f, va: 240 }); for (let i = 0; i < 4; i++) puff(this, 'mote', c.x, c.y, { scale: .3, vx: (i % 2 ? 1 : -1) * (10 + i * 6), vy: -30 - i * 8, life: .5, add: true, tint: 0xffe070 }); s.coins++; this.lvCheck(); }
     }
     this.coinsArr = this.coinsArr.filter(c => !c.got);
     // charms
@@ -1280,7 +1301,7 @@ class Play extends Phaser.Scene {
     this.updateHud();
     // goal
     if (p.y <= 136 && !s.done) {
-      s.done = true; show('controls', false); show('touch', false); show('msg', false); bgmStop();
+      s.done = true; ambBed(null); show('controls', false); show('touch', false); show('msg', false); bgmStop();
       se('鈴'); cam.fadeOut(700, 255, 246, 232);
       cam.once('camerafadeoutcomplete', () => this.scene.start('Goal', { coins: s.coins, lv: s.lv, t: s.t, dmg: s.dmg }));
     }
