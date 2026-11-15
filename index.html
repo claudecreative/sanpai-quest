@@ -1194,6 +1194,7 @@ class Play extends Phaser.Scene {
     const dt = Math.min(dms / 1000, .05), s = this.st, p = this.p;
     if (s.done) return;
     s.t += dt;
+    if (this.hitstop > 0) { this.hitstop -= dt; stepParts(this, dt * .3); return; } // hit-stop: a tiny freeze sells the impact
     s.invuln = Math.max(0, s.invuln - dt); s.lock = Math.max(0, s.lock - dt); s.cool = Math.max(0, s.cool - dt); s.airCd = Math.max(0, s.airCd - dt);
     // input
     let [ix, iy] = readMove();
@@ -1260,9 +1261,15 @@ class Play extends Phaser.Scene {
     if (s.zone === 'rock' && p.y < 540 && !inBoss) {
       this.spawnT -= dt;
       if (this.spawnT <= 0) {
-        this.spawnT = 1.5 + Math.random() * .8;
-        const y = Math.max(232, cam.scrollY - 20);
-        if (y < p.y - 110) { const e = { type: 'yakuiwa', x: 44 + Math.random() * 104, y, t: 0, r: 15, pure: false, vy: 72 + Math.random() * 34, s: this.add.image(0, y, 'yakuiwa').setScale(2) }; this.enemies.push(e); }
+        // the slope gets steeper (more rocks) the higher you climb
+        const prog = Phaser.Math.Clamp((512 - p.y) / 250, 0, 1);
+        this.spawnT = 1.9 - prog * .6 + Math.random() * .7;
+        const y = Math.max(232, cam.scrollY - 20), rx = 44 + Math.random() * 104;
+        if (y < p.y - 110) {
+          // warn first: a red "!" at the top edge where the rock will roll in
+          fx('！', ...this.scr(rx, cam.scrollY + 82), '#ff5a46'); sfx((o, T) => T(0, .08, o, { type: 'square', f: 330, f2: 260, peak: .06 }));
+          this.time.delayedCall(550, () => { if (this.st.boss !== 'none') return; const yy = Math.max(232, this.cameras.main.scrollY - 20); this.enemies.push({ type: 'yakuiwa', x: rx, y: yy, t: 0, r: 15, pure: false, vy: 72 + Math.random() * 34 + prog * 18, s: this.add.image(0, yy, 'yakuiwa').setScale(2) }); });
+        }
       }
     }
     for (const e of this.enemies) {
@@ -1303,7 +1310,7 @@ class Play extends Phaser.Scene {
         if (e.dead || o.life <= 0) continue;
         if (Math.hypot(o.x - e.x, o.y - e.y) < e.r + 6) {
           o.life = 0;
-          if (e.pure) { e.dead = true; e.sh && e.sh.destroy(); e.sh = null; this.burst(e.x, e.y, 8); this.poof(e); se('祓った！'); fx('祓！', ...this.scr(e.x, e.y - 8)); if (!e.noCoin) { s.coins++; this.lvCheck(); } }
+          if (e.pure) { e.dead = true; e.sh && e.sh.destroy(); e.sh = null; this.burst(e.x, e.y, 8); this.poof(e); if (!e.noCoin) { this.hitstop = .05; this.cameras.main.shake(80, .004); } se('祓った！'); fx('祓！', ...this.scr(e.x, e.y - 8)); if (!e.noCoin) { s.coins++; this.lvCheck(); } }
           else { sfx((oo, T, N, Dr) => Dr('k', 0, oo, 1.4)); fx('カキン', ...this.scr(e.x, e.y - 14), '#cfc6e6'); }
         }
       }
@@ -1443,7 +1450,7 @@ class Play extends Phaser.Scene {
       }
       for (const o of this.ofuda) {
         if (o.life > 0 && Math.abs(o.x - B.x) < 30 && Math.abs(o.y - B.y) < 40) {
-          o.life = 0; B.hp--; B.flash = .12; B.hitT = .35; $('bossFill').style.width = (B.hp / B.max * 100) + '%'; { const bb = $('bossbar'); bb.classList.remove('hit'); void bb.offsetWidth; bb.classList.add('hit'); }
+          o.life = 0; B.hp--; B.flash = .12; B.hitT = .35; this.hitstop = .03; $('bossFill').style.width = (B.hp / B.max * 100) + '%'; { const bb = $('bossbar'); bb.classList.remove('hit'); void bb.offsetWidth; bb.classList.add('hit'); }
           sfx((oo, T, N, Dr) => { Dr('k', 0, oo, 1.6); T(0, .12, oo, { type: 'square', f: 300, f2: 120, peak: .14 }); });
           this.burst(o.x, o.y, 4);
           if (B.hp % 4 === 0 && B.hp > 0) fx(['やる気出ない…', 'どうせムリだよ…', 'もう帰ろうよ…'][(B.hp / 4) % 3 | 0], ...this.scr(B.x, B.y - 50), '#ff7fa8');
