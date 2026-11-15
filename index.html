@@ -186,6 +186,9 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #pauseBtn{pointer-events:auto;font-family:var(--pixel);font-size:calc(var(--u)*5.5);color:var(--paper);background:var(--plum);border:calc(var(--u)*.8) solid var(--mute);padding:calc(var(--u)*1) calc(var(--u)*2.5);cursor:pointer;margin-left:calc(var(--u)*-2)}
 
 /* ---- HD polish (UI) ---- */
+#wipe{position:absolute;inset:0;pointer-events:none;z-index:8;--r:0%;--x:50%;--y:50%;background:radial-gradient(circle at var(--x) var(--y),transparent var(--r),var(--gold) calc(var(--r) + .6%),#07041a calc(var(--r) + 1.4%))}
+#wipeMark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:calc(var(--u)*30);color:var(--shu);opacity:var(--m,0);filter:drop-shadow(0 0 calc(var(--u)*4) rgba(224,58,46,.6))}
+
 #zcard{position:absolute;left:0;right:0;top:calc(var(--u)*112);height:calc(var(--u)*40);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;animation:zc 2.6s ease-in-out both}
 #zcard::before{content:'';position:absolute;left:-5%;right:-5%;top:0;bottom:0;background:linear-gradient(90deg,transparent,rgba(26,15,46,.88) 18%,rgba(26,15,46,.88) 82%,transparent);border-top:calc(var(--u)*1) solid var(--gold);border-bottom:calc(var(--u)*1) solid var(--gold);transform:skewY(-3deg);animation:zcbar 2.6s ease-in-out both}
 #zcard small{position:relative;font-size:calc(var(--u)*6);letter-spacing:.5em;color:var(--gold)}
@@ -312,6 +315,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
       </div>
     </div>
     <div id="toast" hidden></div>
+    <div id="wipe" hidden><div id="wipeMark">⛩</div></div>
     <button id="gate" type="button" hidden aria-label="タップしてはじめる">
       <div class="g-box">
         <div class="g-eyebrow">カレンダーハガキ 1月号</div>
@@ -683,6 +687,15 @@ let msgTimer = 0;
 let SHEEP_ICON = '', BOSS_ICON = '', HERO_ICON = '';
 function say(text, ms = 3200, who = 'ひつじ') { $('msgText').textContent = text; $('msgName').textContent = who; $('msgIcon').src = who === 'ひつじ' ? SHEEP_ICON : who === '主人公' ? HERO_ICON : BOSS_ICON; $('msgName').style.color = who === '怠け心' ? '#ff7fa8' : who === '主人公' ? '#7fe8ff' : ''; show('msg'); clearTimeout(msgTimer); msgTimer = setTimeout(() => show('msg', false), ms); }
 let bannerTimer = 0;
+// iris wipe centred on a stage point (logical px): close → cb → open
+function iris(x, y, closing, ms, cb) {
+  const w = $('wipe'); w.hidden = false; w.style.setProperty('--x', (x / GW * 100) + '%'); w.style.setProperty('--y', (y / GH * 100) + '%');
+  const t0 = performance.now(), R = 120;
+  const step = now => { let k = Math.min(1, (now - t0) / ms); k = k * k * (3 - 2 * k); const r = closing ? R * (1 - k) : R * k;
+    w.style.setProperty('--r', r + '%'); w.style.setProperty('--m', closing ? Math.max(0, k * 2 - 1) : Math.max(0, 1 - k * 2));
+    if (k < 1) requestAnimationFrame(step); else { if (!closing) w.hidden = true; cb && cb(); } };
+  requestAnimationFrame(step);
+}
 function zoneCard(name) { const [no, nm] = name.split('　'); $('zcNo').textContent = no; $('zcName').textContent = nm || ''; const z = $('zcard'); z.hidden = true; void z.offsetWidth; z.hidden = false; clearTimeout(zoneCard.t); zoneCard.t = setTimeout(() => z.hidden = true, 2700); }
 function banner(text) { const b = $('banner'); b.hidden = true; b.textContent = text; void b.offsetWidth; b.hidden = false; clearTimeout(bannerTimer); bannerTimer = setTimeout(() => b.hidden = true, 2200); }
 function fx(text, sx, sy, color) {
@@ -1001,7 +1014,7 @@ class Prologue extends Phaser.Scene {
     if (this.leaving) return; this.leaving = true;
     const d = $('storyDate'); d.innerHTML = '2027年<br>元日<small>いざ、初もうで！</small>'; show('storyDate'); show('story'); $('storyBox').hidden = true;
     sfx((o, T) => ['D5', 'G5', 'A5', 'D6'].forEach((n, i) => T(i * .1, .4, o, { type: 'triangle', f: hz(n), peak: .1, rel: .3 })));
-    this.time.delayedCall(1700, () => { this.cameras.main.fadeOut(700, 255, 246, 232); this.cameras.main.once('camerafadeoutcomplete', () => { $('storyBox').hidden = false; bgmStop(); this.scene.start('Play'); }); });
+    this.time.delayedCall(1700, () => iris(96, 240, true, 800, () => { $('storyBox').hidden = false; bgmStop(); this.scene.start('Play'); setTimeout(() => iris(96, 330, false, 900), 150); }));
   }
   update(_, dms) {
     const dt = Math.min(dms / 1000, .05); this.snowT -= dt;
@@ -1317,8 +1330,8 @@ class Play extends Phaser.Scene {
     // goal
     if (p.y <= 136 && !s.done) {
       s.done = true; ambBed(null); show('controls', false); show('touch', false); show('msg', false); bgmStop();
-      se('鈴'); cam.fadeOut(700, 255, 246, 232);
-      cam.once('camerafadeoutcomplete', () => this.scene.start('Goal', { coins: s.coins, lv: s.lv, t: s.t, dmg: s.dmg }));
+      se('鈴'); const [ex, ey] = this.scr(p.x, p.y - 14);
+      iris(ex, ey, true, 900, () => { this.scene.start('Goal', { coins: s.coins, lv: s.lv, t: s.t, dmg: s.dmg }); setTimeout(() => iris(96, 300, false, 900), 120); });
     }
   }
   startBoss() {
@@ -1459,7 +1472,7 @@ class Goal extends Phaser.Scene {
       this.tweens.add({ targets: sg, alpha: .45, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.inOut' }); }
     addAmbient(this, .1, () => Math.random() < .8 ? puff(this, 'snow', Math.random() * GW, -4, { vy: 14 + Math.random() * 10, wob: 10, life: 30, alpha: .9 })
       : puff(this, 'twinkle', 40 + Math.random() * 112, 120 + Math.random() * 120, { scale: .3, add: true, life: .8, fadeIn: .3, tint: 0xffe08a }));
-    this.cameras.main.fadeIn(600, 255, 246, 232);
+    this.cameras.main.fadeIn(200, 255, 246, 232);
     const sh = this.add.image(96, 440, 'shadow').setScale(2.2), pl = this.add.image(96, 440, 'player_back').setOrigin(.5, 1).setScale(2);
     const ssh = this.add.image(140, 450, 'shadow').setScale(1.8), sp = this.add.image(140, 450, 'sheep').setOrigin(.5, 1).setScale(2).setFlipX(true);
     this.tweens.add({ targets: [pl, sh], y: 344, duration: 1700, ease: 'Sine.out' });
