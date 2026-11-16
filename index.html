@@ -1794,9 +1794,9 @@ class Play extends Phaser.Scene {
     this.tweens.add({ targets: this.heroAura, alpha: { from: .9, to: .5 }, duration: 500, yoyo: true, repeat: -1, delay: 600 });
     for (let i = 0; i < 3; i++) T(i * 180, () => ringFx(this, p.x, p.y - 14, 0xffd23f, 1.2 + i * .5));
     this.burst(p.x, p.y - 16, 16);
-    T(2000, () => { say('その気持ちが、いちばんのお札だメェ！ いけーっ！', 2000); s.hp = 3; s.power = true; this.updateHud(); this.pSpr.clearTint(); banner('覚醒！ お札が3枚に！');
+    T(2000, () => { say('その気持ちが、いちばんのお札だメェ！ いけーっ！', 2000); s.hp = Math.min(3, s.hp + 1); s.power = true; this.updateHud(); this.pSpr.clearTint(); banner('覚醒！ お札が3枚に！');
       sfx((o, T2) => ['A5', 'D6', 'F#6', 'A6', 'D7'].forEach((n, i) => T2(i * .05, .2, o, { type: 'square', f: hz(n), peak: .12, rel: .15 }))); });
-    B.dmgPer = Math.max(2, Math.ceil(B.hp / 9)); // about three volleys of three ofuda
+    B.dmgPer = Math.max(2, Math.ceil(B.hp / 15)); // about five volleys of three ofuda: a close finish under fire
     T(3600, () => { if (s.boss !== 'awake') return; s.boss = 'fight'; bgm('boss'); B.atk = 1.4; });
   }
   awakeHit(o) {
@@ -1809,7 +1809,7 @@ class Play extends Phaser.Scene {
   // the giant's attack rotation: fans, spirals, rapid bursts, gap rings, a rain of Zzz with homing wisps
   giantAttack() {
     const B = this.B, p = this.p, R = B.rage ? 1.18 : 1, mx = B.x - 2, my = B.y + 10, aim = () => Math.atan2(p.y - 12 - my, p.x - mx), D = (ms, f) => this.time.delayedCall(ms, () => { if (this.st.boss === 'fight' && this.B) f(); });
-    const k = B.n % 6; B.atk = (B.rage ? .62 : .85) * (this.st.awake ? 1.8 : 1);
+    const k = B.n % 6; B.atk = (B.rage ? .62 : .85) * (this.st.awake ? 1.15 : 1);
     if (k === 0) { const a0 = aim(); for (let i = -3; i <= 3; i++) this.zzz(mx, my, a0 + i * .2, 100 * R); }
     else if (k === 1) { const rot = Math.random() * 6; for (let r = 0; r < (B.rage ? 4 : 3); r++) D(r * 170, () => { for (let i = 0; i < 12; i++) this.zzz(B.x, B.y + 10, rot + i / 12 * Math.PI * 2 + r * .18, 66 * R); }); B.atk += .5; }
     else if (k === 2) { for (let r = 0; r < (B.rage ? 4 : 3); r++) D(r * 130, () => { const a0 = Math.atan2(p.y - 12 - B.y - 10, p.x - B.x); for (const da of [-.36, -.18, 0, .18, .36]) this.zzz(B.x, B.y + 10, a0 + da, 118 * R); }); B.atk += .3; }
