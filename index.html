@@ -170,7 +170,9 @@ rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 @keyframes logoIn{from{transform:translateY(calc(var(--u)*-40)) scale(1.4);opacity:0}to{transform:none;opacity:1}}
 @media (prefers-reduced-motion: reduce){.g-tap{animation:none}#title .t-logo,#title .t-sub{animation:none!important}}
 /* ---- story cut-scenes ---- */
-#story{position:absolute;inset:0;pointer-events:auto;cursor:pointer;background:transparent;border:0;padding:0;color:inherit;font-family:inherit;text-align:left}
+*{-webkit-tap-highlight-color:transparent}
+#story:focus,#story:active{outline:none;background:transparent}
+#story{-webkit-user-select:none;user-select:none;position:absolute;inset:0;pointer-events:auto;cursor:pointer;background:transparent;border:0;padding:0;color:inherit;font-family:inherit;text-align:left}
 #storyBox{position:absolute;left:calc(var(--u)*7);right:calc(var(--u)*7);top:calc(var(--u)*30);min-height:calc(var(--u)*52);box-sizing:border-box;padding:calc(var(--u)*6) calc(var(--u)*7) calc(var(--u)*9);background:rgba(26,15,46,.92);border:calc(var(--u)*1.5) solid var(--paper);box-shadow:inset 0 0 0 calc(var(--u)*1) var(--ink),inset 0 0 0 calc(var(--u)*2) var(--gold),calc(var(--u)*2) calc(var(--u)*2) 0 rgba(0,0,0,.4);display:flex;gap:calc(var(--u)*5);align-items:flex-start;line-height:1.7;font-size:calc(var(--u)*7.5)}
 #storyBox img{width:calc(var(--u)*22);height:calc(var(--u)*22);image-rendering:pixelated;flex:none;background:rgba(255,246,232,.08);border:calc(var(--u)*1) solid rgba(255,246,232,.25)}
 #storyBox b{display:block;font-weight:400;color:var(--gold);font-size:calc(var(--u)*5.5);letter-spacing:.1em}
@@ -1796,7 +1798,7 @@ class Play extends Phaser.Scene {
     this.burst(p.x, p.y - 16, 16);
     T(2000, () => { say('その気持ちが、いちばんのお札だメェ！ いけーっ！', 2000); s.hp = Math.min(3, s.hp + 1); s.power = true; this.updateHud(); this.pSpr.clearTint(); banner('覚醒！ お札が3枚に！');
       sfx((o, T2) => ['A5', 'D6', 'F#6', 'A6', 'D7'].forEach((n, i) => T2(i * .05, .2, o, { type: 'square', f: hz(n), peak: .12, rel: .15 }))); });
-    B.dmgPer = Math.max(2, Math.ceil(B.hp / 15)); // about five volleys of three ofuda: a close finish under fire
+    B.dmgPer = Math.max(1, Math.ceil(B.hp / 24)); // about eight volleys of three ofuda: a longer, close finish under fire
     T(3600, () => { if (s.boss !== 'awake') return; s.boss = 'fight'; bgm('boss'); B.atk = 1.4; });
   }
   awakeHit(o) {
