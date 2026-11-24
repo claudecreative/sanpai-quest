@@ -71,6 +71,7 @@ body{margin:0;background:var(--night);color:var(--paper);font-family:var(--pixel
 #bossFill{height:100%;width:100%;background:linear-gradient(90deg,#9a5cd6,#ff7fa8)}
 #msg{transition:opacity .2s}
 #msg.see{opacity:.42}
+#ui.boss #msg{top:calc(var(--u)*54)}
 rt{font-size:.5em;letter-spacing:0;font-family:var(--pixel)}
 #msg b{display:block;font-weight:400;color:var(--gold);font-size:calc(var(--u)*5.5)}
 
@@ -732,7 +733,7 @@ function spriteCanvas(rows, s = 1) {
   rows.forEach((r, j) => [...r].forEach((ch, i) => { if (ch === '.' || ch === ' ') return; g.fillStyle = D.pal[ch]; g.fillRect(i * s, j * s, s, s); }));
   return c;
 }
-const show = (el, v = true) => { $(el).hidden = !v; };
+const show = (el, v = true) => { $(el).hidden = !v; if (el === 'bossbar') $('ui').classList.toggle('boss', !!v); };
 
 // ---------- HD rendering ----------
 // The canvas renders at 2x (RS) and every camera zooms 2x, so game logic stays in 192x416 units.
@@ -1030,12 +1031,18 @@ if (matchMedia('(prefers-reduced-motion: reduce)').matches) Phaser.Cameras.Scene
 function setKb(on) { $('stage').classList.toggle('kb', on); $('keyhint').hidden = !on; }
 if (matchMedia('(hover:hover) and (pointer:fine)').matches) setKb(true);
 addEventListener('pointerdown', e => { if (e.pointerType === 'touch') setKb(false); }, true);
-document.addEventListener('visibilitychange', () => { if (document.hidden) setPause(true); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { setPause(true); if (stickId !== null) resetStick(); } });
 let stickId = null, sx0 = 0, sy0 = 0;
 const touch = $('touch');
 function stagePt(e) { const r = $('stage').getBoundingClientRect(); return [(e.clientX - r.left) / r.width * GW, (e.clientY - r.top) / r.height * GH]; }
+// Some iOS browsers (seen on Chrome for iOS) can swallow the finger's release near the screen edge
+// (the edge swipe gesture takes the touch) without pointerup/pointercancel. The stick used to wait
+// for that release forever and ignore every new touch, so it stayed dead. Now any new touch takes
+// over the stick, and lost captures / no-finger-left touchend also release it.
+function resetStick() { stickId = null; input.x = input.y = 0; $('stick').classList.remove('active'); $('knob').style.transform = 'translate(0,0)'; const st = $('stick').style; st.left = st.top = st.bottom = ''; }
 touch.addEventListener('pointerdown', e => {
-  if (stickId !== null) return; stickId = e.pointerId; touch.setPointerCapture(e.pointerId);
+  if (stickId !== null && stickId !== e.pointerId) resetStick();
+  stickId = e.pointerId; try { touch.setPointerCapture(e.pointerId); } catch (_) {}
   [sx0, sy0] = stagePt(e); $('stick').classList.add('active', 'used'); $('knob').style.transform = 'translate(0,0)';
   // the stick appears under the finger, wherever the thumb lands
   const st = $('stick').style, cx = Math.max(31, Math.min(GW - 31, sx0)), cy = Math.max(96, Math.min(GH - 31, sy0));
@@ -1047,8 +1054,12 @@ touch.addEventListener('pointermove', e => {
   input.x = Math.abs(dx) < 3 ? 0 : dx / R; input.y = Math.abs(dy) < 3 ? 0 : dy / R;
   const k = $('stage').clientWidth / GW * (17 / 22); $('knob').style.transform = `translate(${dx * k}px, ${dy * k}px)`;
 });
-function endStick(e) { if (e.pointerId !== stickId) return; stickId = null; input.x = input.y = 0; $('stick').classList.remove('active'); $('knob').style.transform = 'translate(0,0)'; const st = $('stick').style; st.left = st.top = st.bottom = ''; }
-touch.addEventListener('pointerup', endStick); touch.addEventListener('pointercancel', endStick);
+function endStick(e) { if (e.pointerId !== stickId) return; resetStick(); }
+['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => touch.addEventListener(t, endStick));
+// releases that never reached the stick layer (finger lifted outside it, or taken by the browser)
+['pointerup', 'pointercancel'].forEach(t => addEventListener(t, endStick, true));
+['touchend', 'touchcancel'].forEach(t => addEventListener(t, e => { if (stickId !== null && e.touches.length === 0) resetStick(); }, true));
+addEventListener('blur', () => { if (stickId !== null) resetStick(); });
 function holdBtn(id, key) {
   const b = $(id);
   b.addEventListener('pointerdown', e => { e.preventDefault(); input[key] = true; input[key + 'Held'] = true; b.classList.add('down'); try { b.setPointerCapture(e.pointerId); } catch (_) {} });
@@ -1286,7 +1297,7 @@ class Prologue extends Phaser.Scene {
 class Play extends Phaser.Scene {
   constructor() { super('Play'); }
   create() { Z(this);
-    resetUI(); show('hud'); show('controls'); show('touch'); $('btnHarai').hidden = false; $('btnHashiru').hidden = false; $('stick').classList.remove('active', 'used'); $('knob').style.transform = 'translate(0,0)';
+    resetUI(); show('hud'); show('controls'); show('touch'); $('btnHarai').hidden = false; $('btnHashiru').hidden = false; resetStick(); $('stick').classList.remove('used');
     this.add.image(0, 0, 'map').setOrigin(0).setDepth(-10);
     placeTorii(this, D.toriiPlay);
         this.st = { hp: 3, coins: 0, lv: 1, invuln: 0, lock: 0, air: 0, airCd: 0, cool: 0, walkT: 0, flip: false, zone: null, done: false, boss: 'none', t: 0, dmg: 0, power: false };
@@ -2057,7 +2068,7 @@ class Ending extends Phaser.Scene {
   constructor() { super('Ending'); }
   create() { Z(this);
     resetUI(); show('controls'); show('touch'); $('btnHarai').hidden = true; $('btnHashiru').hidden = true;
-    $('stick').classList.remove('active', 'used'); $('knob').style.transform = 'translate(0,0)'; input.x = input.y = 0;
+    resetStick(); $('stick').classList.remove('used'); input.x = input.y = 0;
     const cam = this.cameras.main; cam.fadeIn(900, 255, 246, 232);
     this.add.image(0, 0, 'ending_map').setOrigin(0).setDepth(-10);
     addAmbient(this, .1, () => { const top = this.cameras.main.scrollY, pr = this.dawnP || 0; puff(this, Math.random() < .3 + pr * .7 ? 'petal' : 'snow', Math.random() * GW, top - 4, { vy: 14 + Math.random() * 10, vx: -3, wob: 12, va: 80, life: 30, alpha: .85, depth: 3000 });
